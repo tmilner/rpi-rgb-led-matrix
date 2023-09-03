@@ -380,6 +380,8 @@ public:
                         uint8_t red, uint8_t green, uint8_t blue);
   virtual void SetPixels(int x, int y, int width, int height,
                          Color *colors);
+  virtual void SetPixels(int x, int y, int width, int height,
+                         uint8_t red, uint8_t green, uint8_t blue);
   virtual void Clear();
   virtual void Fill(uint8_t red, uint8_t green, uint8_t blue);
 

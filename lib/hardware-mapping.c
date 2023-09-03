@@ -83,11 +83,11 @@ struct HardwareMapping matrix_hardware_mappings[] = {
     .e             = GPIO_BIT(24),  /* Needs manual wiring, see README.md */
 
     .p0_r1         = GPIO_BIT(5),
-    .p0_g1         = GPIO_BIT(13),
-    .p0_b1         = GPIO_BIT(6),
+    .p0_b1         = GPIO_BIT(13),
+    .p0_g1         = GPIO_BIT(6),
     .p0_r2         = GPIO_BIT(12),
-    .p0_g2         = GPIO_BIT(16),
-    .p0_b2         = GPIO_BIT(23),
+    .p0_b2         = GPIO_BIT(16),
+    .p0_g2         = GPIO_BIT(23),
   },
 
   /*
@@ -107,11 +107,11 @@ struct HardwareMapping matrix_hardware_mappings[] = {
     .e             = GPIO_BIT(24),
 
     .p0_r1         = GPIO_BIT(5),
-    .p0_g1         = GPIO_BIT(13),
-    .p0_b1         = GPIO_BIT(6),
+    .p0_b1         = GPIO_BIT(13),
+    .p0_g1         = GPIO_BIT(6),
     .p0_r2         = GPIO_BIT(12),
-    .p0_g2         = GPIO_BIT(16),
-    .p0_b2         = GPIO_BIT(23),
+    .p0_b2         = GPIO_BIT(16),
+    .p0_g2         = GPIO_BIT(23),
   },
 
   /*

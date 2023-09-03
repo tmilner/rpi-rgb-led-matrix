@@ -20,6 +20,7 @@
 #include <inttypes.h>
 
 #include "graphics.h"
+#include <iostream>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -77,9 +78,16 @@ Font::~Font() {
 // TODO: that might not be working for all input files yet.
 bool Font::LoadFont(const char *path) {
   if (!path || !*path) return false;
+  std::cout << "Opening font " << path << std::endl;
+
   FILE *f = fopen(path, "r");
-  if (f == NULL)
+  if (f == NULL) {
+    perror("Failed to load font");
     return false;
+  }
+  
+  std::cout << "Loading font " << path << std::endl;
+
   uint32_t codepoint;
   char buffer[1024];
   int dummy;

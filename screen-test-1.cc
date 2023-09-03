@@ -11,9 +11,13 @@
 #include "graphics.h"
 
 #include <string>
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <ctime>
+#include <filesystem>
 
 #include <curl/curl.h>
-
 #include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
@@ -21,6 +25,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <json/json.h>
+#include <screen-line.h>
+
+#include <Magick++.h>
+#include <magick/image.h>
+
+namespace fs = std::filesystem;
 
 using namespace rgb_matrix;
 
@@ -30,27 +40,8 @@ static void InterruptHandler(int signo)
   interrupt_received = true;
 }
 
-static int usage(const char *progname)
-{
-  fprintf(stderr, "usage: %s [options] <text>\n", progname);
-  fprintf(stderr, "Takes text and scrolls it with speed -s\n");
-  fprintf(stderr, "Options:\n");
-  fprintf(stderr,
-          "\t-s <speed>        : Approximate letters per second. "
-          "(Zero for no scrolling)\n"
-          "\t-l <loop-count>   : Number of loops through the text. "
-          "-1 for endless (default)\n"
-          "\t-f <font-file>    : Use given font.\n"
-          "\t-x <x-origin>     : X-Origin of displaying text (Default: 0)\n"
-          "\t-y <y-origin>     : Y-Origin of displaying text (Default: 0)\n"
-          "\t-t <track=spacing>: Spacing pixels between letters (Default: 0)\n"
-          "\n"
-          "\t-C <r,g,b>        : Text-Color. Default 255,255,0\n"
-          "\t-B <r,g,b>        : Background-Color. Default 0,0,0\n"
-          "\n");
-  rgb_matrix::PrintMatrixFlags(stderr);
-  return 1;
-}
+std::string line1str = "Loading";
+std::string line2str = "Loading";
 
 static bool parseColor(Color *c, const char *str)
 {
@@ -76,31 +67,87 @@ namespace
   }
 }
 
-int main(int argc, char *argv[])
+using ImageVector = std::vector<Magick::Image>;
+
+// Given the filename, load the image and scale to the size of the
+// matrix.
+// // If this is an animated image, the resutlting vector will contain multiple.
+static ImageVector LoadImageAndScaleImage(const char *filename,
+                                          int target_width,
+                                          int target_height)
 {
-  RGBMatrix::Options defaults;
-  defaults.hardware_mapping = "adafruit-hat"; // or e.g. "adafruit-hat"
-  defaults.rows = 32;
-  defaults.cols = 64;
-  defaults.chain_length = 1;
-  defaults.parallel = 1;
-  defaults.show_refresh_rate = true;
+  ImageVector result;
 
-  RGBMatrix *canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
+  ImageVector frames;
+  try
+  {
+    readImages(&frames, filename);
+  }
+  catch (std::exception &e)
+  {
+    if (e.what())
+      fprintf(stderr, "%s\n", e.what());
+    return result;
+  }
 
+  if (frames.empty())
+  {
+    fprintf(stderr, "No image found.");
+    return result;
+  }
+
+  // Animated images have partial frames that need to be put together
+  if (frames.size() > 1)
+  {
+    Magick::coalesceImages(&result, frames.begin(), frames.end());
+  }
+  else
+  {
+    result.push_back(frames[0]); // just a single still image.
+  }
+
+  for (Magick::Image &image : result)
+  {
+    image.scale(Magick::Geometry(target_width, target_height));
+  }
+
+  return result;
+}
+
+// Copy an image to a Canvas. Note, the RGBMatrix is implementing the Canvas
+// interface as well as the FrameCanvas we use in the double-buffering of the
+// animted image.
+void CopyImageToCanvas(const Magick::Image &image, Canvas *canvas, int offset_x, int offset_y)
+{
+  // Copy all the pixels to the canvas.
+  for (size_t y = 0; y < image.rows(); ++y)
+  {
+    for (size_t x = 0; x < image.columns(); ++x)
+    {
+      const Magick::Color &c = image.pixelColor(x, y);
+      if (c.alphaQuantum() < 256)
+      {
+        canvas->SetPixel(x + offset_x, y + offset_y,
+                         ScaleQuantumToChar(c.redQuantum()),
+                         ScaleQuantumToChar(c.greenQuantum()),
+                         ScaleQuantumToChar(c.blueQuantum()));
+      }
+    }
+  }
+}
+
+bool updateRadio6Data(std::string *line)
+{
   const std::string url("https://nowplaying.jameswragg.com/api/bbc6music");
 
   CURL *curl = curl_easy_init();
 
   // Set remote URL.
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
   // Don't bother trying IPv6, which would increase DNS resolution time.
   curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
   // Don't wait forever, time out after 10 seconds.
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
-
   // Follow HTTP redirects if necessary.
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -110,7 +157,6 @@ int main(int argc, char *argv[])
 
   // Hook up data handling function.
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback);
-
   // Hook up data container (will be passed as the last parameter to the
   // callback handling function).  Can be any pointer type, since it will
   // internally be passed as a void pointer.
@@ -132,10 +178,6 @@ int main(int argc, char *argv[])
 
     if (jsonReader.parse(*httpData, jsonData))
     {
-      std::cout << "Successfully parsed JSON data" << std::endl;
-      std::cout << "\nJSON data received:" << std::endl;
-      std::cout << jsonData.toStyledString() << std::endl;
-
       const std::string artist(jsonData["tracks"][0]["artist"].asString());
 
       const std::string track_name(jsonData["tracks"][0]["name"].asString());
@@ -143,98 +185,88 @@ int main(int argc, char *argv[])
       std::cout << "\tArtist: " << artist << std::endl;
       std::cout << "\tTrack Name: " << track_name << std::endl;
       std::cout << std::endl;
+
+      line->clear();
+      line->append(artist).append(" - ").append(track_name);
+      return true;
     }
     else
     {
       std::cout << "Could not parse HTTP data as JSON" << std::endl;
       std::cout << "HTTP data was:\n"
                 << *httpData.get() << std::endl;
-      return 1;
+      return false;
     }
   }
   else
   {
     std::cout << "Couldn't GET from " << url << " - exiting" << std::endl;
-    return 1;
+    return false;
   }
+}
 
-  // RGBMatrix::Options matrix_options;
-  // rgb_matrix::RuntimeOptions runtime_opt;
-  // if (!rgb_matrix::ParseOptionsFromFlags(&argc, &argv,
-  //                                        &matrix_options, &runtime_opt)) {
-  //   return usage(argv[0]);
-  // }
+using namespace std::literals::chrono_literals;
+void radio6UpdateLoop(std::string *line)
+{
+  while (true)
+  {
+    updateRadio6Data(line);
+    std::this_thread::sleep_for(30s);
+  }
+}
+
+int main(int argc, char *argv[])
+{
+
+  Magick::InitializeMagick(*argv);
+
+  RGBMatrix::Options defaults;
+  defaults.hardware_mapping = "adafruit-hat-pwm";
+  defaults.rows = 32;
+  defaults.cols = 64;
+  defaults.chain_length = 1;
+  defaults.parallel = 1;
+  defaults.show_refresh_rate = false;
+  defaults.limit_refresh_rate_hz = 25;
+
+  RGBMatrix *canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
   Color color(255, 255, 0);
   Color bg_color(0, 0, 0);
 
-  const char *bdf_font_file = NULL;
-  std::string line;
+  const char *bdf_font_file = "fonts/8x13.bdf";
   /* x_origin is set by default just right of the screen */
   const int x_default_start = (defaults.chain_length * defaults.cols) + 5;
-  int x_orig = x_default_start;
-  int y_orig = 0;
+
   int letter_spacing = 0;
-  float speed = 7.0f;
-  int loops = -1;
+  float speed = 3.0f;
+  const char *base_path_c = ".";
 
   int opt;
-  while ((opt = getopt(argc, argv, "x:y:f:C:B:t:s:l:")) != -1)
+  while ((opt = getopt(argc, argv, "f:s:p:")) != -1)
   {
     switch (opt)
     {
     case 's':
       speed = atof(optarg);
       break;
-    case 'l':
-      loops = atoi(optarg);
-      break;
-    case 'x':
-      x_orig = atoi(optarg);
-      break;
-    case 'y':
-      y_orig = atoi(optarg);
-      break;
     case 'f':
       bdf_font_file = strdup(optarg);
       break;
-    case 't':
-      letter_spacing = atoi(optarg);
+    case 'p':
+      base_path_c = strdup(optarg);
       break;
-    case 'C':
-      if (!parseColor(&color, optarg))
-      {
-        fprintf(stderr, "Invalid color spec: %s\n", optarg);
-        return usage(argv[0]);
-      }
-      break;
-    case 'B':
-      if (!parseColor(&bg_color, optarg))
-      {
-        fprintf(stderr, "Invalid background color spec: %s\n", optarg);
-        return usage(argv[0]);
-      }
-      break;
-    default:
-      return usage(argv[0]);
     }
   }
 
-  for (int i = optind; i < argc; ++i)
-  {
-    line.append(argv[i]).append(" ");
-  }
+  const std::string base_path(base_path_c);
 
-  if (line.empty())
-  {
-    fprintf(stderr, "Add the text you want to print on the command-line.\n");
-    return usage(argv[0]);
-  }
+  std::thread radio6Thread(radio6UpdateLoop, &line1str);
 
   if (bdf_font_file == NULL)
   {
     fprintf(stderr, "Need to specify BDF font-file with -f\n");
-    return usage(argv[0]);
+    return -1;
   }
 
   /*
@@ -251,10 +283,6 @@ int main(int argc, char *argv[])
   if (canvas == NULL)
     return 1;
 
-  const bool all_extreme_colors = (matrix_options.brightness == 100) && FullSaturation(color) && FullSaturation(bg_color);
-  if (all_extreme_colors)
-    canvas->SetPWMBits(1);
-
   signal(SIGTERM, InterruptHandler);
   signal(SIGINT, InterruptHandler);
 
@@ -268,31 +296,62 @@ int main(int argc, char *argv[])
   {
     delay_speed_usec = 1000000 / speed / font.CharacterWidth('W');
   }
-  else if (x_orig == x_default_start)
+
+  // int line1_x_orig = x_default_start;
+  // int line1_x = x_default_start;
+  // int line1_y = 1;
+  // int line1_length = 0;
+  int line2_x_orig = x_default_start;
+  int line2_x = x_default_start;
+  int line2_y = 20;
+  int line2_length = 0;
+
+  const std::string radio6ImagePath("/img/bbcradio6musicsmall.png");
+
+  ImageVector radio6Image = LoadImageAndScaleImage(
+      (base_path + radio6ImagePath).c_str(),
+      13,
+      13);
+  if (radio6Image.size() == 0)
   {
-    // There would be no scrolling, so text would never appear. Move to front.
-    x_orig = 0;
+    std::cout << "FAILED TO LOAD RADIO 6 IMAGE" << std::endl;
   }
 
-  int x = x_orig;
-  int y = y_orig;
-  int length = 0;
+  ScreenLine line1(
+    speed, 
+    x_default_start, 
+    1, 
+    letter_spacing, 
+    &font, 
+    color, 
+    &line1str
+  );
 
-  while (!interrupt_received && loops != 0)
+  ScreenLine line2(
+    speed, 
+    x_default_start, 
+    18, 
+    letter_spacing, 
+    &font, 
+    color, 
+    &line2str
+  );
+
+  while (!interrupt_received)
   {
     offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
-    // length = holds how many pixels our text takes up
-    length = rgb_matrix::DrawText(offscreen_canvas, font,
-                                  x, y + font.baseline(),
-                                  color, nullptr,
-                                  line.c_str(), letter_spacing);
 
-    if (speed > 0 && --x + length < 0)
-    {
-      x = x_orig;
-      if (loops > 0)
-        --loops;
-    }
+    line1.render(offscreen_canvas);
+    line2.render(offscreen_canvas);
+    line1.updateText(&line1str);
+    line2.updateText(&line2str);
+  
+    offscreen_canvas->SetPixels(0, 0, 13, 32, 10, 10, 11);
+
+    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 1);
+
+
+    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 18);
 
     // Swap the offscreen_canvas with canvas on vsync, avoids flickering
     offscreen_canvas = canvas->SwapOnVSync(offscreen_canvas);
