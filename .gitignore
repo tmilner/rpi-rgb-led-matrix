@@ -4,3 +4,6 @@
 *.so
 .envrc
 .direnv
+.metals/metals.log
+.metals/metals.mv.db
+.vscode/settings.json
