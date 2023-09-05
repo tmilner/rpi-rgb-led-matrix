@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 
   RGBMatrix *canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
-  Color color(255, 255, 0);
+  Color color(240, 160, 100);
   Color red(214, 40, 40);
 
   Color bg_color(0, 0, 0);
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 
     offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
 
-    rgb_matrix::DrawLine(offscreen_canvas, 14, 0, 14, 32, red);
+    rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, red);
 
     CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 1);
 
