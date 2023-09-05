@@ -136,10 +136,9 @@ void CopyImageToCanvas(const Magick::Image &image, Canvas *canvas, int offset_x,
   }
 }
 
-bool updateRadio6Data(std::string *line)
-{
-  const std::string url("https://nowplaying.jameswragg.com/api/bbc6music");
 
+Json::Value callJsonAPI(std::string url)
+{
   CURL *curl = curl_easy_init();
 
   // Set remote URL.
@@ -178,24 +177,14 @@ bool updateRadio6Data(std::string *line)
 
     if (jsonReader.parse(*httpData, jsonData))
     {
-      const std::string artist(jsonData["tracks"][0]["artist"].asString());
-
-      const std::string track_name(jsonData["tracks"][0]["name"].asString());
-
-      std::cout << "\tArtist: " << artist << std::endl;
-      std::cout << "\tTrack Name: " << track_name << std::endl;
-      std::cout << std::endl;
-
-      line->clear();
-      line->append(artist).append(" - ").append(track_name);
-      return true;
+      return jsonData;
     }
     else
     {
       std::cout << "Could not parse HTTP data as JSON" << std::endl;
       std::cout << "HTTP data was:\n"
                 << *httpData.get() << std::endl;
-      return false;
+      return NULL;
     }
   }
   else
@@ -205,6 +194,53 @@ bool updateRadio6Data(std::string *line)
   }
 }
 
+bool updateWeatherData(std::string *line){
+    const std::string url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=9b8d4c21eb390f8f70f34a5705ed1546");
+
+  Json::Value jsonData = callJsonAPI(url);
+
+  if (jsonData != NULL)
+  {
+    const std::string condition(jsonData["weather"][0]["description"].asString());
+
+    const std::string temp(jsonData["mian"]["temp"].asString());
+
+    std::cout << "\tCondition: " << condition << std::endl;
+    std::cout << "\tTempt: " << temp << std::endl;
+    std::cout << std::endl;
+
+    line->clear();
+    line->append(condition).append(" - ").append(temp);
+    return true;
+  }
+
+  return false;
+}
+
+bool updateRadio6Data(std::string *line)
+{
+  const std::string url("https://nowplaying.jameswragg.com/api/bbc6music");
+
+  Json::Value jsonData = callJsonAPI(url);
+
+  if (jsonData != NULL)
+  {
+    const std::string artist(jsonData["tracks"][0]["artist"].asString());
+
+    const std::string track_name(jsonData["tracks"][0]["name"].asString());
+
+    std::cout << "\tArtist: " << artist << std::endl;
+    std::cout << "\tTrack Name: " << track_name << std::endl;
+    std::cout << std::endl;
+
+    line->clear();
+    line->append(artist).append(" - ").append(track_name);
+    return true;
+  }
+
+  return false;
+}
+
 using namespace std::literals::chrono_literals;
 void radio6UpdateLoop(std::string *line)
 {
@@ -212,6 +248,15 @@ void radio6UpdateLoop(std::string *line)
   {
     updateRadio6Data(line);
     std::this_thread::sleep_for(30s);
+  }
+}
+
+void weatherUpdateLoop(std::string *line)
+{
+  while (true)
+  {
+    updateWeatherData(line);
+    std::this_thread::sleep_for(360s);
   }
 }
 
@@ -232,6 +277,8 @@ int main(int argc, char *argv[])
   RGBMatrix *canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
   Color color(255, 255, 0);
+  Color red(214, 40, 40);
+
   Color bg_color(0, 0, 0);
 
   const char *bdf_font_file = "fonts/8x13.bdf";
@@ -262,6 +309,8 @@ int main(int argc, char *argv[])
   const std::string base_path(base_path_c);
 
   std::thread radio6Thread(radio6UpdateLoop, &line1str);
+  std::thread radio6Thread(weatherUpdateLoop, &line2str);
+
 
   if (bdf_font_file == NULL)
   {
@@ -297,15 +346,6 @@ int main(int argc, char *argv[])
     delay_speed_usec = 1000000 / speed / font.CharacterWidth('W');
   }
 
-  // int line1_x_orig = x_default_start;
-  // int line1_x = x_default_start;
-  // int line1_y = 1;
-  // int line1_length = 0;
-  int line2_x_orig = x_default_start;
-  int line2_x = x_default_start;
-  int line2_y = 20;
-  int line2_length = 0;
-
   const std::string radio6ImagePath("/img/bbcradio6musicsmall.png");
 
   ImageVector radio6Image = LoadImageAndScaleImage(
@@ -317,25 +357,34 @@ int main(int argc, char *argv[])
     std::cout << "FAILED TO LOAD RADIO 6 IMAGE" << std::endl;
   }
 
+  const std::string weatherImagePath("/img/cloudysun.png");
+
+  ImageVector weatherImage = LoadImageAndScaleImage(
+      (base_path + weatherImagePath).c_str(),
+      13,
+      13);
+  if (weatherImage.size() == 0)
+  {
+    std::cout << "FAILED TO LOAD WEATHER IMAGE" << std::endl;
+  }
+
   ScreenLine line1(
-    speed, 
-    x_default_start, 
-    1, 
-    letter_spacing, 
-    &font, 
-    color, 
-    &line1str
-  );
+      speed,
+      x_default_start,
+      1,
+      letter_spacing,
+      &font,
+      color,
+      &line1str);
 
   ScreenLine line2(
-    speed, 
-    x_default_start, 
-    18, 
-    letter_spacing, 
-    &font, 
-    color, 
-    &line2str
-  );
+      speed,
+      x_default_start,
+      18,
+      letter_spacing,
+      &font,
+      color,
+      &line2str);
 
   while (!interrupt_received)
   {
@@ -345,13 +394,14 @@ int main(int argc, char *argv[])
     line2.render(offscreen_canvas);
     line1.updateText(&line1str);
     line2.updateText(&line2str);
-  
-    offscreen_canvas->SetPixels(0, 0, 13, 32, 10, 10, 11);
+
+    offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
+
+    rgb_matrix::DrawLine(offscreen_canvas, 14, 0, 14, 32, red);
 
     CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 1);
 
-
-    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 18);
+    CopyImageToCanvas(weatherImage[0], offscreen_canvas, 0, 18);
 
     // Swap the offscreen_canvas with canvas on vsync, avoids flickering
     offscreen_canvas = canvas->SwapOnVSync(offscreen_canvas);
