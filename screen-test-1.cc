@@ -202,20 +202,17 @@ bool updateWeatherData(std::string *line)
   {
     Json::Value jsonData = callJsonAPI(url);
 
-    if (jsonData != NULL)
-    {
-      const std::string condition(jsonData["weather"][0]["description"].asString());
+    const std::string condition(jsonData["weather"][0]["description"].asString());
 
-      const std::string temp(jsonData["mian"]["temp"].asString());
+    const std::string temp(jsonData["mian"]["temp"].asString());
 
-      std::cout << "\tCondition: " << condition << std::endl;
-      std::cout << "\tTempt: " << temp << std::endl;
-      std::cout << std::endl;
+    std::cout << "\tCondition: " << condition << std::endl;
+    std::cout << "\tTempt: " << temp << std::endl;
+    std::cout << std::endl;
 
-      line->clear();
-      line->append(condition).append(" - ").append(temp);
-      return true;
-    }
+    line->clear();
+    line->append(condition).append(" - ").append(temp);
+    return true;
   }
   catch (std::runtime_error &e)
   {
@@ -231,20 +228,17 @@ bool updateRadio6Data(std::string *line)
   {
     Json::Value jsonData = callJsonAPI(url);
 
-    if (jsonData != NULL)
-    {
-      const std::string artist(jsonData["tracks"][0]["artist"].asString());
+    const std::string artist(jsonData["tracks"][0]["artist"].asString());
 
-      const std::string track_name(jsonData["tracks"][0]["name"].asString());
+    const std::string track_name(jsonData["tracks"][0]["name"].asString());
 
-      std::cout << "\tArtist: " << artist << std::endl;
-      std::cout << "\tTrack Name: " << track_name << std::endl;
-      std::cout << std::endl;
+    std::cout << "\tArtist: " << artist << std::endl;
+    std::cout << "\tTrack Name: " << track_name << std::endl;
+    std::cout << std::endl;
 
-      line->clear();
-      line->append(artist).append(" - ").append(track_name);
-      return true;
-    }
+    line->clear();
+    line->append(artist).append(" - ").append(track_name);
+    return true;
   }
   catch (std::runtime_error &e)
   {
