@@ -16,6 +16,7 @@
 #include <thread>
 #include <ctime>
 #include <filesystem>
+#include <stdexcept>
 
 #include <curl/curl.h>
 #include <getopt.h>
@@ -136,7 +137,6 @@ void CopyImageToCanvas(const Magick::Image &image, Canvas *canvas, int offset_x,
   }
 }
 
-
 Json::Value callJsonAPI(std::string url)
 {
   CURL *curl = curl_easy_init();
@@ -184,61 +184,72 @@ Json::Value callJsonAPI(std::string url)
       std::cout << "Could not parse HTTP data as JSON" << std::endl;
       std::cout << "HTTP data was:\n"
                 << *httpData.get() << std::endl;
-      return NULL;
+      throw std::runtime_error("Failed to Parse JSON");
     }
   }
   else
   {
     std::cout << "Couldn't GET from " << url << " - exiting" << std::endl;
-    return false;
+    throw std::runtime_error("Got non 200 Response from URL");
   }
 }
 
-bool updateWeatherData(std::string *line){
-    const std::string url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=9b8d4c21eb390f8f70f34a5705ed1546");
+bool updateWeatherData(std::string *line)
+{
+  const std::string url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=9b8d4c21eb390f8f70f34a5705ed1546");
 
-  Json::Value jsonData = callJsonAPI(url);
-
-  if (jsonData != NULL)
+  try
   {
-    const std::string condition(jsonData["weather"][0]["description"].asString());
+    Json::Value jsonData = callJsonAPI(url);
 
-    const std::string temp(jsonData["mian"]["temp"].asString());
+    if (jsonData != NULL)
+    {
+      const std::string condition(jsonData["weather"][0]["description"].asString());
 
-    std::cout << "\tCondition: " << condition << std::endl;
-    std::cout << "\tTempt: " << temp << std::endl;
-    std::cout << std::endl;
+      const std::string temp(jsonData["mian"]["temp"].asString());
 
-    line->clear();
-    line->append(condition).append(" - ").append(temp);
-    return true;
+      std::cout << "\tCondition: " << condition << std::endl;
+      std::cout << "\tTempt: " << temp << std::endl;
+      std::cout << std::endl;
+
+      line->clear();
+      line->append(condition).append(" - ").append(temp);
+      return true;
+    }
   }
-
-  return false;
+  catch (std::runtime_error &e)
+  {
+    return false;
+  }
 }
 
 bool updateRadio6Data(std::string *line)
 {
   const std::string url("https://nowplaying.jameswragg.com/api/bbc6music");
 
-  Json::Value jsonData = callJsonAPI(url);
-
-  if (jsonData != NULL)
+  try
   {
-    const std::string artist(jsonData["tracks"][0]["artist"].asString());
+    Json::Value jsonData = callJsonAPI(url);
 
-    const std::string track_name(jsonData["tracks"][0]["name"].asString());
+    if (jsonData != NULL)
+    {
+      const std::string artist(jsonData["tracks"][0]["artist"].asString());
 
-    std::cout << "\tArtist: " << artist << std::endl;
-    std::cout << "\tTrack Name: " << track_name << std::endl;
-    std::cout << std::endl;
+      const std::string track_name(jsonData["tracks"][0]["name"].asString());
 
-    line->clear();
-    line->append(artist).append(" - ").append(track_name);
-    return true;
+      std::cout << "\tArtist: " << artist << std::endl;
+      std::cout << "\tTrack Name: " << track_name << std::endl;
+      std::cout << std::endl;
+
+      line->clear();
+      line->append(artist).append(" - ").append(track_name);
+      return true;
+    }
   }
-
-  return false;
+  catch (std::runtime_error &e)
+  {
+    return false;
+  }
 }
 
 using namespace std::literals::chrono_literals;
@@ -309,8 +320,7 @@ int main(int argc, char *argv[])
   const std::string base_path(base_path_c);
 
   std::thread radio6Thread(radio6UpdateLoop, &line1str);
-  std::thread radio6Thread(weatherUpdateLoop, &line2str);
-
+  std::thread weatherThread(weatherUpdateLoop, &line2str);
 
   if (bdf_font_file == NULL)
   {
