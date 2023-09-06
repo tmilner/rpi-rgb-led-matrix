@@ -17,7 +17,10 @@
 #include <ctime>
 #include <filesystem>
 #include <stdexcept>
+#include <iomanip>
+#include <sstream>
 
+#include <yaml-cpp/yaml.h>
 #include <curl/curl.h>
 #include <getopt.h>
 #include <signal.h>
@@ -146,7 +149,7 @@ Json::Value callJsonAPI(std::string url)
   // Don't bother trying IPv6, which would increase DNS resolution time.
   curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
   // Don't wait forever, time out after 10 seconds.
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
   // Follow HTTP redirects if necessary.
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -162,7 +165,7 @@ Json::Value callJsonAPI(std::string url)
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
 
   // Run our HTTP GET command, capture the HTTP response code, and clean up.
-  curl_easy_perform(curl);
+  CURLcode code = curl_easy_perform(curl);
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
   curl_easy_cleanup(curl);
 
@@ -177,6 +180,7 @@ Json::Value callJsonAPI(std::string url)
 
     if (jsonReader.parse(*httpData, jsonData))
     {
+      httpData.release();
       return jsonData;
     }
     else
@@ -184,45 +188,23 @@ Json::Value callJsonAPI(std::string url)
       std::cout << "Could not parse HTTP data as JSON" << std::endl;
       std::cout << "HTTP data was:\n"
                 << *httpData.get() << std::endl;
+      httpData.release();
+
       throw std::runtime_error("Failed to Parse JSON");
     }
   }
   else
   {
-    std::cout << "Couldn't GET from " << url << " - exiting" << std::endl;
+    httpData.release();
+    std::cout << "Non 200 from " << url << ". Code = " << httpCode << " Curl code " << curl_easy_strerror(code) << std::endl;
     throw std::runtime_error("Got non 200 Response from URL");
   }
 }
 
-bool updateWeatherData(std::string *line)
+void updateRadio6(std::string *line)
 {
-  const std::string url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=9b8d4c21eb390f8f70f34a5705ed1546");
-
-  try
-  {
-    Json::Value jsonData = callJsonAPI(url);
-
-    const std::string condition(jsonData["weather"][0]["description"].asString());
-
-    const std::string temp(jsonData["mian"]["temp"].asString());
-
-    std::cout << "\tCondition: " << condition << std::endl;
-    std::cout << "\tTempt: " << temp << std::endl;
-    std::cout << std::endl;
-
-    line->clear();
-    line->append(condition).append(" - ").append(temp);
-    return true;
-  }
-  catch (std::runtime_error &e)
-  {
-    return false;
-  }
-}
-
-bool updateRadio6Data(std::string *line)
-{
-  const std::string url("https://nowplaying.jameswragg.com/api/bbc6music");
+  const std::string url("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
+  std::cout << "Fetching radio6 data from " << url << std::endl;
 
   try
   {
@@ -238,30 +220,55 @@ bool updateRadio6Data(std::string *line)
 
     line->clear();
     line->append(artist).append(" - ").append(track_name);
-    return true;
   }
   catch (std::runtime_error &e)
   {
-    return false;
+    printf("Failed to fetch weather\n");
+  }
+}
+const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
+void updateWeather(std::string *line, const std::string weather_api_key)
+{
+  const std::string url = weather_base_url + weather_api_key;
+  std::cout << "Fetching wether data from " << url << std::endl;
+  try
+  {
+    Json::Value jsonData = callJsonAPI(url);
+
+    const std::string condition(jsonData["weather"][0]["description"].asString());
+    const double kevinScale = 273.15;
+    const double temp = jsonData["main"]["temp"].asDouble() - kevinScale;
+
+    std::stringstream temp_str_stream;
+    temp_str_stream << std::fixed << std::setprecision(1) << temp;
+    std::string temp_str = temp_str_stream.str();
+
+    std::cout << "\tCondition: " << condition << std::endl;
+    std::cout << "\tTemp: " << temp << std::endl;
+    std::cout << std::endl;
+
+    line->clear();
+    line->append(condition).append(" - ").append(temp_str);
+  }
+  catch (std::runtime_error &e)
+  {
+    printf("Failed to fetch radio6\n");
   }
 }
 
 using namespace std::literals::chrono_literals;
-void radio6UpdateLoop(std::string *line)
+void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key)
 {
-  while (true)
-  {
-    updateRadio6Data(line);
-    std::this_thread::sleep_for(30s);
-  }
-}
+  int refreshCount = 0;
 
-void weatherUpdateLoop(std::string *line)
-{
   while (true)
   {
-    updateWeatherData(line);
-    std::this_thread::sleep_for(360s);
+    updateRadio6(line1);
+    if (refreshCount % 10 == 0)
+    {
+      updateWeather(line2, weather_api_key);
+    }
+    std::this_thread::sleep_for(30s);
   }
 }
 
@@ -277,9 +284,8 @@ int main(int argc, char *argv[])
   defaults.chain_length = 1;
   defaults.parallel = 1;
   defaults.show_refresh_rate = false;
-  defaults.limit_refresh_rate_hz = 25;
 
-  RGBMatrix *canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
+  RGBMatrix *matrix = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
   Color color(240, 160, 100);
   Color red(214, 40, 40);
@@ -313,8 +319,11 @@ int main(int argc, char *argv[])
 
   const std::string base_path(base_path_c);
 
-  std::thread radio6Thread(radio6UpdateLoop, &line1str);
-  std::thread weatherThread(weatherUpdateLoop, &line2str);
+  YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
+
+  const std::string weather_api_key = config["weather_api_key"].as<std::string>();
+
+  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key);
 
   if (bdf_font_file == NULL)
   {
@@ -333,8 +342,20 @@ int main(int argc, char *argv[])
   }
 
   /* RGBMatrix *canvas = RGBMatrix::CreateFromOptions(matrix_options, runtime_opt); */
-  if (canvas == NULL)
+  if (matrix == NULL)
     return 1;
+
+  // Let's request all input bits and see which are actually available.
+  // This will differ depending on which hardware mapping you use and how
+  // many parallel chains you have.
+  const uint64_t available_inputs = matrix->RequestInputs(0xffffffff);
+  fprintf(stderr, "Available GPIO-bits: ");
+  for (int b = 0; b < 32; ++b)
+  {
+    if (available_inputs & (1 << b))
+      fprintf(stderr, "%d ", b);
+  }
+  fprintf(stderr, "\n");
 
   signal(SIGTERM, InterruptHandler);
   signal(SIGINT, InterruptHandler);
@@ -342,7 +363,7 @@ int main(int argc, char *argv[])
   printf("CTRL-C for exit.\n");
 
   // Create a new canvas to be used with led_matrix_swap_on_vsync
-  FrameCanvas *offscreen_canvas = canvas->CreateFrameCanvas();
+  FrameCanvas *offscreen_canvas = matrix->CreateFrameCanvas();
 
   int delay_speed_usec = 1000000;
   if (speed > 0)
@@ -350,12 +371,14 @@ int main(int argc, char *argv[])
     delay_speed_usec = 1000000 / speed / font.CharacterWidth('W');
   }
 
-  const std::string radio6ImagePath("/img/bbcradio6musicsmall.png");
+  const std::string radio6ImagePath("/img/radio6icon.png");
 
+  std::cout << "Loading Radio6 Image" << std::endl;
   ImageVector radio6Image = LoadImageAndScaleImage(
       (base_path + radio6ImagePath).c_str(),
-      13,
-      13);
+      11,
+      11);
+
   if (radio6Image.size() == 0)
   {
     std::cout << "FAILED TO LOAD RADIO 6 IMAGE" << std::endl;
@@ -363,10 +386,12 @@ int main(int argc, char *argv[])
 
   const std::string weatherImagePath("/img/cloudysun.png");
 
+  std::cout << "Loading Weather Image" << std::endl;
   ImageVector weatherImage = LoadImageAndScaleImage(
       (base_path + weatherImagePath).c_str(),
       13,
       13);
+
   if (weatherImage.size() == 0)
   {
     std::cout << "FAILED TO LOAD WEATHER IMAGE" << std::endl;
@@ -403,17 +428,18 @@ int main(int argc, char *argv[])
 
     rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, red);
 
-    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 0, 1);
+    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
 
     CopyImageToCanvas(weatherImage[0], offscreen_canvas, 0, 18);
 
     // Swap the offscreen_canvas with canvas on vsync, avoids flickering
-    offscreen_canvas = canvas->SwapOnVSync(offscreen_canvas);
+    offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
     usleep(delay_speed_usec);
   }
 
   // Finished. Shut down the RGB matrix.
-  delete canvas;
+  matrix->Clear();
+  delete matrix;
 
   return 0;
 }
