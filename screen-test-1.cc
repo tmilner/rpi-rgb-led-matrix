@@ -47,16 +47,6 @@ static void InterruptHandler(int signo)
 std::string line1str = "Loading";
 std::string line2str = "Loading";
 
-static bool parseColor(Color *c, const char *str)
-{
-  return sscanf(str, "%hhu,%hhu,%hhu", &c->r, &c->g, &c->b) == 3;
-}
-
-static bool FullSaturation(const Color &c)
-{
-  return (c.r == 0 || c.r == 255) && (c.g == 0 || c.g == 255) && (c.b == 0 || c.b == 255);
-}
-
 namespace
 {
   std::size_t callback(
@@ -295,13 +285,13 @@ int main(int argc, char *argv[])
   RGBMatrix *matrix = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
   Color color(240, 160, 100);
-  Color red(214, 40, 40);
+  Color red(233, 110, 80);
 
   Color bg_color(0, 0, 0);
 
   const char *bdf_font_file = "fonts/8x13.bdf";
   /* x_origin is set by default just right of the screen */
-  const int x_default_start = (defaults.chain_length * defaults.cols) + 5;
+  const int x_default_start = (defaults.chain_length * defaults.cols) + 2;
 
   int letter_spacing = 0;
   float speed = 3.0f;
@@ -393,19 +383,6 @@ int main(int argc, char *argv[])
     std::cout << "FAILED TO LOAD RADIO 6 IMAGE" << std::endl;
   }
 
-  // const std::string weatherImagePath("/img/cloudysun.png");
-  //
-  //  std::cout << "Loading Weather Image" << std::endl;
-  //  ImageVector weatherImage = LoadImageAndScaleImage(
-  //      (base_path + weatherImagePath).c_str(),
-  //      13,
-  //      13);
-
-  // if (weatherImage.size() == 0)
-  // {
-  //   std::cout << "FAILED TO LOAD WEATHER IMAGE" << std::endl;
-  // }
-
   const std::string image_path("/img");
 
 
@@ -441,21 +418,23 @@ int main(int argc, char *argv[])
 
   ScreenLine line1(
       speed,
-      x_default_start,
       1,
       letter_spacing,
       &font,
       color,
-      &line1str);
+      &line1str,
+      defaults.chain_length * defaults.cols,
+      14);
 
   ScreenLine line2(
       speed,
-      x_default_start,
       18,
       letter_spacing,
       &font,
       color,
-      &line2str);
+      &line2str,
+      defaults.chain_length * defaults.cols,
+      14);
 
   while (!interrupt_received)
   {
