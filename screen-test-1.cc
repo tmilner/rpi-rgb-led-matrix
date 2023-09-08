@@ -227,7 +227,7 @@ void updateRadio6(std::string *line)
   }
 }
 const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
-void updateWeather(std::string *line, const std::string weather_api_key)
+void updateWeather(std::string *line, const std::string weather_api_key, YAML::Node weather_strings)
 {
   const std::string url = weather_base_url + weather_api_key;
   std::cout << "Fetching wether data from " << url << std::endl;
@@ -236,6 +236,7 @@ void updateWeather(std::string *line, const std::string weather_api_key)
     Json::Value jsonData = callJsonAPI(url);
 
     const std::string condition(jsonData["weather"][0]["description"].asString());
+    const std::string weather_id(jsonData["weather"][0]["id"].asString());
     const double kevinScale = 273.15;
     const double temp = jsonData["main"]["temp"].asDouble() - kevinScale;
 
@@ -243,12 +244,14 @@ void updateWeather(std::string *line, const std::string weather_api_key)
     temp_str_stream << std::fixed << std::setprecision(1) << temp;
     std::string temp_str = temp_str_stream.str();
 
+    std::string weather_string = weather_strings[weather_id].as<std::string>();
     std::cout << "\tCondition: " << condition << std::endl;
     std::cout << "\tTemp: " << temp << std::endl;
+    std::cout << "\tString" << weather_string << " for id " << weather_id << std::endl;
     std::cout << std::endl;
 
     line->clear();
-    line->append(condition).append(" - ").append(temp_str);
+    line->append(weather_string).append(" - ").append(temp_str).append("℃");
   }
   catch (std::runtime_error &e)
   {
@@ -257,7 +260,7 @@ void updateWeather(std::string *line, const std::string weather_api_key)
 }
 
 using namespace std::literals::chrono_literals;
-void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key)
+void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key, YAML::Node weather_strings)
 {
   int refreshCount = 0;
 
@@ -266,7 +269,7 @@ void updateLines(std::string *line1, std::string *line2, const std::string weath
     updateRadio6(line1);
     if (refreshCount % 10 == 0)
     {
-      updateWeather(line2, weather_api_key);
+      updateWeather(line2, weather_api_key, weather_strings);
     }
     std::this_thread::sleep_for(30s);
   }
@@ -319,12 +322,16 @@ int main(int argc, char *argv[])
 
   const std::string base_path(base_path_c);
 
+  //Weather API Key
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
-
   const std::string weather_api_key = config["weather_api_key"].as<std::string>();
 
-  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key);
+  //Weather String
+  YAML::Node weather_file = YAML::LoadFile(base_path + "/weather_strings.yaml");
+  YAML::Node weather_strings = weather_file["strings"];
 
+
+  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, weather_strings);
   if (bdf_font_file == NULL)
   {
     fprintf(stderr, "Need to specify BDF font-file with -f\n");
