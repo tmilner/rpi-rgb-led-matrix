@@ -1,56 +1,45 @@
 ---
 strings:
   '200':
-    recommendation: Stormy with a bit of rain. Coat required
+    recommendation: "Stormy with a bit of rain"
   '201':
-    recommendation: Stormy with showers. Grab a brolly on your way out
+    recommendation: "Stormy with showers"
   '202':
-    recommendation: It's going to be absolutely torrential out there today. Carry
-      as many umbrellas as you can
+    recommendation: "Torrential Rain"
   '210':
-    recommendation: Light storm on the way. Good time for that spare lightning detector
-      you've had lying around
+    recommendation: "Incoming Storm"
   '211':
-    recommendation: A storm on the way. Mind your eardrums please.
+    recommendation: "Stormy"
   '212':
-    recommendation: Biblical weather today. Gumboots and a life jacket are the bare
-      minimum
+    recommendation: "Heavy Storm"
   '221':
-    recommendation: Horrid weather. Jackets, brollies, heck, you might even need a
-      boat
+    recommendation: "Horrid weather"
   '230':
-    recommendation: Storms and a bit of rain. Brolly + layers I'm afraid
+    recommendation: "Storms and a bit of rain"
   '231':
-    recommendation: Rain + storms aka you'll look pretty daft going without a jacket
-      today
+    recommendation: "Rain + storms"
   '232':
-    recommendation: Rainfall incoming. Umbrella for goodness sake!
+    recommendation: "Raining Soon"
   '300':
-    recommendation: Well, a bit of rain never killed anyone. Am I even legally allowed
-      to say er... *frantically deletes*
+    recommendation: "Light Rain"
   '301':
-    recommendation: Rain, but not terminal. Be sensible and wear a coat for heavens
-      sake
+    recommendation: "Rain"
   '302':
-    recommendation: Rain, of the annoying variety. Don't get caught out
+    recommendation: "Heavy Rain"
   '310':
-    recommendation: The kind of rain you see people dance in in the movies. You'll
-      be fine
+    recommendation: "Heavy Rain"
   '311':
-    recommendation: A spot of rain. Nothing to be overly worried about
+    recommendation: "Light Rain"
   '312':
-    recommendation: More rain, I'm afraid. Coat or jacket as standard
+    recommendation: "Rain"
   '313':
-    recommendation: Showers forecasted. That means a free shower for you if you don't
-      carry a brolly
+    recommendation: "Rain Showers"
   '314':
-    recommendation: Cats and dogs. Umbrella and a thick pair of wellies required.
+    recommendation: "Monsoon"
   '321':
-    recommendation: Rain, but the sort you could survive by staying indoors. Umbrella
-      optional
+    recommendation: "Rain"
   '500':
-    recommendation: 'You can get away with just a sweater today. Disclaimer: I will
-      not be held responsible for any rain-related mishaps'
+    recommendation: 'Mild'
   '501':
     recommendation: A bit more rain. Best carry an umbrella chap
   '502':

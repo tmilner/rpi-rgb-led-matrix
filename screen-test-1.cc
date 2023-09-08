@@ -73,6 +73,8 @@ namespace
 
 using ImageVector = std::vector<Magick::Image>;
 
+std::map<std::string, Magick::Image> image_map{};
+
 // Given the filename, load the image and scale to the size of the
 // matrix.
 // // If this is an animated image, the resutlting vector will contain multiple.
@@ -226,8 +228,9 @@ void updateRadio6(std::string *line)
     printf("Failed to fetch weather\n");
   }
 }
+
 const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
-void updateWeather(std::string *line, const std::string weather_api_key, YAML::Node weather_strings)
+void updateWeather(std::string *line, const std::string weather_api_key, Magick::Image *current_image)
 {
   const std::string url = weather_base_url + weather_api_key;
   std::cout << "Fetching wether data from " << url << std::endl;
@@ -236,7 +239,7 @@ void updateWeather(std::string *line, const std::string weather_api_key, YAML::N
     Json::Value jsonData = callJsonAPI(url);
 
     const std::string condition(jsonData["weather"][0]["description"].asString());
-    const std::string weather_id(jsonData["weather"][0]["id"].asString());
+    const std::string weather_icon(jsonData["weather"][0]["icon"].asString());
     const double kevinScale = 273.15;
     const double temp = jsonData["main"]["temp"].asDouble() - kevinScale;
 
@@ -244,14 +247,15 @@ void updateWeather(std::string *line, const std::string weather_api_key, YAML::N
     temp_str_stream << std::fixed << std::setprecision(1) << temp;
     std::string temp_str = temp_str_stream.str();
 
-    std::string weather_string = weather_strings[weather_id].as<std::string>();
     std::cout << "\tCondition: " << condition << std::endl;
-    std::cout << "\tTemp: " << temp << std::endl;
-    std::cout << "\tString" << weather_string << " for id " << weather_id << std::endl;
+    std::cout << "\tTemp: " << temp << std::endl;    
+    std::cout << "\tIcon: " << weather_icon << std::endl;
+
     std::cout << std::endl;
 
+    current_image = &(image_map.at(weather_icon));
     line->clear();
-    line->append(weather_string).append(" - ").append(temp_str).append("℃");
+    line->append(temp_str).append("℃");
   }
   catch (std::runtime_error &e)
   {
@@ -260,7 +264,7 @@ void updateWeather(std::string *line, const std::string weather_api_key, YAML::N
 }
 
 using namespace std::literals::chrono_literals;
-void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key, YAML::Node weather_strings)
+void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key, Magick::Image *current_image)
 {
   int refreshCount = 0;
 
@@ -269,7 +273,7 @@ void updateLines(std::string *line1, std::string *line2, const std::string weath
     updateRadio6(line1);
     if (refreshCount % 10 == 0)
     {
-      updateWeather(line2, weather_api_key, weather_strings);
+      updateWeather(line2, weather_api_key, current_image);
     }
     std::this_thread::sleep_for(30s);
   }
@@ -322,16 +326,14 @@ int main(int argc, char *argv[])
 
   const std::string base_path(base_path_c);
 
-  //Weather API Key
+  // Weather API Key
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
   const std::string weather_api_key = config["weather_api_key"].as<std::string>();
 
-  //Weather String
-  YAML::Node weather_file = YAML::LoadFile(base_path + "/weather_strings.yaml");
-  YAML::Node weather_strings = weather_file["strings"];
+  // Weather String
+  //  YAML::Node weather_file = YAML::LoadFile(base_path + "/weather_strings.yaml");
+  //  YAML::Node weather_strings = weather_file["strings"];
 
-
-  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, weather_strings);
   if (bdf_font_file == NULL)
   {
     fprintf(stderr, "Need to specify BDF font-file with -f\n");
@@ -391,18 +393,51 @@ int main(int argc, char *argv[])
     std::cout << "FAILED TO LOAD RADIO 6 IMAGE" << std::endl;
   }
 
-  const std::string weatherImagePath("/img/cloudysun.png");
+  // const std::string weatherImagePath("/img/cloudysun.png");
+  //
+  //  std::cout << "Loading Weather Image" << std::endl;
+  //  ImageVector weatherImage = LoadImageAndScaleImage(
+  //      (base_path + weatherImagePath).c_str(),
+  //      13,
+  //      13);
 
-  std::cout << "Loading Weather Image" << std::endl;
-  ImageVector weatherImage = LoadImageAndScaleImage(
-      (base_path + weatherImagePath).c_str(),
-      13,
-      13);
+  // if (weatherImage.size() == 0)
+  // {
+  //   std::cout << "FAILED TO LOAD WEATHER IMAGE" << std::endl;
+  // }
 
-  if (weatherImage.size() == 0)
+  const std::string image_path("/img");
+
+
+  for (auto const &dir_entry : std::filesystem::directory_iterator{base_path + image_path})
   {
-    std::cout << "FAILED TO LOAD WEATHER IMAGE" << std::endl;
+    if (dir_entry.path().extension() == ".png")
+    {
+      ImageVector image = LoadImageAndScaleImage(
+          (dir_entry.path()).c_str(),
+          13,
+          13);
+
+      std::cout << "Loading image: " << dir_entry.path() << std::endl;
+
+      if (image.size() == 0)
+      {
+        std::cout << "FAILED TO LOAD IMAGE" << dir_entry.path() << std::endl;
+      }
+      else
+      {
+        image_map[dir_entry.path().stem()] = image[0];
+      }
+    }
+    else
+    {
+      std::cout << "Found a non PNG file: " << dir_entry.path() << ", extension is: " << dir_entry.path().extension() << std::endl;
+    }
   }
+
+  Magick::Image *current_image = & (image_map.at("01d"));
+
+  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, current_image);
 
   ScreenLine line1(
       speed,
@@ -437,7 +472,7 @@ int main(int argc, char *argv[])
 
     CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
 
-    CopyImageToCanvas(weatherImage[0], offscreen_canvas, 0, 18);
+    CopyImageToCanvas(*current_image, offscreen_canvas, 0, 18);
 
     // Swap the offscreen_canvas with canvas on vsync, avoids flickering
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
