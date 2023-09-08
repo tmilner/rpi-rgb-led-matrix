@@ -21,6 +21,6 @@ class ScreenLine
 
 public:
     ScreenLine(int init_speed, int init_y, int init_letter_spacing, Font *init_font, Color init_color, std::string *starting_line, int init_screen_width, int init_icon_offset);
-    void updateText(std::string *newLineString);
+    void updateText(std::string &newLineString);
     void render(FrameCanvas *offscreen_canvas);
 };

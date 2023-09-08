@@ -28,9 +28,9 @@ ScreenLine::ScreenLine(int init_speed, int init_y, int init_letter_spacing, Font
 
     std::cout << "Line created! Max width for scrolling = " << max_width_for_no_scrolling << ", Init Screen width = " << init_screen_width << " icon offset " << icon_offset << std::endl; 
 };
-void ScreenLine::updateText(std::string *newLineString)
+void ScreenLine::updateText(std::string &newLineString)
 {
-    currentLine = *newLineString;
+    currentLine = newLineString;
 };
 void ScreenLine::render(FrameCanvas *offscreen_canvas)
 {

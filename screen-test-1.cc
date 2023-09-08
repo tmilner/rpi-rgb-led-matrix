@@ -46,18 +46,17 @@ static void InterruptHandler(int signo)
   interrupt_received = true;
 }
 
+std::map<std::string, Magick::Image> image_map{};
+
 std::string line1str = "Loading";
 std::string line2str = "Loading";
 
-enum Mode
-{
-  display,
-  main_menu,
-  brightness_menu
-};
+std::vector<std::string> menu_items{"Brightness", "Exit"};
+ScreenMode current_mode = ScreenMode::display;
+int current_menu_item = 0;
+int current_brightness = 100;
 
-Mode current_mode = display;
-Mode next_mode = display;
+RotaryDialWithPush dial(current_mode, current_menu_item, menu_items, current_brightness);
 namespace
 {
   std::size_t callback(
@@ -72,40 +71,7 @@ namespace
   }
 }
 
-void dialed(bool up, long value)
-{
-  std::cout << "dialed! Up? " << up << ", for " << value << std::endl;
-  return;
-}
-void pressed()
-{
-  std::cout << "pressed" << std::endl;
-  if (current_mode == display)
-  {
-    current_mode = main_menu;
-  }
-  else
-  {
-    current_mode = display;
-  }
-  return;
-}
-
-void released(std::chrono::nanoseconds heldFor)
-{
-  std::cout << "released after" << heldFor.count() << "ns" << std::endl;
-  return;
-}
-
 using ImageVector = std::vector<Magick::Image>;
-
-std::map<std::string, Magick::Image> image_map{};
-
-std::function<void(bool, long)> dialed_fn = [](bool up, long value){ dialed(up, value); };
-std::function<void()> pressed_fn = [](){ pressed(); };
-std::function<void(std::chrono::nanoseconds heldFor)> released_fn = [](std::chrono::nanoseconds heldFor){ released(heldFor); };
-
-RotaryDialWithPush dial(&dialed_fn, &pressed_fn, &released_fn);
 
 // Given the filename, load the image and scale to the size of the
 // matrix.
@@ -262,7 +228,7 @@ void updateRadio6(std::string *line)
 }
 
 const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
-void updateWeather(std::string *line, const std::string weather_api_key, Magick::Image *current_image)
+void updateWeather(std::string *line, const std::string weather_api_key, std::string *current_image)
 {
   const std::string url = weather_base_url + weather_api_key;
   std::cout << "Fetching wether data from " << url << std::endl;
@@ -285,7 +251,8 @@ void updateWeather(std::string *line, const std::string weather_api_key, Magick:
 
     std::cout << std::endl;
 
-    current_image = &(image_map.at(weather_icon));
+    current_image->clear();
+    current_image->append(weather_icon);
     line->clear();
     line->append(temp_str).append("℃");
   }
@@ -296,14 +263,14 @@ void updateWeather(std::string *line, const std::string weather_api_key, Magick:
 }
 
 using namespace std::literals::chrono_literals;
-void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key, Magick::Image *current_image)
+void updateLines(std::string *line1, std::string *line2, const std::string weather_api_key, std::string *current_image)
 {
   int refreshCount = 0;
 
   while (true)
   {
     updateRadio6(line1);
-    if (refreshCount % 10 == 0)
+    if (refreshCount == 0 || refreshCount % 10 == 0)
     {
       updateWeather(line2, weather_api_key, current_image);
     }
@@ -327,7 +294,6 @@ int main(int argc, char *argv[])
   RGBMatrix *matrix = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
   if (matrix == NULL)
     return 1;
-
 
   Color color(240, 160, 100);
   Color red(233, 110, 80);
@@ -438,9 +404,13 @@ int main(int argc, char *argv[])
     }
   }
 
-  Magick::Image *current_image = &(image_map.at("01d"));
+  std::cout << "Images loaded: " << std::endl;
+  for (const auto &[key, value] : image_map)
+    std::cout << '[' << key << "] = " << value.constImageInfo() << std::endl;
 
-  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, current_image);
+  std::string current_image = "01d";
+
+  std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, &current_image);
 
   ScreenLine line1(
       speed,
@@ -462,21 +432,15 @@ int main(int argc, char *argv[])
       width,
       14);
 
-
-  int menu_width = width - 20;
-  std::vector<std::string> menu_items{"Brightness"};
-  std::string *current_menu_item = &menu_items[0];
-
   ScreenLine menu_line(
       speed,
-      15,
+      12,
       letter_spacing,
       &menu_font,
       color,
-      current_menu_item,
-      menu_width,
+      &menu_items[current_menu_item],
+      width,
       0);
-
 
   while (!interrupt_received)
   {
@@ -486,8 +450,8 @@ int main(int argc, char *argv[])
 
       line1.render(offscreen_canvas);
       line2.render(offscreen_canvas);
-      line1.updateText(&line1str);
-      line2.updateText(&line2str);
+      line1.updateText(line1str);
+      line2.updateText(line2str);
 
       offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
 
@@ -495,25 +459,44 @@ int main(int argc, char *argv[])
 
       CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
 
-      CopyImageToCanvas(*current_image, offscreen_canvas, 0, 18);
+      try
+      {
+        CopyImageToCanvas(image_map[current_image], offscreen_canvas, 0, 18);
+      }
+      catch (std::out_of_range error)
+      {
+        std::cout << "No image selected. Falling back. Wanted " << current_image << std::endl;
+        CopyImageToCanvas(image_map["01d"], offscreen_canvas, 0, 18);
+      }
 
       // Swap the offscreen_canvas with canvas on vsync, avoids flickering
       offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
       usleep(delay_speed_usec);
     }
-    else if (current_mode == main_menu)
+    else
     {
+      offscreen_canvas->SetBrightness(current_brightness);
+      menu_offscreen_canvas->SetBrightness(current_brightness);
+
       menu_offscreen_canvas->CopyFrom(*offscreen_canvas);
 
-      menu_offscreen_canvas->SetPixels(0, 10, width - 20, defaults.rows - 20, 50, 50, 50);
+      if (current_mode == main_menu)
+      {
+        menu_offscreen_canvas->SetPixels(0, 10, width, defaults.rows - 20, 50, 50, 50);
+        menu_line.updateText(menu_items[current_menu_item]);
+      }
+      else
+      {
+        menu_offscreen_canvas->SetPixels(0, 10, width, defaults.rows - 20, 233, 110, 80);
+        menu_offscreen_canvas->SetPixels(1, 11, width - 2, defaults.rows - 18, 50, 50, 50);
+        std::string menuText = menu_items[current_menu_item] + std::string(" - ").append(std::to_string(current_brightness)).append("%");
+        menu_line.updateText(menuText);
+      }
 
       menu_line.render(menu_offscreen_canvas);
 
-      // rgb_matrix::DrawText(menu_offscreen_canvas, menu_font,
-      //                      10, 10 + menu_font.baseline(),
-      //                      color, &menu_bg_color,
-      //                      current_menu_item->c_str(), letter_spacing);
-      // Swap the offscreen_canvas with canvas on vsync, avoids flickering
+      matrix->SetBrightness(current_brightness);
+
       menu_offscreen_canvas = matrix->SwapOnVSync(menu_offscreen_canvas);
       usleep(delay_speed_usec);
     }
