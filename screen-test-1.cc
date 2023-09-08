@@ -9,6 +9,8 @@
 
 #include "led-matrix.h"
 #include "graphics.h"
+#include "rotary_dial.cc"
+#include <cppgpio.hpp>
 
 #include <string>
 #include <iostream>
@@ -47,6 +49,15 @@ static void InterruptHandler(int signo)
 std::string line1str = "Loading";
 std::string line2str = "Loading";
 
+enum Mode
+{
+  display,
+  main_menu,
+  brightness_menu
+};
+
+Mode current_mode = display;
+Mode next_mode = display;
 namespace
 {
   std::size_t callback(
@@ -61,9 +72,40 @@ namespace
   }
 }
 
+void dialed(bool up, long value)
+{
+  std::cout << "dialed! Up? " << up << ", for " << value << std::endl;
+  return;
+}
+void pressed()
+{
+  std::cout << "pressed" << std::endl;
+  if (current_mode == display)
+  {
+    current_mode = main_menu;
+  }
+  else
+  {
+    current_mode = display;
+  }
+  return;
+}
+
+void released(std::chrono::nanoseconds heldFor)
+{
+  std::cout << "released after" << heldFor.count() << "ns" << std::endl;
+  return;
+}
+
 using ImageVector = std::vector<Magick::Image>;
 
 std::map<std::string, Magick::Image> image_map{};
+
+std::function<void(bool, long)> dialed_fn = [](bool up, long value){ dialed(up, value); };
+std::function<void()> pressed_fn = [](){ pressed(); };
+std::function<void(std::chrono::nanoseconds heldFor)> released_fn = [](std::chrono::nanoseconds heldFor){ released(heldFor); };
+
+RotaryDialWithPush dial(&dialed_fn, &pressed_fn, &released_fn);
 
 // Given the filename, load the image and scale to the size of the
 // matrix.
@@ -238,7 +280,7 @@ void updateWeather(std::string *line, const std::string weather_api_key, Magick:
     std::string temp_str = temp_str_stream.str();
 
     std::cout << "\tCondition: " << condition << std::endl;
-    std::cout << "\tTemp: " << temp << std::endl;    
+    std::cout << "\tTemp: " << temp << std::endl;
     std::cout << "\tIcon: " << weather_icon << std::endl;
 
     std::cout << std::endl;
@@ -287,11 +329,12 @@ int main(int argc, char *argv[])
   Color color(240, 160, 100);
   Color red(233, 110, 80);
 
+  Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
 
   const char *bdf_font_file = "fonts/8x13.bdf";
   /* x_origin is set by default just right of the screen */
-  const int x_default_start = (defaults.chain_length * defaults.cols) + 2;
+  const int width = defaults.chain_length * defaults.cols;
 
   int letter_spacing = 0;
   float speed = 3.0f;
@@ -363,6 +406,7 @@ int main(int argc, char *argv[])
 
   // Create a new canvas to be used with led_matrix_swap_on_vsync
   FrameCanvas *offscreen_canvas = matrix->CreateFrameCanvas();
+  FrameCanvas *menu_offscreen_canvas = matrix->CreateFrameCanvas();
 
   int delay_speed_usec = 1000000;
   if (speed > 0)
@@ -384,7 +428,6 @@ int main(int argc, char *argv[])
   }
 
   const std::string image_path("/img");
-
 
   for (auto const &dir_entry : std::filesystem::directory_iterator{base_path + image_path})
   {
@@ -412,7 +455,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  Magick::Image *current_image = & (image_map.at("01d"));
+  Magick::Image *current_image = &(image_map.at("01d"));
 
   std::thread updateThread(updateLines, &line1str, &line2str, weather_api_key, current_image);
 
@@ -436,26 +479,45 @@ int main(int argc, char *argv[])
       defaults.chain_length * defaults.cols,
       14);
 
+  std::vector<std::string> menuItems{"Brightness"};
+
   while (!interrupt_received)
   {
-    offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
+    if (current_mode == display)
+    {
+      offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-    line1.render(offscreen_canvas);
-    line2.render(offscreen_canvas);
-    line1.updateText(&line1str);
-    line2.updateText(&line2str);
+      line1.render(offscreen_canvas);
+      line2.render(offscreen_canvas);
+      line1.updateText(&line1str);
+      line2.updateText(&line2str);
 
-    offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
+      offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
 
-    rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, red);
+      rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, red);
 
-    CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
+      CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
 
-    CopyImageToCanvas(*current_image, offscreen_canvas, 0, 18);
+      CopyImageToCanvas(*current_image, offscreen_canvas, 0, 18);
 
-    // Swap the offscreen_canvas with canvas on vsync, avoids flickering
-    offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-    usleep(delay_speed_usec);
+      // Swap the offscreen_canvas with canvas on vsync, avoids flickering
+      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
+      usleep(delay_speed_usec);
+    }
+    else if (current_mode == main_menu)
+    {
+      menu_offscreen_canvas->CopyFrom(*offscreen_canvas);
+
+      menu_offscreen_canvas->SetPixels(10, 10, width - 20, defaults.rows - 20, 50, 50, 50);
+
+      rgb_matrix::DrawText(menu_offscreen_canvas, font,
+                           10, 10 + font.baseline(),
+                           color, &menu_bg_color,
+                           menuItems[0].c_str(), letter_spacing);
+      // Swap the offscreen_canvas with canvas on vsync, avoids flickering
+      menu_offscreen_canvas = matrix->SwapOnVSync(menu_offscreen_canvas);
+      usleep(delay_speed_usec);
+    }
   }
 
   // Finished. Shut down the RGB matrix.
