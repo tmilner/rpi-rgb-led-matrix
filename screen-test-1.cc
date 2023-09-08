@@ -325,6 +325,9 @@ int main(int argc, char *argv[])
   defaults.show_refresh_rate = false;
 
   RGBMatrix *matrix = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
+  if (matrix == NULL)
+    return 1;
+
 
   Color color(240, 160, 100);
   Color red(233, 110, 80);
@@ -332,7 +335,6 @@ int main(int argc, char *argv[])
   Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
 
-  const char *bdf_font_file = "fonts/8x13.bdf";
   /* x_origin is set by default just right of the screen */
   const int width = defaults.chain_length * defaults.cols;
 
@@ -341,15 +343,13 @@ int main(int argc, char *argv[])
   const char *base_path_c = ".";
 
   int opt;
-  while ((opt = getopt(argc, argv, "f:s:p:")) != -1)
+  while ((opt = getopt(argc, argv, "s:p:")) != -1)
   {
     switch (opt)
     {
     case 's':
       speed = atof(optarg);
       break;
-    case 'f':
-      bdf_font_file = strdup(optarg);
       break;
     case 'p':
       base_path_c = strdup(optarg);
@@ -363,41 +363,24 @@ int main(int argc, char *argv[])
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
   const std::string weather_api_key = config["weather_api_key"].as<std::string>();
 
-  // Weather String
-  //  YAML::Node weather_file = YAML::LoadFile(base_path + "/weather_strings.yaml");
-  //  YAML::Node weather_strings = weather_file["strings"];
-
-  if (bdf_font_file == NULL)
-  {
-    fprintf(stderr, "Need to specify BDF font-file with -f\n");
-    return -1;
-  }
-
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
-  rgb_matrix::Font font;
-  if (!font.LoadFont(bdf_font_file))
+  const std::string bdf_8x13_font_path(base_path + "/fonts/8x13.bdf");
+  const std::string bdf_5x7_font_path(base_path + "/fonts/5x7.bdf");
+
+  rgb_matrix::Font main_font;
+  if (!main_font.LoadFont(bdf_8x13_font_path.c_str()))
   {
-    fprintf(stderr, "Couldn't load font '%s'\n", bdf_font_file);
+    fprintf(stderr, "Couldn't load font '%s'\n", bdf_8x13_font_path);
     return 1;
   }
-
-  /* RGBMatrix *canvas = RGBMatrix::CreateFromOptions(matrix_options, runtime_opt); */
-  if (matrix == NULL)
-    return 1;
-
-  // Let's request all input bits and see which are actually available.
-  // This will differ depending on which hardware mapping you use and how
-  // many parallel chains you have.
-  const uint64_t available_inputs = matrix->RequestInputs(0xffffffff);
-  fprintf(stderr, "Available GPIO-bits: ");
-  for (int b = 0; b < 32; ++b)
+  rgb_matrix::Font menu_font;
+  if (!menu_font.LoadFont(bdf_5x7_font_path.c_str()))
   {
-    if (available_inputs & (1 << b))
-      fprintf(stderr, "%d ", b);
+    fprintf(stderr, "Couldn't load font '%s'\n", bdf_5x7_font_path);
+    return 1;
   }
-  fprintf(stderr, "\n");
 
   signal(SIGTERM, InterruptHandler);
   signal(SIGINT, InterruptHandler);
@@ -411,7 +394,7 @@ int main(int argc, char *argv[])
   int delay_speed_usec = 1000000;
   if (speed > 0)
   {
-    delay_speed_usec = 1000000 / speed / font.CharacterWidth('W');
+    delay_speed_usec = 1000000 / speed / main_font.CharacterWidth('W');
   }
 
   const std::string radio6ImagePath("/img/radio6icon.png");
@@ -463,23 +446,37 @@ int main(int argc, char *argv[])
       speed,
       1,
       letter_spacing,
-      &font,
+      &main_font,
       color,
       &line1str,
-      defaults.chain_length * defaults.cols,
+      width,
       14);
 
   ScreenLine line2(
       speed,
       18,
       letter_spacing,
-      &font,
+      &main_font,
       color,
       &line2str,
-      defaults.chain_length * defaults.cols,
+      width,
       14);
 
-  std::vector<std::string> menuItems{"Brightness"};
+
+  int menu_width = width - 20;
+  std::vector<std::string> menu_items{"Brightness"};
+  std::string *current_menu_item = &menu_items[0];
+
+  ScreenLine menu_line(
+      speed,
+      15,
+      letter_spacing,
+      &menu_font,
+      color,
+      current_menu_item,
+      menu_width,
+      0);
+
 
   while (!interrupt_received)
   {
@@ -508,12 +505,14 @@ int main(int argc, char *argv[])
     {
       menu_offscreen_canvas->CopyFrom(*offscreen_canvas);
 
-      menu_offscreen_canvas->SetPixels(10, 10, width - 20, defaults.rows - 20, 50, 50, 50);
+      menu_offscreen_canvas->SetPixels(0, 10, width - 20, defaults.rows - 20, 50, 50, 50);
 
-      rgb_matrix::DrawText(menu_offscreen_canvas, font,
-                           10, 10 + font.baseline(),
-                           color, &menu_bg_color,
-                           menuItems[0].c_str(), letter_spacing);
+      menu_line.render(menu_offscreen_canvas);
+
+      // rgb_matrix::DrawText(menu_offscreen_canvas, menu_font,
+      //                      10, 10 + menu_font.baseline(),
+      //                      color, &menu_bg_color,
+      //                      current_menu_item->c_str(), letter_spacing);
       // Swap the offscreen_canvas with canvas on vsync, avoids flickering
       menu_offscreen_canvas = matrix->SwapOnVSync(menu_offscreen_canvas);
       usleep(delay_speed_usec);
