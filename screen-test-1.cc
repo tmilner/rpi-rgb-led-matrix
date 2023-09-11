@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
     return 1;
 
   Color color(240, 160, 100);
-  Color red(233, 110, 80);
+  Color divider_color(240, 160, 100);
 
   Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
 
       offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
 
-      rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, red);
+      rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, divider_color);
 
       CopyImageToCanvas(radio6Image[0], offscreen_canvas, 1, 2);
 
@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
       else
       {
         menu_offscreen_canvas->SetPixels(0, 10, width, defaults.rows - 20, 233, 110, 80);
-        menu_offscreen_canvas->SetPixels(1, 11, width - 2, defaults.rows - 18, 50, 50, 50);
+        menu_offscreen_canvas->SetPixels(1, 11, width - 2, defaults.rows - 22, 50, 50, 50);
         std::string menuText = menu_items[current_menu_item] + std::string(" - ").append(std::to_string(current_brightness)).append("%");
         menu_line.updateText(menuText);
       }
