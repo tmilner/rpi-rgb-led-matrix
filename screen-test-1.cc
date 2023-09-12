@@ -16,6 +16,7 @@
 #include "screen_state.h"
 #include "radio6-line-updater.h"
 #include "weather-line-updater.h"
+#include "screen-menu.h"
 
 #include <string>
 #include <iostream>
@@ -87,7 +88,6 @@ int main(int argc, char *argv[])
 
   // Create a new canvas to be used with led_matrix_swap_on_vsync
   FrameCanvas *offscreen_canvas = matrix->CreateFrameCanvas();
-  FrameCanvas *menu_offscreen_canvas = matrix->CreateFrameCanvas();
 
   Color color(240, 160, 100);
   Color divider_color(130, 100, 73);
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 
   JSONFetcher *fetcher{};
 
-  ScrollingLineSettings weatherLineSettings = ScrollingLineSettings(
+  ScrollingLineSettings line2Settings = ScrollingLineSettings(
       speed,
       16,
       letter_spacing,
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
       width,
       14);
 
-  ScrollingLineSettings radio6LineSettings = ScrollingLineSettings(
+  ScrollingLineSettings line1Settings = ScrollingLineSettings(
       speed,
       0,
       letter_spacing,
@@ -216,28 +216,29 @@ int main(int argc, char *argv[])
       width,
       14);
 
-  Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, radio6LineSettings);
-  WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, weatherLineSettings);
+  Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, line2Settings);
+  WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, line1Settings);
 
   std::thread updateThread(updateLines, &weather, &radio6);
 
-  ScrollingLine menu_line(ScrollingLineSettings(
-      speed,
-      9,
-      letter_spacing,
-      &menu_font,
-      color,
-      width,
-      0));
-
-  ScrollingLine menu_sub_line(ScrollingLineSettings(
-      speed,
-      17,
-      letter_spacing,
-      &menu_font,
-      color,
-      width,
-      0));
+  ScreenMenu menu = ScreenMenu(
+      ScrollingLineSettings(
+          speed,
+          9,
+          letter_spacing,
+          &menu_font,
+          color,
+          width,
+          0),
+      ScrollingLineSettings(
+          speed,
+          17,
+          letter_spacing,
+          &menu_font,
+          color,
+          width,
+          0),
+      &state);
 
   offscreen_canvas->Clear();
 
@@ -256,28 +257,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-      offscreen_canvas->SetBrightness(state.current_brightness);
-      menu_offscreen_canvas->SetBrightness(state.current_brightness);
-
-      menu_offscreen_canvas->CopyFrom(*offscreen_canvas);
-
-      if (state.current_mode == main_menu)
-      {
-        menu_offscreen_canvas->SetPixels(0, 7, width, defaults.rows - 13, 50, 50, 50);
-      }
-      else
-      {
-        menu_offscreen_canvas->SetPixels(0, 7, width, defaults.rows - 13, 233, 110, 80);
-        menu_offscreen_canvas->SetPixels(1, 8, width - 2, defaults.rows - 15, 50, 50, 50);
-        menu_sub_line.updateText(&std::to_string(state.current_brightness).append("%"));
-        menu_sub_line.renderLine(menu_offscreen_canvas);
-      }
-      menu_line.updateText(&state.menu_items[state.current_menu_item]);
-      menu_line.renderLine(menu_offscreen_canvas);
-
-      matrix->SetBrightness(state.current_brightness);
-
-      menu_offscreen_canvas = matrix->SwapOnVSync(menu_offscreen_canvas);
+      menu.render(offscreen_canvas);
+      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
       usleep(delay_speed_usec);
     }
   }

@@ -1,8 +1,11 @@
-#include "line-updater.h"
+#include "updateable-screen.h"
 #include "led-matrix.h"
 #include "scrolling-line.h"
+#include "json-fetcher.h"
+#include <Magick++.h>
 
-class WeatherLineUpdater : public LineUpdater, ScrollingLine
+
+class WeatherLineUpdater : public UpdateableScreen, ScrollingLine
 {
 public:
     WeatherLineUpdater(const std::string weather_api_key, JSONFetcher *fetcher, std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);

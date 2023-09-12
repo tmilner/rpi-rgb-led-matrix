@@ -1,3 +1,6 @@
+#ifndef SCREEN_STATE_H
+#define SCREEN_STATE_H
+
 #include <string>
 #include <map>
 #include <vector>
@@ -17,3 +20,4 @@ namespace rgb_matrix
         int current_brightness = 100;
     };
 }
+#endif /*SCREEN_STATE_H*/

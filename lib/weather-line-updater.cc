@@ -1,6 +1,8 @@
 #include "weather-line-updater.h"
 #include <iostream>
 #include <iomanip>
+#include "json/json.h"
+
 #include "img_utils.h"
 
 WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFetcher *fetcher,
@@ -9,7 +11,7 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFe
     const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
 
     this->fetcher = fetcher;
-    this->line = "Loading";
+    this->current_line = "Loading";
     this->url = weather_base_url + weather_api_key;
     this->refreshCount = 9; // Refresh after one loop.
     this->image_map = image_map;
@@ -24,7 +26,6 @@ Magick::Image *WeatherLineUpdater::getIcon()
 void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 {
     std::cout << "RENDER - WEATHER - Y = " << this->y << std::endl;
-    this->updateText(this->getLine());
     this->renderLine(offscreen_canvas);
     offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
     rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
@@ -57,8 +58,8 @@ void WeatherLineUpdater::update()
 
             this->current_image.clear();
             this->current_image.append(weather_icon);
-            this->line.clear();
-            this->line.append(temp_str).append("℃");
+            this->current_line.clear();
+            this->current_line.append(temp_str).append("℃");
         }
         catch (std::runtime_error &e)
         {

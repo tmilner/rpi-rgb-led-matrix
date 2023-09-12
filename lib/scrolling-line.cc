@@ -6,9 +6,25 @@
 #include <iostream>
 using namespace rgb_matrix;
 
+ScrollingLine::ScrollingLine()
+{
+    current_line = "Loading";
+    x = 0;
+    y = 0;
+    length = 0;
+    letter_spacing = 0;
+    color = Color(0, 0, 0);
+    font = Font();
+    orig_speed = 0;
+    speed = 0;
+    icon_offset = 0;
+    screen_width = 0;
+    max_width_for_no_scrolling = 0;
+
+}
 ScrollingLine::ScrollingLine(ScrollingLineSettings settings)
 {
-    currentLine = "Loading";
+    current_line = "Loading";
     x = settings.init_icon_offset;
     y = settings.init_y;
     length = 0;
@@ -28,9 +44,9 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings)
 
     std::cout << "Line created! Max width for scrolling = " << max_width_for_no_scrolling << ", Init Screen width = " << settings.init_screen_width << " icon offset " << icon_offset << std::endl;
 };
-void ScrollingLine::updateText(std::string *newLineString)
+void ScrollingLine::updateText(std::string *new_line_string)
 {
-    currentLine = *newLineString;
+    current_line = *new_line_string;
 };
 void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas)
 {
@@ -47,7 +63,7 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas)
     length = rgb_matrix::DrawText(offscreen_canvas, font,
                                   x, y + font.baseline() + 1,
                                   color, nullptr,
-                                  currentLine.c_str(), letter_spacing);
+                                  current_line.c_str(), letter_spacing);
 
     if (speed > 0 && --x + length < icon_offset)
     {

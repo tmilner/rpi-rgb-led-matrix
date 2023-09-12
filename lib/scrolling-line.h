@@ -30,7 +30,7 @@ struct ScrollingLineSettings
 class ScrollingLine
 {
 protected:
-    std::string currentLine;
+    std::string current_line;
     int x;
     int y;
     int length;
@@ -44,8 +44,9 @@ protected:
     Color color;
 
 public:
+    ScrollingLine();
     ScrollingLine(ScrollingLineSettings settings);
-    void updateText(std::string *newLineString);
+    void updateText(std::string *new_line_string);
     void renderLine(FrameCanvas *offscreen_canvas);
 };
 

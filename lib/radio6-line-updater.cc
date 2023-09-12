@@ -6,7 +6,7 @@ Radio6LineUpdater::Radio6LineUpdater(JSONFetcher *fetcher,
                                      std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
     this->fetcher = fetcher;
-    this->line = "Loading";
+    this->current_line = "Loading";
     this->url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
     this->image_map = image_map;
     this->image_key = "radio6icon";
@@ -25,7 +25,6 @@ Magick::Image *Radio6LineUpdater::getIcon()
 void Radio6LineUpdater::render(FrameCanvas *offscreen_canvas)
 {
     std::cout << "RENDER - RADIO6 - Y = " << this->y << std::endl;
-    this->updateText(this->getLine());
     this->renderLine(offscreen_canvas);
     offscreen_canvas->SetPixels(0, this->y , 13, 16, 0, 0, 0);
     rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
@@ -47,8 +46,8 @@ void Radio6LineUpdater::update()
         std::cout << "\tTrack Name: " << track_name << std::endl;
         std::cout << std::endl;
 
-        this->line.clear();
-        this->line.append(artist).append(" - ").append(track_name);
+        this->current_line.clear();
+        this->current_line.append(artist).append(" - ").append(track_name);
     }
     catch (std::runtime_error &e)
     {

@@ -1,7 +1,9 @@
-#include "line-updater.h"
+#include "updateable-screen.h"
 #include "scrolling-line.h"
+#include "json-fetcher.h"
+#include <Magick++.h>
 
-class Radio6LineUpdater : public LineUpdater, ScrollingLine
+class Radio6LineUpdater : public UpdateableScreen, ScrollingLine
 {
 public:
     Radio6LineUpdater(JSONFetcher *fetcher,
