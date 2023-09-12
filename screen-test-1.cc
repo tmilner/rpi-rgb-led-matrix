@@ -9,7 +9,6 @@
 
 #include "led-matrix.h"
 #include "graphics.h"
-#include "rotary_dial.h"
 #include "json-fetcher.h"
 #include "scrolling-line.h"
 #include "img_utils.h"
@@ -68,6 +67,9 @@ int main(int argc, char *argv[])
   state.image_map = {};
   state.current_mode = ScreenMode::display;
   state.current_brightness = 100;
+
+  GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
+  GPIO::PushButton push(11, GPIO::GPIO_PULL::UP);
 
   Magick::InitializeMagick(*argv);
 
@@ -219,25 +221,13 @@ int main(int argc, char *argv[])
   std::thread updateThread(updateLines, &weather, &radio6);
 
   ScreenMenu menu = ScreenMenu(
-      ScrollingLineSettings(
-          speed,
-          9,
-          letter_spacing,
-          &menu_font,
-          color,
-          width,
-          0),
-      ScrollingLineSettings(
-          speed,
-          17,
-          letter_spacing,
-          &menu_font,
-          color,
-          width,
-          0),
-      &state);
-
-  RotaryDialWithPush dial(menu);
+      speed,
+      letter_spacing,
+      &menu_font,
+      width,
+      &state,
+      &dial,
+      &push);
 
   offscreen_canvas->Clear();
 
@@ -252,7 +242,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-      // menu.render(offscreen_canvas);
+      menu.render(offscreen_canvas);
     }
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
     usleep(delay_speed_usec);

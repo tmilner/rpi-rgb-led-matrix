@@ -2,13 +2,38 @@
 #include <iostream>
 #include "img_utils.h"
 
-ScreenMenu::ScreenMenu(ScrollingLineSettings line1_settings, ScrollingLineSettings line2_settings, ScreenState *state)
+ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
+                       GPIO::RotaryDial *dial,
+                       GPIO::PushButton *button)
+    : menu_line{ScrollingLineSettings(
+          speed,
+          9,
+          letter_spaceing,
+          font,
+          Color(240, 160, 100),
+          screen_width,
+          0)},
+      menu_sub_line{ScrollingLineSettings(
+          speed,
+          17,
+          letter_spaceing,
+          font,
+          Color(240, 160, 100),
+          screen_width,
+          0)}
 {
-    this->menu_sub_line = ScrollingLine(line2_settings);
-    this->menu_line = ScrollingLine(line1_settings);
     this->state = state;
     this->current_menu_item = 1;
-    this->menu_items = {"Brightness", "Exit"};
+    this->menu_items = {"Brightness", "Switch Order", "Exit"};
+
+    dial->f_dialed = [&](bool up, long value)
+    { this->scrollMenu(up); };
+
+    button->f_pushed = [&]()
+    { this->modeChange(); };
+
+    dial->start();
+    button->start();
 }
 void ScreenMenu::scrollMenu(bool up)
 {
@@ -42,6 +67,10 @@ void ScreenMenu::scrollMenu(bool up)
                 this->current_menu_item--;
             }
         }
+    }
+    else if (this->state->current_mode == ScreenMode::switch_order_menu)
+    {
+        
     }
     else if (this->state->current_mode == ScreenMode::brightness_menu)
     {
@@ -95,6 +124,11 @@ void ScreenMenu::modeChange()
         std::cout << "pressed go to brightness" << std::endl;
         this->state->current_mode = ScreenMode::brightness_menu;
     }
+    else if (this->state->current_mode == ScreenMode::main_menu && this->current_menu_item == 1)
+    {
+        std::cout << "pressed go to brightness" << std::endl;
+        this->state->current_mode = ScreenMode::switch_order_menu;
+    }
     else
     {
         std::cout << "pressed go to display" << std::endl;
@@ -105,6 +139,8 @@ void ScreenMenu::modeChange()
 
 void ScreenMenu::render(FrameCanvas *offscreen_canvas)
 {
+
+    std::cout << "Render Menu" << std::endl;
     offscreen_canvas->SetBrightness(this->state->current_brightness);
 
     if (this->state->current_mode == main_menu)

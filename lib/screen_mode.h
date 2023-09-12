@@ -5,6 +5,7 @@ enum ScreenMode
 {
     display,
     main_menu,
+    switch_order_menu,
     brightness_menu
 };
 

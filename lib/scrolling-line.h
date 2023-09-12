@@ -44,10 +44,9 @@ protected:
     Color color;
 
 public:
-    ScrollingLine();
     ScrollingLine(ScrollingLineSettings settings);
     void updateText(std::string *new_line_string);
     void renderLine(FrameCanvas *offscreen_canvas);
-};
-
+    void changeYPos(int new_y);
+}
 #endif /*SCROLLING_LINE_H*/

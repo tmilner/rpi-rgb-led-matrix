@@ -6,22 +6,19 @@
 #include <iostream>
 using namespace rgb_matrix;
 
-ScrollingLine::ScrollingLine()
-{
-    current_line = "Loading";
-    x = 0;
-    y = 0;
-    length = 0;
-    letter_spacing = 0;
-    color = Color(0, 0, 0);
-    font = Font();
-    orig_speed = 0;
-    speed = 0;
-    icon_offset = 0;
-    screen_width = 0;
-    max_width_for_no_scrolling = 0;
+// ScrollingLine::ScrollingLine()
+// {
+//     x = 0;
+//     y = 0;
+//     length = 0;
+//     letter_spacing = 0;
 
-}
+//     orig_speed = 0;
+//     speed = 0;
+//     icon_offset = 0;
+//     screen_width = 0;
+//     max_width_for_no_scrolling = 0;
+// }
 ScrollingLine::ScrollingLine(ScrollingLineSettings settings)
 {
     current_line = "Loading";
@@ -70,3 +67,8 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas)
         x = screen_width + 1;
     }
 };
+
+void ScrollingLine::changeYPos(int new_y)
+{
+    this->y = new_y;
+}

@@ -16,6 +16,7 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFe
     this->refreshCount = 9; // Refresh after one loop.
     this->image_map = image_map;
     this->current_image = "01d";
+    this->is_visible = true;
 }
 
 Magick::Image *WeatherLineUpdater::getIcon()
@@ -25,7 +26,9 @@ Magick::Image *WeatherLineUpdater::getIcon()
 
 void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 {
-    std::cout << "RENDER - WEATHER - Y = " << this->y << std::endl;
+    if(!is_visible) {
+        return;
+    }
     this->renderLine(offscreen_canvas);
     offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
     rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
@@ -33,6 +36,9 @@ void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 }
 void WeatherLineUpdater::update()
 {
+    if(!is_visible) {
+        return;
+    }
     if (this->refreshCount == 10)
     {
         this->refreshCount = 0;
