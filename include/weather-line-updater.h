@@ -6,15 +6,14 @@ class WeatherLineUpdater : public LineUpdater, ScrollingLine
 {
 public:
     WeatherLineUpdater(const std::string weather_api_key, JSONFetcher *fetcher, std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);
-    void updateLine();
-    Magick::Image *getIcon();
+    void update();
     void render(FrameCanvas *offscreen_canvas);
 
 private:
+    Magick::Image *getIcon();
     JSONFetcher *fetcher;
     std::string url;
     std::string current_image;
-    int y_pos;
     int refreshCount;
     std::map<std::string, Magick::Image> *image_map{};
 };

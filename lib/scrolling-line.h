@@ -29,6 +29,7 @@ struct ScrollingLineSettings
 
 class ScrollingLine
 {
+protected:
     std::string currentLine;
     int x;
     int y;

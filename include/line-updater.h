@@ -8,7 +8,7 @@
 class LineUpdater
 {
 public:
-    void updateLine();
+    void update();
     Magick::Image *getIcon();
     std::string *getLine()
     {

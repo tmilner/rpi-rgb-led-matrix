@@ -55,9 +55,9 @@ void updateLines(WeatherLineUpdater *weather, Radio6LineUpdater *radio6)
 {
   while (true)
   {
-    radio6->updateLine();
-    weather->updateLine();
-    std::this_thread::sleep_for(30s);
+    radio6->update();
+    weather->update();
+    std::this_thread::sleep_for(15s);
   }
 }
 
@@ -65,10 +65,6 @@ int main(int argc, char *argv[])
 {
   ScreenState state;
   state.image_map = {};
-
-  state.line1str = "Loading";
-  state.line2str = "Loading";
-
   state.menu_items = {"Brightness", "Exit"};
   state.current_mode = ScreenMode::display;
   state.current_menu_item = 0;
@@ -204,26 +200,26 @@ int main(int argc, char *argv[])
 
   ScrollingLineSettings weatherLineSettings = ScrollingLineSettings(
       speed,
-      18,
+      16,
       letter_spacing,
       &main_font,
       color,
       width,
       14);
 
-  Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map);
-  WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, weatherLineSettings);
-
-  std::thread updateThread(updateLines, &weather, &radio6);
-
-  ScrollingLine line1(ScrollingLineSettings(
+  ScrollingLineSettings radio6LineSettings = ScrollingLineSettings(
       speed,
-      1,
+      0,
       letter_spacing,
       &main_font,
       color,
       width,
-      14));
+      14);
+
+  Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, radio6LineSettings);
+  WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, weatherLineSettings);
+
+  std::thread updateThread(updateLines, &weather, &radio6);
 
   ScrollingLine menu_line(ScrollingLineSettings(
       speed,
@@ -251,18 +247,8 @@ int main(int argc, char *argv[])
     {
       offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-      line1.updateText(radio6.getLine());
       weather.render(offscreen_canvas);
-      // line2.updateText(weather.getLine());
-      line1.renderLine(offscreen_canvas);
-      // line2.render(offscreen_canvas);
-
-      offscreen_canvas->SetPixels(0, 0, 13, 32, 0, 0, 0);
-
-      rgb_matrix::DrawLine(offscreen_canvas, 13, 0, 13, 32, divider_color);
-
-      CopyImageToCanvas(radio6.getIcon(), offscreen_canvas, 1, 2);
-      // CopyImageToCanvas(weather.getIcon(), offscreen_canvas, 0, 18);
+      radio6.render(offscreen_canvas);
 
       // Swap the offscreen_canvas with canvas on vsync, avoids flickering
       offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);

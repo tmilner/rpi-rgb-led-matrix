@@ -14,7 +14,6 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFe
     this->refreshCount = 9; // Refresh after one loop.
     this->image_map = image_map;
     this->current_image = "01d";
-    this->y_pos = settings.init_y;
 }
 
 Magick::Image *WeatherLineUpdater::getIcon()
@@ -24,11 +23,14 @@ Magick::Image *WeatherLineUpdater::getIcon()
 
 void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 {
+    std::cout << "RENDER - WEATHER - Y = " << this->y << std::endl;
     this->updateText(this->getLine());
     this->renderLine(offscreen_canvas);
-    CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y_pos);
+    offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
+    rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
+    CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y);
 }
-void WeatherLineUpdater::updateLine()
+void WeatherLineUpdater::update()
 {
     if (this->refreshCount == 10)
     {
@@ -44,7 +46,7 @@ void WeatherLineUpdater::updateLine()
             const double temp = jsonData["main"]["temp"].asDouble() - kevinScale;
 
             std::stringstream temp_str_stream;
-            temp_str_stream << std::fixed << std::setprecision(1) << temp;
+            temp_str_stream << std::fixed << std::setprecision(0) << temp;
             std::string temp_str = temp_str_stream.str();
 
             std::cout << "\tCondition: " << condition << std::endl;
