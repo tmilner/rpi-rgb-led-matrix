@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
   Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
 
-  rgb_matrix::DrawCircle(offscreen_canvas, 32, 14, 10, color);
+  rgb_matrix::DrawCircle(offscreen_canvas, 32, 13, 10, color);
   offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
 
   /* x_origin is set by default just right of the screen */

@@ -27,9 +27,9 @@ void Radio6LineUpdater::render(FrameCanvas *offscreen_canvas)
     std::cout << "RENDER - RADIO6 - Y = " << this->y << std::endl;
     this->updateText(this->getLine());
     this->renderLine(offscreen_canvas);
-    offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
+    offscreen_canvas->SetPixels(0, this->y , 13, 16, 0, 0, 0);
     rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
-    CopyImageToCanvas(this->getIcon(), offscreen_canvas, 1, this->y);
+    CopyImageToCanvas(this->getIcon(), offscreen_canvas, 1, this->y + 2);
 }
 
 void Radio6LineUpdater::update()

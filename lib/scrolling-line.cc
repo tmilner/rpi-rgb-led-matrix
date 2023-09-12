@@ -45,7 +45,7 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas)
     }
 
     length = rgb_matrix::DrawText(offscreen_canvas, font,
-                                  x, y + font.baseline(),
+                                  x, y + font.baseline() + 1,
                                   color, nullptr,
                                   currentLine.c_str(), letter_spacing);
 
