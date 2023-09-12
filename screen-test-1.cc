@@ -66,13 +66,10 @@ int main(int argc, char *argv[])
 {
   ScreenState state;
   state.image_map = {};
-  state.menu_items = {"Brightness", "Exit"};
   state.current_mode = ScreenMode::display;
-  state.current_menu_item = 0;
   state.current_brightness = 100;
 
   Magick::InitializeMagick(*argv);
-  RotaryDialWithPush dial(state.current_mode, state.current_menu_item, state.menu_items, state.current_brightness);
 
   RGBMatrix::Options defaults;
   defaults.hardware_mapping = "adafruit-hat-pwm";
@@ -240,6 +237,8 @@ int main(int argc, char *argv[])
           0),
       &state);
 
+  RotaryDialWithPush dial(menu);
+
   offscreen_canvas->Clear();
 
   while (!interrupt_received)
@@ -250,17 +249,13 @@ int main(int argc, char *argv[])
 
       weather.render(offscreen_canvas);
       radio6.render(offscreen_canvas);
-
-      // Swap the offscreen_canvas with canvas on vsync, avoids flickering
-      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-      usleep(delay_speed_usec);
     }
     else
     {
-      menu.render(offscreen_canvas);
-      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-      usleep(delay_speed_usec);
+      // menu.render(offscreen_canvas);
     }
+    offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
+    usleep(delay_speed_usec);
   }
 
   // Finished. Shut down the RGB matrix.
