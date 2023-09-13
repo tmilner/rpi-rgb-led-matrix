@@ -7,6 +7,7 @@
 class UpdateableScreen : public Screen
 {
 public:
+    UpdateableScreen(ScreenSettings settings);
     void update();
     void render(rgb_matrix::Canvas *offscreen_canvas);
 };

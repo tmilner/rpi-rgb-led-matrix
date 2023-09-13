@@ -20,6 +20,8 @@ public:
 private:
     void scrollMenu(bool up);
     void modeChange();
+    enum MenuMode {main_menu, brightness_menu, switch_order_menu};
+    MenuMode current_mode = main_menu;
     ScrollingLine menu_line;
     ScrollingLine menu_sub_line;
     ScreenState *state;

@@ -15,6 +15,7 @@
 #include "screen_state.h"
 #include "radio6-line-updater.h"
 #include "weather-line-updater.h"
+#include "scrolling-line-screen.h"
 #include "screen-menu.h"
 
 #include <string>
@@ -51,12 +52,11 @@ static void InterruptHandler(int signo)
 }
 
 using namespace std::literals::chrono_literals;
-void updateLines(WeatherLineUpdater *weather, Radio6LineUpdater *radio6)
+void updateLines(ScrollingLineScreen *srollingTwoLineScreen)
 {
   while (true)
   {
-    radio6->update();
-    weather->update();
+    srollingTwoLineScreen->update();
     std::this_thread::sleep_for(15s);
   }
 }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 {
   ScreenState state;
   state.image_map = {};
-  state.current_mode = ScreenMode::display;
+  state.current_mode = ScreenMode::scrolling_lines;
   state.current_brightness = 100;
 
   GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
@@ -197,28 +197,40 @@ int main(int argc, char *argv[])
 
   JSONFetcher *fetcher{};
 
-  ScrollingLineSettings line2Settings = ScrollingLineSettings(
-      speed,
-      16,
-      letter_spacing,
-      &main_font,
-      color,
-      width,
-      14);
+  // ScrollingLineSettings line2Settings = ScrollingLineSettings(
+  //     speed,
+  //     16,
+  //     letter_spacing,
+  //     &main_font,
+  //     color,
+  //     width,
+  //     14);
 
-  ScrollingLineSettings line1Settings = ScrollingLineSettings(
-      speed,
-      0,
-      letter_spacing,
-      &main_font,
-      color,
-      width,
-      14);
+  // ScrollingLineSettings line1Settings = ScrollingLineSettings(
+  //     speed,
+  //     0,
+  //     letter_spacing,
+  //     &main_font,
+  //     color,
+  //     width,
+  //     14);
 
-  Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, line2Settings);
-  WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, line1Settings);
+  // Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, line2Settings);
+  // WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, line1Settings);
 
-  std::thread updateThread(updateLines, &weather, &radio6);
+  ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
+                                                                                        defaults.rows,
+                                                                                        &main_font,
+                                                                                        color,
+                                                                                        speed,
+                                                                                        letter_spacing,
+                                                                                        ScreenLineOption::radio6,
+                                                                                        ScreenLineOption::weather,
+                                                                                        weather_api_key);
+
+  ScrollingLineScreen srollingTwoLineScreen = ScrollingLineScreen(fetcher, &state.image_map, scrollingLineScreenSettings);
+
+  std::thread updateThread(updateLines, &srollingTwoLineScreen);
 
   ScreenMenu menu = ScreenMenu(
       speed,
@@ -233,17 +245,14 @@ int main(int argc, char *argv[])
 
   while (!interrupt_received)
   {
-    if (state.current_mode == display)
+    if (state.current_mode == scrolling_lines)
     {
       offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-      weather.render(offscreen_canvas);
-      radio6.render(offscreen_canvas);
+      srollingTwoLineScreen.render(offscreen_canvas);
     }
-    else
-    {
-      menu.render(offscreen_canvas);
-    }
+
+    menu.render(offscreen_canvas);
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
     usleep(delay_speed_usec);
   }

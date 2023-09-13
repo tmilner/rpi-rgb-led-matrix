@@ -1,3 +1,5 @@
+#ifndef RADIO6_LINE_UDPATER_H
+#define RADIO6_LINE_UPDATER_H
 #include "updateable-screen.h"
 #include "scrolling-line.h"
 #include "json-fetcher.h"
@@ -18,3 +20,4 @@ private:
     std::map<std::string, Magick::Image> *image_map{};
     std::string image_key;
 };
+#endif /*RADIO6_LINE_UPDATER_H*/

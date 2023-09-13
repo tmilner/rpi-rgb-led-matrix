@@ -38,7 +38,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
 void ScreenMenu::scrollMenu(bool up)
 {
 
-    if (this->state->current_mode == ScreenMode::main_menu)
+    if (this->current_mode == ScreenMode::main_menu)
     {
 
         if (up)
@@ -68,11 +68,11 @@ void ScreenMenu::scrollMenu(bool up)
             }
         }
     }
-    else if (this->state->current_mode == ScreenMode::switch_order_menu)
+    else if (this->current_mode == ScreenMode::switch_order_menu)
     {
         
     }
-    else if (this->state->current_mode == ScreenMode::brightness_menu)
+    else if (this->current_mode == ScreenMode::brightness_menu)
     {
         if (up)
         {
@@ -114,31 +114,36 @@ void ScreenMenu::scrollMenu(bool up)
 void ScreenMenu::modeChange()
 {
     std::cout << "Pressed! Current Mode " << this->state->current_mode << std::endl;
-    if (this->state->current_mode == ScreenMode::display)
+    if (!this->is_visible)
     {
         std::cout << "pressed go to menu" << std::endl;
-        this->state->current_mode = ScreenMode::main_menu;
+        this->is_visible = true;
+        this->current_mode = MenuMode::main_menu;
     }
-    else if (this->state->current_mode == ScreenMode::main_menu && this->current_menu_item == 0)
+    else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 0)
     {
         std::cout << "pressed go to brightness" << std::endl;
-        this->state->current_mode = ScreenMode::brightness_menu;
+        this->current_mode = MenuMode::brightness_menu;
     }
-    else if (this->state->current_mode == ScreenMode::main_menu && this->current_menu_item == 1)
+    else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 1)
     {
-        std::cout << "pressed go to brightness" << std::endl;
-        this->state->current_mode = ScreenMode::switch_order_menu;
+        std::cout << "pressed go to switch order menu" << std::endl;
+        this->current_mode = MenuMode::switch_order_menu;
     }
     else
     {
-        std::cout << "pressed go to display" << std::endl;
-        this->state->current_mode = ScreenMode::display;
+        std::cout << "pressed go to leave menu" << std::endl;
+        this->is_visible = false;
+        this->current_mode = MenuMode::main_menu;
     }
     return;
 }
 
 void ScreenMenu::render(FrameCanvas *offscreen_canvas)
 {
+    if(!this->is_visible){
+        return;
+    }
 
     std::cout << "Render Menu" << std::endl;
     offscreen_canvas->SetBrightness(this->state->current_brightness);

@@ -1,3 +1,5 @@
+#ifndef WEATHER_LINE_UPDATER_H
+#define WEATHER_LINE_UPDATER_H
 #include "updateable-screen.h"
 #include "led-matrix.h"
 #include "scrolling-line.h"
@@ -20,3 +22,5 @@ private:
     int refreshCount;
     std::map<std::string, Magick::Image> *image_map{};
 };
+
+#endif /*WEATHER_LINE_UPDATER_H*/
