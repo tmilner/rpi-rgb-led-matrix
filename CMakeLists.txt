@@ -14,7 +14,7 @@ include_directories(include)
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/lib/*.c*)
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}/include/*.h)
 
-find_package(CURL CONFIG REQUIRED)
+find_package(CURL REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(unofficial-graphicsmagick CONFIG REQUIRED)

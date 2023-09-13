@@ -5,8 +5,7 @@
 #include "img_utils.h"
 
 ScrollingLineScreen::ScrollingLineScreen(JSONFetcher *fetcher,
-                                         std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings) : UpdateableScreen(settings),
-                                                                                                                                  line1_settings{
+                                         std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings) : line1_settings{
                                                                                                                                       settings.speed,
                                                                                                                                       0,
                                                                                                                                       settings.letter_spacing,
@@ -14,21 +13,15 @@ ScrollingLineScreen::ScrollingLineScreen(JSONFetcher *fetcher,
                                                                                                                                       settings.color,
                                                                                                                                       settings.width,
                                                                                                                                       14},
-                                                                                                                                  line2_settings{
-                                                                                                                                      settings.speed,
-                                                                                                                                      settings.height / 2,
-                                                                                                                                      settings.letter_spacing,
-                                                                                                                                      settings.font,
-                                                                                                                                      settings.color,
-                                                                                                                                      settings.width,
-                                                                                                                                      14},
-                                                                                                                                  settings{settings}
+                                                                                                                                  line2_settings{settings.speed, settings.height / 2, settings.letter_spacing, settings.font, settings.color, settings.width, 14}, settings{settings}
 {
     this->fetcher = fetcher;
     this->image_map = image_map;
     this->is_visible = true;
-    this->line1 = &Radio6LineUpdater(fetcher, image_map, line1_settings);
-    this->line2 = &WeatherLineUpdater(settings.weather_api_key, fetcher, image_map, line2_settings);
+    Radio6LineUpdater radio6LineUpdater(fetcher, image_map, line1_settings);
+    this->line1 = &radio6LineUpdater;
+    WeatherLineUpdater weatherLineUpdater(settings.weather_api_key, fetcher, image_map, line2_settings);
+    this->line2 = &weatherLineUpdater;
 }
 
 void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas)
@@ -47,11 +40,13 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        this->line1 = &Radio6LineUpdater(this->fetcher, this->image_map, this->line1_settings);
+        Radio6LineUpdater radio6LineUpdater(this->fetcher, this->image_map, this->line1_settings);
+        this->line1 = &radio6LineUpdater;
     }
     else
     {
-        this->line1 = &WeatherLineUpdater(this->settings.weather_api_key, this->fetcher, this->image_map, this->line1_settings);
+        WeatherLineUpdater weatherLineUpdater(this->settings.weather_api_key, this->fetcher, this->image_map, this->line1_settings);
+        this->line1 = &weatherLineUpdater;
     }
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type)
@@ -60,11 +55,13 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        this->line2 = &Radio6LineUpdater(this->fetcher, this->image_map, this->line2_settings);
+        Radio6LineUpdater radio6LineUpdater(this->fetcher, this->image_map, this->line1_settings);
+        this->line2 = &radio6LineUpdater;
     }
     else
     {
-        this->line2 = &WeatherLineUpdater(this->settings.weather_api_key, this->fetcher, this->image_map, this->line2_settings);
+        WeatherLineUpdater weatherLineUpdater(this->settings.weather_api_key, this->fetcher, this->image_map, this->line1_settings);
+        this->line2 = &weatherLineUpdater;
     }
 }
 void ScrollingLineScreen::update()

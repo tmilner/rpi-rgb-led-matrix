@@ -38,7 +38,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
 void ScreenMenu::scrollMenu(bool up)
 {
 
-    if (this->current_mode == ScreenMode::main_menu)
+    if (this->current_mode == MenuMode::main_menu)
     {
 
         if (up)
@@ -68,11 +68,11 @@ void ScreenMenu::scrollMenu(bool up)
             }
         }
     }
-    else if (this->current_mode == ScreenMode::switch_order_menu)
+    else if (this->current_mode == MenuMode::switch_order_menu)
     {
         
     }
-    else if (this->current_mode == ScreenMode::brightness_menu)
+    else if (this->current_mode == MenuMode::brightness_menu)
     {
         if (up)
         {
@@ -144,11 +144,8 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     if(!this->is_visible){
         return;
     }
-
     std::cout << "Render Menu" << std::endl;
-    offscreen_canvas->SetBrightness(this->state->current_brightness);
-
-    if (this->state->current_mode == main_menu)
+    if (this->current_mode == main_menu)
     {
         offscreen_canvas->SetPixels(0, 7, offscreen_canvas->width(), offscreen_canvas->height() - 13, 50, 50, 50);
     }

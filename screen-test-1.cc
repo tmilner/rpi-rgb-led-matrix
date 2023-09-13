@@ -245,6 +245,8 @@ int main(int argc, char *argv[])
 
   while (!interrupt_received)
   {
+    offscreen_canvas->SetBrightness(state.current_brightness);
+
     if (state.current_mode == scrolling_lines)
     {
       offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);

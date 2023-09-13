@@ -7,9 +7,10 @@
 class UpdateableScreen : public Screen
 {
 public:
-    UpdateableScreen(ScreenSettings settings);
-    void update();
-    void render(rgb_matrix::Canvas *offscreen_canvas);
+    UpdateableScreen(){};
+    virtual ~UpdateableScreen(){};
+    virtual void update() = 0;
+    virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas) = 0;
 };
 
 #endif /*UPDATEABLE_SCREEN_HPP*/
