@@ -15,9 +15,9 @@ file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/lib/*.c*)
 file(GLOB_RECURSE HEADER_FILES ${PROJECT_SOURCE_DIR}/include/*.h)
 
 find_package(CURL REQUIRED)
-find_package(jsoncpp CONFIG REQUIRED)
+find_package(jsoncpp REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(unofficial-graphicsmagick CONFIG REQUIRED)
+find_package(unofficial-graphicsmagick )
 find_package(yaml-cpp CONFIG REQUIRED)
 
 add_executable(ScreenTest screen-test-1.cc ${SRC_FILES} ${HEADER_FILES})

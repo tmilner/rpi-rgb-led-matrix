@@ -2,11 +2,9 @@
 #include <iostream>
 #include "img_utils.h"
 
-Radio6LineUpdater::Radio6LineUpdater(JSONFetcher *fetcher,
-                                     std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
+Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
     std::cout << "Radio 6 Line Updater Constructor" << std::endl;
-    this->fetcher = fetcher;
     this->current_line = "Loading";
     this->url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
     this->image_map = image_map;

@@ -5,14 +5,13 @@
 
 #include "img_utils.h"
 
-WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFetcher *fetcher,
+WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, 
                                        std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
     std::cout << "Weather Line Updater Constructor" << std::endl;
 
     const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
 
-    this->fetcher = fetcher;
     this->current_line = "Loading";
     this->url = weather_base_url + weather_api_key;
     this->refreshCount = 9; // Refresh after one loop.

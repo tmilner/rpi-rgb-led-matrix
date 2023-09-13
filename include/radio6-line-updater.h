@@ -8,8 +8,7 @@
 class Radio6LineUpdater : public UpdateableScreen, ScrollingLine
 {
 public:
-    Radio6LineUpdater(JSONFetcher *fetcher,
-                      std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);
+    Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);
     void update();
     void render(FrameCanvas *offscreen_canvas);
 

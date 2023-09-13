@@ -46,8 +46,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
 class ScrollingLineScreen : public UpdateableScreen
 {
 public:
-    ScrollingLineScreen(JSONFetcher *fetcher,
-                        std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings);
+    ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings);
     void update();
     void render(FrameCanvas *offscreen_canvas);
     void setLine1(ScreenLineOption type);
@@ -55,7 +54,6 @@ public:
 
 private:
     ScrollingLineScreenSettings settings;
-    JSONFetcher *fetcher;
     std::map<std::string, Magick::Image> *image_map{};
     UpdateableScreen *line1;
     UpdateableScreen *line2;
