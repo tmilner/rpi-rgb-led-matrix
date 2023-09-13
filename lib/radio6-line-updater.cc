@@ -5,6 +5,7 @@
 Radio6LineUpdater::Radio6LineUpdater(JSONFetcher *fetcher,
                                      std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
+    std::cout << "Radio 6 Line Updater Constructor" << std::endl;
     this->fetcher = fetcher;
     this->current_line = "Loading";
     this->url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
@@ -16,13 +17,13 @@ Radio6LineUpdater::Radio6LineUpdater(JSONFetcher *fetcher,
     tmp.resize(Magick::Geometry(11, 11));
 
     (*this->image_map)[this->image_key] = tmp;
+    std::cout << "Radio 6 Line Updater Constructor END" << std::endl;
 }
 
 Magick::Image *Radio6LineUpdater::getIcon()
 {
     return &(*this->image_map)[this->image_key];
 }
-
 
 void Radio6LineUpdater::render(FrameCanvas *offscreen_canvas)
 {

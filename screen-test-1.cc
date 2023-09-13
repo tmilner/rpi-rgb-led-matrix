@@ -230,6 +230,8 @@ int main(int argc, char *argv[])
 
   ScrollingLineScreen srollingTwoLineScreen = ScrollingLineScreen(fetcher, &state.image_map, scrollingLineScreenSettings);
 
+  std::cout << "Setting up update thread" << std::endl;
+
   std::thread updateThread(updateLines, &srollingTwoLineScreen);
 
   ScreenMenu menu = ScreenMenu(

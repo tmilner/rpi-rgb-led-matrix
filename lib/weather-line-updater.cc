@@ -8,6 +8,8 @@
 WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFetcher *fetcher,
                                        std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
+    std::cout << "Weather Line Updater Constructor" << std::endl;
+
     const std::string weather_base_url("https://api.openweathermap.org/data/2.5/weather?lon=-0.093014&lat=51.474087&appid=");
 
     this->fetcher = fetcher;
@@ -17,6 +19,7 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, JSONFe
     this->image_map = image_map;
     this->current_image = "01d";
     this->is_visible = true;
+    std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
 
 Magick::Image *WeatherLineUpdater::getIcon()
@@ -26,7 +29,8 @@ Magick::Image *WeatherLineUpdater::getIcon()
 
 void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 {
-    if(!is_visible) {
+    if (!is_visible)
+    {
         return;
     }
     this->renderLine(offscreen_canvas);
@@ -36,7 +40,8 @@ void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
 }
 void WeatherLineUpdater::update()
 {
-    if(!is_visible) {
+    if (!is_visible)
+    {
         return;
     }
     if (this->refreshCount == 10)
