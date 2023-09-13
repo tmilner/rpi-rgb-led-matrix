@@ -33,10 +33,10 @@ Json::Value JSONFetcher::fetch(std::string &url)
     // Set remote URL.
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     // Don't bother trying IPv6, which would increase DNS resolution time.
-    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    // curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     // Don't wait forever, time out after 10 seconds.
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
-    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); // Prevent "longjmp causes uninitialized stack frame" bug
+    // curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); // Prevent "longjmp causes uninitialized stack frame" bug
     // Follow HTTP redirects if necessary.
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -57,7 +57,7 @@ Json::Value JSONFetcher::fetch(std::string &url)
 
     if (code != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(code));
+        fprintf(stderr, "curl_easy_perform() for %s failed: %s\n", url.c_str(), curl_easy_strerror(code));
         throw std::runtime_error("Got bad code from CURL");
     }
 

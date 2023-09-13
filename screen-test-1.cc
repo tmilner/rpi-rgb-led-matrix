@@ -57,7 +57,7 @@ void updateLines(ScrollingLineScreen *srollingTwoLineScreen)
   while (true)
   {
     srollingTwoLineScreen->update();
-    std::this_thread::sleep_for(15s);
+    std::this_thread::sleep_for(20s);
   }
 }
 
@@ -195,29 +195,6 @@ int main(int argc, char *argv[])
 
   std::string current_image = "01d";
 
-  JSONFetcher *fetcher{};
-
-  // ScrollingLineSettings line2Settings = ScrollingLineSettings(
-  //     speed,
-  //     16,
-  //     letter_spacing,
-  //     &main_font,
-  //     color,
-  //     width,
-  //     14);
-
-  // ScrollingLineSettings line1Settings = ScrollingLineSettings(
-  //     speed,
-  //     0,
-  //     letter_spacing,
-  //     &main_font,
-  //     color,
-  //     width,
-  //     14);
-
-  // Radio6LineUpdater radio6 = Radio6LineUpdater(fetcher, &state.image_map, line2Settings);
-  // WeatherLineUpdater weather = WeatherLineUpdater(weather_api_key, fetcher, &state.image_map, line1Settings);
-
   ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
                                                                                         defaults.rows,
                                                                                         &main_font,
@@ -228,7 +205,7 @@ int main(int argc, char *argv[])
                                                                                         ScreenLineOption::weather,
                                                                                         weather_api_key);
 
-  ScrollingLineScreen srollingTwoLineScreen = ScrollingLineScreen(fetcher, &state.image_map, scrollingLineScreenSettings);
+  ScrollingLineScreen srollingTwoLineScreen = ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings);
 
   std::cout << "Setting up update thread" << std::endl;
 
@@ -264,7 +241,6 @@ int main(int argc, char *argv[])
   // Finished. Shut down the RGB matrix.
   matrix->Clear();
   delete matrix;
-  delete fetcher;
 
   return 0;
 }

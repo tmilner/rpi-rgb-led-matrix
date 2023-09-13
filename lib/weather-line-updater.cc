@@ -73,7 +73,7 @@ void WeatherLineUpdater::update()
         }
         catch (std::runtime_error &e)
         {
-            printf("Failed to fetch radio6\n");
+            printf("Failed to fetch Weather\n");
         }
     }
     this->refreshCount++;

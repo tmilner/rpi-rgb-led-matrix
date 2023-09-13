@@ -59,6 +59,6 @@ void Radio6LineUpdater::update()
     }
     catch (std::runtime_error &e)
     {
-        printf("Failed to fetch weather\n");
+        printf("Failed to fetch Radio6 Data\n");
     }
 }
