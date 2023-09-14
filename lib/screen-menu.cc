@@ -22,6 +22,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
           screen_width,
           0)}
 {
+    this->is_visible = false;
     this->state = state;
     this->current_menu_item = 1;
     this->menu_items = {"Brightness", "Switch Order", "Exit"};
@@ -70,7 +71,6 @@ void ScreenMenu::scrollMenu(bool up)
     }
     else if (this->current_mode == MenuMode::switch_order_menu)
     {
-        
     }
     else if (this->current_mode == MenuMode::brightness_menu)
     {
@@ -141,7 +141,8 @@ void ScreenMenu::modeChange()
 
 void ScreenMenu::render(FrameCanvas *offscreen_canvas)
 {
-    if(!this->is_visible){
+    if (!this->is_visible)
+    {
         return;
     }
     std::cout << "Render Menu" << std::endl;
