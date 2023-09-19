@@ -3,8 +3,7 @@
 #include "img_utils.h"
 
 ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
-                       GPIO::RotaryDial *dial,
-                       GPIO::PushButton *button)
+                       GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down)
     : menu_line{ScrollingLineSettings(
           speed,
           9,
@@ -27,14 +26,19 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     this->current_menu_item = 1;
     this->menu_items = {"Brightness", "Switch Order", "Exit"};
 
-    dial->f_dialed = [&](bool up, long value)
-    { this->scrollMenu(up); };
-
-    button->f_pushed = [&]()
+    button_ok->f_pushed = [&]()
     { this->modeChange(); };
 
-    dial->start();
-    button->start();
+    button_up->f_pushed = [&]()
+    { this->scrollMenu(true); };
+
+    button_down->f_pushed = [&]()
+    { this->scrollMenu(false); };
+
+
+    button_ok->start();
+    button_up->start();
+    button_down->start();
 }
 void ScreenMenu::scrollMenu(bool up)
 {
@@ -145,7 +149,6 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     {
         return;
     }
-    std::cout << "Render Menu" << std::endl;
     if (this->current_mode == main_menu)
     {
         offscreen_canvas->SetPixels(0, 7, offscreen_canvas->width(), offscreen_canvas->height() - 13, 50, 50, 50);

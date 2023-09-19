@@ -68,8 +68,10 @@ int main(int argc, char *argv[])
   state.current_mode = ScreenMode::scrolling_lines;
   state.current_brightness = 100;
 
-  GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
-  GPIO::PushButton push(11, GPIO::GPIO_PULL::UP);
+  // GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
+  GPIO::PushButton push_ok(11, GPIO::GPIO_PULL::UP);
+  GPIO::PushButton push_up(25, GPIO::GPIO_PULL::UP);
+  GPIO::PushButton push_down(9, GPIO::GPIO_PULL::UP);
 
   Magick::InitializeMagick(*argv);
 
@@ -217,8 +219,9 @@ int main(int argc, char *argv[])
       &menu_font,
       width,
       &state,
-      &dial,
-      &push);
+      &push_ok,
+      &push_up,
+      &push_down);
 
   offscreen_canvas->Clear();
 

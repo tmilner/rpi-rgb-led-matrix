@@ -5,7 +5,7 @@
 
 #include "img_utils.h"
 
-WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key, 
+WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key,
                                        std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings)
 {
     std::cout << "Weather Line Updater Constructor" << std::endl;
@@ -18,6 +18,8 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key,
     this->image_map = image_map;
     this->current_image = "01d";
     this->is_visible = true;
+    this->fetcher = new JSONFetcher();
+
     std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
 

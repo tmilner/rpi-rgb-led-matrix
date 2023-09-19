@@ -13,8 +13,9 @@ public:
                Font *font,
                int screen_width,
                ScreenState *state,
-               GPIO::RotaryDial *dial,
-               GPIO::PushButton *button);
+               GPIO::PushButton *button_ok,
+               GPIO::PushButton *button_up,
+               GPIO::PushButton *button_down);
     void render(FrameCanvas *offscreen_canvas);
 
 private:

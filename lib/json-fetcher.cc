@@ -18,42 +18,43 @@ size_t write_data(
 
 JSONFetcher::JSONFetcher()
 {
-    curl = curl_easy_init();
+    std::cout << "JSONFetcher Constructor" << std::endl;
+    this->curl = curl_easy_init();
+    std::cout << "JSONFetcher Constructor END" << std::endl;
 }
 
 JSONFetcher::~JSONFetcher()
 {
-    curl_easy_cleanup(curl);
+    curl_easy_cleanup(this->curl);
 }
 
 Json::Value JSONFetcher::fetch(std::string &url)
 {
-    CURL *curl = curl_easy_init();
-
     // Set remote URL.
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
+
     // Don't bother trying IPv6, which would increase DNS resolution time.
     // curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     // Don't wait forever, time out after 10 seconds.
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
+    curl_easy_setopt(this->curl, CURLOPT_TIMEOUT, 20);
     // curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1); // Prevent "longjmp causes uninitialized stack frame" bug
     // Follow HTTP redirects if necessary.
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(this->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     // Response information.
     int httpCode(0);
     std::unique_ptr<std::string> httpData(new std::string());
 
     // Hook up data handling function.
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_data);
     // Hook up data container (will be passed as the last parameter to the
     // callback handling function).  Can be any pointer type, since it will
     // internally be passed as a void pointer.
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, httpData.get());
+    curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, httpData.get());
 
     // Run our HTTP GET command, capture the HTTP response code, and clean up.
-    CURLcode code = curl_easy_perform(curl);
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+    CURLcode code = curl_easy_perform(this->curl);
+    curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
     if (code != CURLE_OK)
     {

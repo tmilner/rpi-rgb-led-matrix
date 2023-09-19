@@ -13,14 +13,12 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
                                                                                                                                                                                          14},
                                                                                                                                   line2_settings{settings.speed, settings.height / 2, 0, settings.font, settings.color, settings.width, 14}, settings{settings}
 {
-    std::cout << "Scrolling Line Screen Constructor" << std::endl;
     this->image_map = image_map;
     this->is_visible = true;
     Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(image_map, line1_settings);
     this->line1 = radio6LineUpdater;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
-    std::cout << "Scrolling Line Screen Constructor END" << std::endl;
 }
 
 void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas)
