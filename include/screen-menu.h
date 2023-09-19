@@ -4,6 +4,7 @@
 #include "scrolling-line.h"
 #include "screen_state.h"
 #include <cppgpio.hpp>
+#include <chrono>
 
 class ScreenMenu : public Screen
 {
@@ -21,6 +22,7 @@ public:
 private:
     void scrollMenu(bool up);
     void modeChange();
+    bool debounceTimePassed();
     enum MenuMode {main_menu, brightness_menu, switch_order_menu};
     MenuMode current_mode = main_menu;
     ScrollingLine menu_line;
@@ -28,5 +30,6 @@ private:
     ScreenState *state;
     int current_menu_item;
     std::vector<std::string> menu_items;
+    std::chrono::time_point<std::chrono::system_clock> last_button_press;
 };
 #endif /*SCREEN_MENU_H*/

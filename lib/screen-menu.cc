@@ -1,7 +1,6 @@
 #include "screen-menu.h"
 #include <iostream>
 #include "img_utils.h"
-#include <chrono>
 
 ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
                        GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down)
@@ -26,6 +25,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     this->state = state;
     this->current_menu_item = 1;
     this->menu_items = {"Brightness", "Switch Order", "Exit"};
+    this->last_button_press = std::chrono::system_clock::now();
 
     button_ok->f_released = [&](std::chrono::nanoseconds nano)
     { this->modeChange(); };
@@ -36,13 +36,32 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     button_down->f_released = [&](std::chrono::nanoseconds nano)
     { this->scrollMenu(false); };
 
-
     button_ok->start();
     button_up->start();
     button_down->start();
 }
+bool ScreenMenu::debounceTimePassed()
+{
+    using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
+
+    const auto now = std::chrono::system_clock::now();
+
+    if (((now - this->last_button_press) / 1ms) < 100)
+    {
+        return false;
+    }
+    else
+    {
+        this->last_button_press = now;
+        return true;
+    }
+}
 void ScreenMenu::scrollMenu(bool up)
 {
+    if (!debounceTimePassed())
+    {
+        return;
+    }
 
     if (this->current_mode == MenuMode::main_menu)
     {
@@ -118,6 +137,10 @@ void ScreenMenu::scrollMenu(bool up)
 
 void ScreenMenu::modeChange()
 {
+    if (!debounceTimePassed())
+    {
+        return;
+    }
     std::cout << "Pressed! Current Mode " << this->state->current_mode << std::endl;
     if (!this->is_visible)
     {
