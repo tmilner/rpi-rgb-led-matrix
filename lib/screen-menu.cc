@@ -1,6 +1,7 @@
 #include "screen-menu.h"
 #include <iostream>
 #include "img_utils.h"
+#include <chrono>
 
 ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
                        GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down)
@@ -26,13 +27,13 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     this->current_menu_item = 1;
     this->menu_items = {"Brightness", "Switch Order", "Exit"};
 
-    button_ok->f_pushed = [&]()
+    button_ok->f_released = [&](std::chrono::nanoseconds nano)
     { this->modeChange(); };
 
-    button_up->f_pushed = [&]()
+    button_up->f_released = [&](std::chrono::nanoseconds nano)
     { this->scrollMenu(true); };
 
-    button_down->f_pushed = [&]()
+    button_down->f_released = [&](std::chrono::nanoseconds nano)
     { this->scrollMenu(false); };
 
 
