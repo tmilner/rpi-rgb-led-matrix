@@ -17,6 +17,7 @@
 #include "weather-line-updater.h"
 #include "scrolling-line-screen.h"
 #include "screen-menu.h"
+#include "game-of-life.h"
 
 #include <string>
 #include <iostream>
@@ -28,6 +29,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include <list>
 #include <cppgpio.hpp>
 #include <yaml-cpp/yaml.h>
 #include <getopt.h>
@@ -207,11 +209,19 @@ int main(int argc, char *argv[])
                                                                                         ScreenLineOption::weather,
                                                                                         weather_api_key);
 
-  ScrollingLineScreen srollingTwoLineScreen = ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings);
+  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings);
 
   std::cout << "Setting up update thread" << std::endl;
 
-  std::thread updateThread(updateLines, &srollingTwoLineScreen);
+  std::thread updateThread(updateLines, srollingTwoLineScreen);
+
+  GameOfLfeScreen *game_of_life_screen = new GameOfLfeScreen(offscreen_canvas, 500, true);
+  game_of_life_screen->set_hidden();
+
+  std::vector<Screen *> screens_to_render;
+
+  screens_to_render.push_back(srollingTwoLineScreen);
+  screens_to_render.push_back(game_of_life_screen);
 
   ScreenMenu menu = ScreenMenu(
       speed,
@@ -221,7 +231,8 @@ int main(int argc, char *argv[])
       &state,
       &push_ok,
       &push_up,
-      &push_down);
+      &push_down, 
+      &screens_to_render);
 
   offscreen_canvas->Clear();
 
@@ -229,11 +240,9 @@ int main(int argc, char *argv[])
   {
     offscreen_canvas->SetBrightness(state.current_brightness);
 
-    if (state.current_mode == scrolling_lines)
+    for (std::vector<Screen *>::iterator screen = screens_to_render.begin(); screen != screens_to_render.end(); screen++)
     {
-      offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
-
-      srollingTwoLineScreen.render(offscreen_canvas);
+      (*screen)->render(offscreen_canvas);
     }
 
     menu.render(offscreen_canvas);

@@ -17,6 +17,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
     int height;
     rgb_matrix::Font *font;
     rgb_matrix::Color color;
+    rgb_matrix::Color bg_color;
     float speed;
     int letter_spacing;
     ScreenLineOption line1;
@@ -54,6 +55,7 @@ public:
 
 private:
     ScrollingLineScreenSettings settings;
+    rgb_matrix::Color bg_color;
     std::map<std::string, Magick::Image> *image_map{};
     UpdateableScreen *line1;
     UpdateableScreen *line2;

@@ -11,12 +11,12 @@ public:
     Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);
     void update();
     void render(FrameCanvas *offscreen_canvas);
-
 private:
     Magick::Image *getIcon();
     JSONFetcher *fetcher;
     std::string url;
     std::map<std::string, Magick::Image> *image_map{};
     std::string image_key;
+    std::string name;
 };
 #endif /*RADIO6_LINE_UPDATER_H*/

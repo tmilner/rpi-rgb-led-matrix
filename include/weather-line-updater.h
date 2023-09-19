@@ -21,6 +21,7 @@ private:
     std::string current_image;
     int refreshCount;
     std::map<std::string, Magick::Image> *image_map{};
+    std::string name;
 };
 
 #endif /*WEATHER_LINE_UPDATER_H*/

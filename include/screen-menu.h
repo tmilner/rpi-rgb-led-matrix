@@ -5,6 +5,7 @@
 #include "screen_state.h"
 #include <cppgpio.hpp>
 #include <chrono>
+#include <list>
 
 class ScreenMenu : public Screen
 {
@@ -16,19 +17,28 @@ public:
                ScreenState *state,
                GPIO::PushButton *button_ok,
                GPIO::PushButton *button_up,
-               GPIO::PushButton *button_down);
+               GPIO::PushButton *button_down,
+               std::vector<Screen *> *screens);
     void render(FrameCanvas *offscreen_canvas);
 
 private:
     void scrollMenu(bool up);
     void modeChange();
     bool debounceTimePassed();
-    enum MenuMode {main_menu, brightness_menu, switch_order_menu};
+    std::string name;
+    std::vector<Screen *> *screens;
+    enum MenuMode
+    {
+        main_menu,
+        brightness_menu,
+        switch_screen
+    };
     MenuMode current_mode = main_menu;
     ScrollingLine menu_line;
     ScrollingLine menu_sub_line;
     ScreenState *state;
     int current_menu_item;
+    int current_screen;
     std::vector<std::string> menu_items;
     std::chrono::time_point<std::chrono::system_clock> last_button_press;
 };

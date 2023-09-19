@@ -5,21 +5,32 @@
 #include "img_utils.h"
 
 ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings) : image_map{image_map}, line1_settings{settings.speed,
-                                                                                                                                                                                         0,
-                                                                                                                                                                                         0,
-                                                                                                                                                                                         settings.font,
-                                                                                                                                                                                         settings.color,
-                                                                                                                                                                                         settings.width,
-                                                                                                                                                                                         14},
-                                                                                                                                  line2_settings{settings.speed, settings.height / 2, 0, settings.font, settings.color, settings.width, 14}, settings{settings}
+                                                                                                                                                                       0,
+                                                                                                                                                                       0,
+                                                                                                                                                                       settings.font,
+                                                                                                                                                                       settings.color,
+                                                                                                                                                                       settings.width,
+                                                                                                                                                                       14},
+                                                                                                                                  line2_settings{settings.speed,
+                                                                                                                                                 settings.height / 2,
+                                                                                                                                                 0,
+                                                                                                                                                 settings.font,
+                                                                                                                                                 settings.color,
+                                                                                                                                                 settings.width, 14},
+                                                                                                                                  settings{settings},
+                                                                                                                                  bg_color{bg_color}
 {
     this->image_map = image_map;
     this->is_visible = true;
+
+    this->name = std::string("Scrolling Screen");
     Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(image_map, line1_settings);
     this->line1 = radio6LineUpdater;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
+    
 }
+
 
 void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas)
 {
@@ -27,6 +38,7 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas)
     {
         return;
     }
+    offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
     this->line1->render(offscreen_canvas);
     this->line2->render(offscreen_canvas);
 }

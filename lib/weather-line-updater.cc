@@ -19,9 +19,10 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key,
     this->current_image = "01d";
     this->is_visible = true;
     this->fetcher = new JSONFetcher();
-
+    this->name = std::string("Weather Line");
     std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
+
 
 Magick::Image *WeatherLineUpdater::getIcon()
 {

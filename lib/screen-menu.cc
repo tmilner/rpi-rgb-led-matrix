@@ -3,7 +3,7 @@
 #include "img_utils.h"
 
 ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
-                       GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down)
+                       GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down, std::vector<Screen *> *screens)
     : menu_line{ScrollingLineSettings(
           speed,
           9,
@@ -19,12 +19,14 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
           font,
           Color(240, 160, 100),
           screen_width,
-          0)}
+          0)},
+      screens{screens}
 {
     this->is_visible = false;
     this->state = state;
     this->current_menu_item = 1;
-    this->menu_items = {"Brightness", "Switch Order", "Exit"};
+    this->current_screen = 0;
+    this->menu_items = {"Brightness", "Switch Screen", "Exit"};
     this->last_button_press = std::chrono::system_clock::now();
 
     button_ok->f_released = [&](std::chrono::nanoseconds nano)
@@ -93,8 +95,30 @@ void ScreenMenu::scrollMenu(bool up)
             }
         }
     }
-    else if (this->current_mode == MenuMode::switch_order_menu)
+    else if (this->current_mode == MenuMode::switch_screen)
     {
+        if (up)
+        {
+            if (this->current_screen + 1 > this->screens->size())
+            {
+                this->current_screen = 0;
+            }
+            else
+            {
+                this->current_screen++;
+            }
+        }
+        else
+        {
+            if (this->current_screen - 1 < 0)
+            {
+                this->current_screen = this->screens->size() - 1;
+            }
+            else
+            {
+                this->current_screen--;
+            }
+        }
     }
     else if (this->current_mode == MenuMode::brightness_menu)
     {
@@ -156,7 +180,24 @@ void ScreenMenu::modeChange()
     else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 1)
     {
         std::cout << "pressed go to switch order menu" << std::endl;
-        this->current_mode = MenuMode::switch_order_menu;
+        this->current_mode = MenuMode::switch_screen;
+        this->current_screen = 0;
+    }
+    else if (this->current_mode == MenuMode::switch_screen)
+    {
+        std::cout << "pressed go to change screen" << std::endl;
+
+        int x = 0;
+        for (std::vector<Screen *>::iterator screen = this->screens->begin(); screen != this->screens->end(); screen++)
+        {
+            if (x++ != this->current_screen)
+                (*screen)->set_hidden();
+            else
+                (*screen)->set_visible();
+        }
+
+        this->is_visible = false;
+        this->current_mode = MenuMode::main_menu;
     }
     else
     {
@@ -181,7 +222,14 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     {
         offscreen_canvas->SetPixels(0, 7, offscreen_canvas->width(), offscreen_canvas->height() - 13, 233, 110, 80);
         offscreen_canvas->SetPixels(1, 8, offscreen_canvas->width() - 2, offscreen_canvas->height() - 15, 50, 50, 50);
-        menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
+        if (this->current_mode == brightness_menu)
+        {
+            menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
+        }
+        else if (this->current_mode == switch_screen)
+        {
+            menu_sub_line.updateText(this->screens->at(this->current_screen)->getName());
+        }
         menu_sub_line.renderLine(offscreen_canvas);
     }
     menu_line.updateText(&this->menu_items[this->current_menu_item]);

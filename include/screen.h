@@ -2,6 +2,7 @@
 #define SCREEN_HPP
 
 #include "led-matrix.h"
+#include <string>
 
 struct ScreenSettings
 {
@@ -15,6 +16,9 @@ class Screen
 {
 public:
     virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas) = 0;
+    std::string* getName() {
+        return &this->name;
+    }
     void set_visible()
     {
         is_visible = true;
@@ -25,6 +29,7 @@ public:
     }
 
 protected:
+    std::string name;
     bool is_visible;
 };
 

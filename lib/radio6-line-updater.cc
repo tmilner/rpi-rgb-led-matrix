@@ -9,6 +9,7 @@ Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image
     this->image_map = image_map;
     this->image_key = "radio6icon";
     this->is_visible = true;
+    this->name = std::string("Radio 6 Line");
     this->fetcher = new JSONFetcher();
 
     Magick::Image tmp = (*image_map)[this->image_key];
