@@ -11,6 +11,8 @@ public:
     Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings);
     void update();
     void render(FrameCanvas *offscreen_canvas);
+    std::string *getName();
+
 private:
     Magick::Image *getIcon();
     JSONFetcher *fetcher;

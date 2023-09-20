@@ -27,6 +27,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
                                 int height,
                                 rgb_matrix::Font *font,
                                 rgb_matrix::Color color,
+                                rgb_matrix::Color bg_color,
                                 float speed,
                                 int letter_spacing,
                                 ScreenLineOption line1,
@@ -37,6 +38,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
         this->height = height;
         this->font = font;
         this->color = color;
+        this->bg_color = bg_color;
         this->speed = speed;
         this->line1 = line1;
         this->line2 = line2;
@@ -52,10 +54,12 @@ public:
     void render(FrameCanvas *offscreen_canvas);
     void setLine1(ScreenLineOption type);
     void setLine2(ScreenLineOption type);
+    std::string *getName();
 
 private:
     ScrollingLineScreenSettings settings;
     rgb_matrix::Color bg_color;
+    std::string name;
     std::map<std::string, Magick::Image> *image_map{};
     UpdateableScreen *line1;
     UpdateableScreen *line2;

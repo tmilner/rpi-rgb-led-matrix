@@ -20,6 +20,7 @@ public:
                GPIO::PushButton *button_down,
                std::vector<Screen *> *screens);
     void render(FrameCanvas *offscreen_canvas);
+    std::string *getName();
 
 private:
     void scrollMenu(bool up);

@@ -20,11 +20,12 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
           Color(240, 160, 100),
           screen_width,
           0)},
-      screens{screens}
+      screens{screens},
+      name{std::string("Menu")}
 {
     this->is_visible = false;
     this->state = state;
-    this->current_menu_item = 1;
+    this->current_menu_item = 0;
     this->current_screen = 0;
     this->menu_items = {"Brightness", "Switch Screen", "Exit"};
     this->last_button_press = std::chrono::system_clock::now();
@@ -58,6 +59,12 @@ bool ScreenMenu::debounceTimePassed()
         return true;
     }
 }
+
+std::string *ScreenMenu::getName()
+{
+    return &this->name;
+}
+
 void ScreenMenu::scrollMenu(bool up)
 {
     if (!debounceTimePassed())
@@ -99,7 +106,7 @@ void ScreenMenu::scrollMenu(bool up)
     {
         if (up)
         {
-            if (this->current_screen + 1 > this->screens->size())
+            if (this->current_screen + 1 >= this->screens->size())
             {
                 this->current_screen = 0;
             }
@@ -228,6 +235,7 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
         }
         else if (this->current_mode == switch_screen)
         {
+            std::cout << "Render switch screen menu! " << *(this->screens->at(this->current_screen)->getName()) << ", " << this->current_screen << std::endl;
             menu_sub_line.updateText(this->screens->at(this->current_screen)->getName());
         }
         menu_sub_line.renderLine(offscreen_canvas);

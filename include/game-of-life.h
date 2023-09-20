@@ -9,6 +9,7 @@ public:
     GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms = 500, bool torus = true);
     ~GameOfLfeScreen();
     void render(rgb_matrix::FrameCanvas *offscreen_canvas);
+    std::string *getName();
 
 private:
     int numAliveNeighbours(int x, int y);

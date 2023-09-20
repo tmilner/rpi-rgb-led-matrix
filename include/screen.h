@@ -3,6 +3,7 @@
 
 #include "led-matrix.h"
 #include <string>
+#include "renderable.h"
 
 struct ScreenSettings
 {
@@ -12,13 +13,11 @@ struct ScreenSettings
     rgb_matrix::Color color;
 };
 
-class Screen
+class Screen : public Renderable
 {
 public:
     virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas) = 0;
-    std::string* getName() {
-        return &this->name;
-    }
+    virtual std::string *getName() = 0;
     void set_visible()
     {
         is_visible = true;

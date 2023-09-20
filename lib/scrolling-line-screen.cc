@@ -18,19 +18,22 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
                                                                                                                                                  settings.color,
                                                                                                                                                  settings.width, 14},
                                                                                                                                   settings{settings},
-                                                                                                                                  bg_color{bg_color}
+                                                                                                                                  bg_color{settings.bg_color},
+                                                                                                                                  name{std::string("Scrolling Screen")}
 {
     this->image_map = image_map;
     this->is_visible = true;
 
-    this->name = std::string("Scrolling Screen");
     Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(image_map, line1_settings);
     this->line1 = radio6LineUpdater;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
-    
 }
 
+std::string *ScrollingLineScreen::getName()
+{
+    return &this->name;
+}
 
 void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas)
 {

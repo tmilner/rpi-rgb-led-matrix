@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
                                                                                         defaults.rows,
                                                                                         &main_font,
                                                                                         color,
+                                                                                        bg_color,
                                                                                         speed,
                                                                                         letter_spacing,
                                                                                         ScreenLineOption::radio6,
@@ -210,6 +211,8 @@ int main(int argc, char *argv[])
                                                                                         weather_api_key);
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings);
+
+  std::cout << "Scrolling screen name is " << *(srollingTwoLineScreen->getName()) << std::endl;
 
   std::cout << "Setting up update thread" << std::endl;
 
@@ -223,6 +226,8 @@ int main(int argc, char *argv[])
   screens_to_render.push_back(srollingTwoLineScreen);
   screens_to_render.push_back(game_of_life_screen);
 
+  std::cout << "Scrolling screen name from vector is " << *(screens_to_render.at(0)->getName()) << std::endl;
+
   ScreenMenu menu = ScreenMenu(
       speed,
       letter_spacing,
@@ -231,7 +236,7 @@ int main(int argc, char *argv[])
       &state,
       &push_ok,
       &push_up,
-      &push_down, 
+      &push_down,
       &screens_to_render);
 
   offscreen_canvas->Clear();

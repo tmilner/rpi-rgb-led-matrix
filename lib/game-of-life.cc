@@ -1,12 +1,10 @@
 #include "game-of-life.h"
 
-GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms, bool torus) : delay_ms_(delay_ms), torus_(torus)
+GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms, bool torus) : delay_ms_(delay_ms), torus_(torus), name{std::string("Game of Life")}
 {
     width_ = canvas->width();
     height_ = canvas->height();
 
-    this->name = std::string("Game of Life");
-    
     // Allocate memory
     values_ = new int *[width_];
     for (int x = 0; x < width_; ++x)
@@ -62,6 +60,11 @@ GameOfLfeScreen::~GameOfLfeScreen()
         delete[] newValues_[x];
     }
     delete[] newValues_;
+}
+
+std::string *GameOfLfeScreen::getName()
+{
+    return &this->name;
 }
 
 void GameOfLfeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas)

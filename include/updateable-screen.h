@@ -11,6 +11,8 @@ public:
     virtual ~UpdateableScreen(){};
     virtual void update() = 0;
     virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas) = 0;
+    virtual std::string *getName() = 0;
+
 protected:
     std::string name;
 };
