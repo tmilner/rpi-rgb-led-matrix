@@ -16,6 +16,7 @@
 #include "radio6-line-updater.h"
 #include "weather-line-updater.h"
 #include "scrolling-line-screen.h"
+#include "rotating-box.h"
 #include "screen-menu.h"
 #include "game-of-life.h"
 
@@ -221,10 +222,14 @@ int main(int argc, char *argv[])
   GameOfLfeScreen *game_of_life_screen = new GameOfLfeScreen(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
 
+  RotatingBox *rotating_box = new RotatingBox(offscreen_canvas);
+  rotating_box->set_hidden();
+
   std::vector<Screen *> screens_to_render;
 
   screens_to_render.push_back(srollingTwoLineScreen);
   screens_to_render.push_back(game_of_life_screen);
+  screens_to_render.push_back(rotating_box);
 
   std::cout << "Scrolling screen name from vector is " << *(screens_to_render.at(0)->getName()) << std::endl;
 
@@ -244,6 +249,7 @@ int main(int argc, char *argv[])
   while (!interrupt_received)
   {
     offscreen_canvas->SetBrightness(state.current_brightness);
+    offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
     for (std::vector<Screen *>::iterator screen = screens_to_render.begin(); screen != screens_to_render.end(); screen++)
     {
