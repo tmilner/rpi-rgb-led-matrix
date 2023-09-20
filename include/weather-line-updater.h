@@ -5,6 +5,7 @@
 #include "scrolling-line.h"
 #include "json-fetcher.h"
 #include <Magick++.h>
+#include <chrono>
 
 class WeatherLineUpdater : public UpdateableScreen, ScrollingLine
 {
@@ -19,7 +20,8 @@ private:
     JSONFetcher *fetcher;
     std::string url;
     std::string current_image;
-    int refreshCount;
+    std::chrono::time_point<std::chrono::system_clock> last_update;
+    static const int update_after_seconds = 360;
     std::map<std::string, Magick::Image> *image_map{};
     std::string name;
 };

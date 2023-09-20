@@ -19,6 +19,7 @@
 #include "rotating-box.h"
 #include "screen-menu.h"
 #include "game-of-life.h"
+#include "updateable-screen.h"
 
 #include <string>
 #include <iostream>
@@ -55,12 +56,15 @@ static void InterruptHandler(int signo)
 }
 
 using namespace std::literals::chrono_literals;
-void updateLines(ScrollingLineScreen *srollingTwoLineScreen)
+void updateLines(std::vector<UpdateableScreen *> screens_to_update)
 {
   while (true)
   {
-    srollingTwoLineScreen->update();
-    std::this_thread::sleep_for(20s);
+    for (std::vector<UpdateableScreen *>::iterator screen = screens_to_update.begin(); screen != screens_to_update.end(); screen++)
+    {
+      (*screen)->update();
+    }
+    usleep(20 * 1000 * 1000);
   }
 }
 
@@ -213,11 +217,7 @@ int main(int argc, char *argv[])
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings);
 
-  std::cout << "Scrolling screen name is " << *(srollingTwoLineScreen->getName()) << std::endl;
-
   std::cout << "Setting up update thread" << std::endl;
-
-  std::thread updateThread(updateLines, srollingTwoLineScreen);
 
   GameOfLfeScreen *game_of_life_screen = new GameOfLfeScreen(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
@@ -231,7 +231,12 @@ int main(int argc, char *argv[])
   screens_to_render.push_back(game_of_life_screen);
   screens_to_render.push_back(rotating_box);
 
-  std::cout << "Scrolling screen name from vector is " << *(screens_to_render.at(0)->getName()) << std::endl;
+  std::vector<UpdateableScreen *> screens_to_update;
+
+  screens_to_update.push_back(srollingTwoLineScreen);
+  screens_to_update.push_back(game_of_life_screen);
+
+  std::thread updateThread(updateLines, screens_to_update);
 
   ScreenMenu menu = ScreenMenu(
       speed,

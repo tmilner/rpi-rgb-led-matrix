@@ -1,27 +1,35 @@
 #include "game-of-life.h"
+#include <iostream>
 
 GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms, bool torus) : delay_ms_(delay_ms), torus_(torus), name{std::string("Game of Life")}
 {
     width_ = canvas->width();
     height_ = canvas->height();
+    game_width = 500;
+    game_height = 500;
+    this->last_reseed = std::chrono::system_clock::now();
 
     // Allocate memory
-    values_ = new int *[width_];
-    for (int x = 0; x < width_; ++x)
+    values_ = new int *[game_width];
+    for (int x = 0; x < game_width; ++x)
     {
-        values_[x] = new int[height_];
+        values_[x] = new int[game_height];
     }
-    newValues_ = new int *[width_];
-    for (int x = 0; x < width_; ++x)
+    newValues_ = new int *[game_width];
+    for (int x = 0; x < game_width; ++x)
     {
-        newValues_[x] = new int[height_];
+        newValues_[x] = new int[game_height];
     }
+    this->seed();
+}
 
+void GameOfLfeScreen::seed()
+{
     // Init values randomly
     srand(time(NULL));
-    for (int x = 0; x < width_; ++x)
+    for (int x = 0; x < game_width; ++x)
     {
-        for (int y = 0; y < height_; ++y)
+        for (int y = 0; y < game_height; ++y)
         {
             values_[x][y] = rand() % 2;
         }
@@ -50,12 +58,12 @@ GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms, 
 
 GameOfLfeScreen::~GameOfLfeScreen()
 {
-    for (int x = 0; x < width_; ++x)
+    for (int x = 0; x < game_width; ++x)
     {
         delete[] values_[x];
     }
     delete[] values_;
-    for (int x = 0; x < width_; ++x)
+    for (int x = 0; x < game_width; ++x)
     {
         delete[] newValues_[x];
     }
@@ -74,16 +82,14 @@ void GameOfLfeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas)
         return;
     }
 
-    updateValues();
-
-    for (int x = 0; x < width_; ++x)
+    for (int x = 100; x < width_ + 100; ++x)
     {
-        for (int y = 0; y < height_; ++y)
+        for (int y = 100; y < height_ + 100; ++y)
         {
             if (values_[x][y])
-                offscreen_canvas->SetPixel(x, y, r_, g_, b_);
+                offscreen_canvas->SetPixel(x - 100, y - 100, r_, g_, b_);
             else
-                offscreen_canvas->SetPixel(x, y, 0, 0, 0);
+                offscreen_canvas->SetPixel(x - 100, y - 100, 0, 0, 0);
         }
     }
 }
@@ -93,14 +99,14 @@ int GameOfLfeScreen::numAliveNeighbours(int x, int y)
     if (torus_)
     {
         // Edges are connected (torus)
-        num += values_[(x - 1 + width_) % width_][(y - 1 + height_) % height_];
-        num += values_[(x - 1 + width_) % width_][y];
-        num += values_[(x - 1 + width_) % width_][(y + 1) % height_];
-        num += values_[(x + 1) % width_][(y - 1 + height_) % height_];
-        num += values_[(x + 1) % width_][y];
-        num += values_[(x + 1) % width_][(y + 1) % height_];
-        num += values_[x][(y - 1 + height_) % height_];
-        num += values_[x][(y + 1) % height_];
+        num += values_[(x - 1 + game_width) % game_width][(y - 1 + game_height) % game_height];
+        num += values_[(x - 1 + game_width) % game_width][y];
+        num += values_[(x - 1 + game_width) % game_width][(y + 1) % game_height];
+        num += values_[(x + 1) % game_width][(y - 1 + game_height) % game_height];
+        num += values_[(x + 1) % game_width][y];
+        num += values_[(x + 1) % game_width][(y + 1) % game_height];
+        num += values_[x][(y - 1 + game_height) % game_height];
+        num += values_[x][(y + 1) % game_height];
     }
     else
     {
@@ -109,11 +115,11 @@ int GameOfLfeScreen::numAliveNeighbours(int x, int y)
         {
             if (y > 0)
                 num += values_[x - 1][y - 1];
-            if (y < height_ - 1)
+            if (y < game_height - 1)
                 num += values_[x - 1][y + 1];
             num += values_[x - 1][y];
         }
-        if (x < width_ - 1)
+        if (x < game_width - 1)
         {
             if (y > 0)
                 num += values_[x + 1][y - 1];
@@ -123,26 +129,33 @@ int GameOfLfeScreen::numAliveNeighbours(int x, int y)
         }
         if (y > 0)
             num += values_[x][y - 1];
-        if (y < height_ - 1)
+        if (y < game_height - 1)
             num += values_[x][y + 1];
     }
     return num;
 }
 
-void GameOfLfeScreen::updateValues()
+void GameOfLfeScreen::update()
 {
-    // Copy values to newValues
-    for (int x = 0; x < width_; ++x)
+    if (!is_visible)
     {
-        for (int y = 0; y < height_; ++y)
+        return;
+    }
+
+    std::cout << "Update Game of Life" << std::endl;
+
+    // Copy values to newValues
+    for (int x = 0; x < game_width; ++x)
+    {
+        for (int y = 0; y < game_height; ++y)
         {
             newValues_[x][y] = values_[x][y];
         }
     }
     // update newValues based on values
-    for (int x = 0; x < width_; ++x)
+    for (int x = 0; x < game_width; ++x)
     {
-        for (int y = 0; y < height_; ++y)
+        for (int y = 0; y < game_height; ++y)
         {
             int num = numAliveNeighbours(x, y);
             if (values_[x][y])
@@ -160,11 +173,12 @@ void GameOfLfeScreen::updateValues()
         }
     }
     // copy newValues to values
-    for (int x = 0; x < width_; ++x)
+    for (int x = 0; x < game_width; ++x)
     {
-        for (int y = 0; y < height_; ++y)
+        for (int y = 0; y < game_height; ++y)
         {
             values_[x][y] = newValues_[x][y];
         }
     }
+    std::cout << "Updated Game of Life" << std::endl;
 }

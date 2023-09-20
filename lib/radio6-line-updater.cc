@@ -2,6 +2,8 @@
 #include <iostream>
 #include "img_utils.h"
 
+using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
+
 Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings),
                                                                                                                         name{std::string("Radio 6 Line")}
 {
@@ -11,6 +13,8 @@ Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image
     this->image_key = "radio6icon";
     this->is_visible = true;
     this->fetcher = new JSONFetcher();
+    auto now = std::chrono::system_clock::now();
+    this->last_update = now - 5min;
 
     Magick::Image tmp = (*image_map)[this->image_key];
     tmp.resize(Magick::Geometry(11, 11));
@@ -46,14 +50,22 @@ void Radio6LineUpdater::update()
     {
         return;
     }
+
+    const auto now = std::chrono::system_clock::now();
+
+    if (((now - this->last_update) / 1s) < this->update_after_seconds)
+    {
+        return;
+    }
+
     std::cout << "Fetching radio6 data from " << this->url << std::endl;
 
     try
     {
         Json::Value jsonData = fetcher->fetch(this->url);
 
-        const std::string artist(jsonData["tracks"][0]["artist"].asString());
-        const std::string track_name(jsonData["tracks"][0]["name"].asString());
+        std::string artist(jsonData["tracks"][0]["artist"].asString());
+        std::string track_name(jsonData["tracks"][0]["name"].asString());
 
         std::cout << "\tArtist: " << artist << std::endl;
         std::cout << "\tTrack Name: " << track_name << std::endl;

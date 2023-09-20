@@ -6,18 +6,18 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
                        GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down, std::vector<Screen *> *screens)
     : menu_line{ScrollingLineSettings(
           speed,
-          9,
+          4,
           letter_spaceing,
           font,
-          Color(240, 160, 100),
+          Color(130, 100, 73),
           screen_width,
           0)},
       menu_sub_line{ScrollingLineSettings(
           speed,
-          17,
+          12,
           letter_spaceing,
           font,
-          Color(240, 160, 100),
+          Color(130, 100, 73),
           screen_width,
           0)},
       screens{screens},
@@ -27,7 +27,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     this->state = state;
     this->current_menu_item = 0;
     this->current_screen = 0;
-    this->menu_items = {"Brightness", "Switch Screen", "Exit"};
+    this->menu_items = {"Brightness", "Screen", "Exit"};
     this->last_button_press = std::chrono::system_clock::now();
 
     button_ok->f_released = [&](std::chrono::nanoseconds nano)
@@ -43,6 +43,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     button_up->start();
     button_down->start();
 }
+
 bool ScreenMenu::debounceTimePassed()
 {
     using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
@@ -92,7 +93,7 @@ void ScreenMenu::scrollMenu(bool up)
         {
             std::cout << "Main Menu. Scroll down!!" << this->current_menu_item << ", Count == " << menu_items.size() << std::endl;
 
-            if (this->current_menu_item = 0)
+            if (this->current_menu_item == 0)
             {
                 this->current_menu_item = (this->menu_items.size() - 1);
             }
@@ -117,7 +118,7 @@ void ScreenMenu::scrollMenu(bool up)
         }
         else
         {
-            if (this->current_screen - 1 < 0)
+            if (this->current_screen == 0)
             {
                 this->current_screen = this->screens->size() - 1;
             }
@@ -187,8 +188,8 @@ void ScreenMenu::modeChange()
     else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 1)
     {
         std::cout << "pressed go to switch order menu" << std::endl;
-        this->current_mode = MenuMode::switch_screen;
         this->current_screen = 0;
+        this->current_mode = MenuMode::switch_screen;
     }
     else if (this->current_mode == MenuMode::switch_screen)
     {
@@ -221,25 +222,25 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     {
         return;
     }
-    if (this->current_mode == main_menu)
+
+    offscreen_canvas->SetPixels(1, 1, offscreen_canvas->width() - 2, offscreen_canvas->height() - 2, 130, 100, 73);
+    offscreen_canvas->SetPixels(2, 2, offscreen_canvas->width() - 4, offscreen_canvas->height() - 4, 50, 50, 50);
+    rgb_matrix::DrawLine(offscreen_canvas, 2, 10, offscreen_canvas->width() - 4, 10, Color(130, 100, 73));
+    if (this->current_mode == brightness_menu)
     {
-        offscreen_canvas->SetPixels(0, 7, offscreen_canvas->width(), offscreen_canvas->height() - 13, 50, 50, 50);
+        menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
+    }
+    else if (this->current_mode == switch_screen)
+    {
+        menu_sub_line.updateText(this->screens->at(this->current_screen)->getName());
     }
     else
     {
-        offscreen_canvas->SetPixels(0, 7, offscreen_canvas->width(), offscreen_canvas->height() - 13, 233, 110, 80);
-        offscreen_canvas->SetPixels(1, 8, offscreen_canvas->width() - 2, offscreen_canvas->height() - 15, 50, 50, 50);
-        if (this->current_mode == brightness_menu)
-        {
-            menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
-        }
-        else if (this->current_mode == switch_screen)
-        {
-            std::cout << "Render switch screen menu! " << *(this->screens->at(this->current_screen)->getName()) << ", " << this->current_screen << std::endl;
-            menu_sub_line.updateText(this->screens->at(this->current_screen)->getName());
-        }
-        menu_sub_line.renderLine(offscreen_canvas);
+        std::string enter{"..."};
+        menu_sub_line.updateText(&enter);
     }
+    menu_sub_line.renderLine(offscreen_canvas);
+
     menu_line.updateText(&this->menu_items[this->current_menu_item]);
     menu_line.renderLine(offscreen_canvas);
 }

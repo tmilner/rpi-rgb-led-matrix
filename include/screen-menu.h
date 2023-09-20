@@ -5,7 +5,6 @@
 #include "screen_state.h"
 #include <cppgpio.hpp>
 #include <chrono>
-#include <list>
 
 class ScreenMenu : public Screen
 {

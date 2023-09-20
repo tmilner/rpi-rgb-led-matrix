@@ -58,10 +58,12 @@ Json::Value JSONFetcher::fetch(std::string &url)
 
     if (code != CURLE_OK)
     {
+        httpData.release();
         fprintf(stderr, "curl_easy_perform() for %s failed: %s\n", url.c_str(), curl_easy_strerror(code));
         throw std::runtime_error("Got bad code from CURL");
     }
 
+    this->curl
     if (httpCode == 200)
     {
         std::cout << "\nGot successful response from " << url << std::endl;
