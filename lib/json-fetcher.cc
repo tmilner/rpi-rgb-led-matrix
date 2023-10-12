@@ -63,7 +63,6 @@ Json::Value JSONFetcher::fetch(std::string &url)
         throw std::runtime_error("Got bad code from CURL");
     }
 
-    this->curl
     if (httpCode == 200)
     {
         std::cout << "\nGot successful response from " << url << std::endl;
