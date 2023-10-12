@@ -20,6 +20,7 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
                                                                                                                                   settings{settings},
                                                                                                                                   bg_color{settings.bg_color},
                                                                                                                                   name{std::string("Scrolling Screen")}
+
 {
     this->image_map = image_map;
     this->is_visible = true;
