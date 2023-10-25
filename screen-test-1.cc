@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
   const int width = defaults.chain_length * defaults.cols;
 
   int letter_spacing = 0;
-  float speed = 3.0f;
+  float speed = 2.0f;
   const char *base_path_c = ".";
 
   int opt;
