@@ -224,8 +224,8 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     }
 
     offscreen_canvas->SetPixels(1, 1, offscreen_canvas->width() - 2, offscreen_canvas->height() - 2, 130, 100, 73);
-    offscreen_canvas->SetPixels(2, 2, offscreen_canvas->width() - 4, offscreen_canvas->height() - 4, 50, 50, 50);
-    rgb_matrix::DrawLine(offscreen_canvas, 2, 10, offscreen_canvas->width() - 4, 10, Color(130, 100, 73));
+    offscreen_canvas->SetPixels(2, 2, offscreen_canvas->width() - 4, offscreen_canvas->height() - 4, 0, 0, 0);
+    rgb_matrix::DrawLine(offscreen_canvas, 2, 13, offscreen_canvas->width() - 4, 13, Color(130, 100, 73));
     if (this->current_mode == brightness_menu)
     {
         menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
