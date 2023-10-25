@@ -14,7 +14,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
           0)},
       menu_sub_line{ScrollingLineSettings(
           speed,
-          12,
+          15,
           letter_spaceing,
           font,
           Color(130, 100, 73),
