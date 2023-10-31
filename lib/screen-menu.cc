@@ -1,5 +1,7 @@
 #include "screen-menu.h"
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include "img_utils.h"
 
 ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width, ScreenState *state,
@@ -173,10 +175,10 @@ void ScreenMenu::scrollMenu(bool up)
 
             if (this->state->speed != 100)
             {
-                int increment_by = 0.1;
-                if (this->state->speed + increment_by > 100)
+                float increment_by = 0.1f;
+                if (this->state->speed + increment_by > 10)
                 {
-                    this->state->speed = 100;
+                    this->state->speed = 10;
                 }
                 else
                 {
@@ -190,7 +192,7 @@ void ScreenMenu::scrollMenu(bool up)
 
             if (this->state->speed != 0)
             {
-                int decrement_by = 0.1;
+                float decrement_by = 0.1f;
                 if (this->state->speed - decrement_by < 0)
                 {
                     this->state->speed = 0;
@@ -225,7 +227,6 @@ void ScreenMenu::modeChange()
     else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 1)
     {
         std::cout << "pressed go to speed menu" << std::endl;
-        this->current_screen = 0;
         this->current_mode = MenuMode::speed_menu;
     }
     else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 2)
@@ -281,6 +282,13 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
     if (this->current_mode == brightness_menu)
     {
         menu_sub_line.updateText(&std::to_string(this->state->current_brightness).append("%"));
+    }
+    if (this->current_mode == speed_menu)
+    {
+        std::stringstream temp_str_stream;
+        temp_str_stream << std::fixed << std::setprecision(2) << this->state->speed;
+        std::string temp_str = temp_str_stream.str();
+        menu_sub_line.updateText(&temp_str);
     }
     else if (this->current_mode == switch_screen)
     {
