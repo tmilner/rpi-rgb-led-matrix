@@ -29,7 +29,7 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings)
     color = settings.init_color;
     font = *settings.init_font;
     orig_speed = settings.init_speed;
-    speed = settings.init_speed;
+    speed = *settings.init_speed;
     icon_offset = settings.init_icon_offset;
     screen_width = settings.init_screen_width;
     max_width_for_no_scrolling = (settings.init_screen_width - icon_offset);
@@ -52,9 +52,9 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas)
         speed = 0;
         x = ((max_width_for_no_scrolling - length) / 2) + icon_offset;
     }
-    else if (speed == 0)
+    else
     {
-        speed = orig_speed;
+        speed = *orig_speed;
     }
 
     length = rgb_matrix::DrawText(offscreen_canvas, font,

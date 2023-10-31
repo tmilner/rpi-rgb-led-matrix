@@ -2,10 +2,10 @@
 #include <iostream>
 #include "img_utils.h"
 
-ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_width, ScreenState *state,
+ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width, ScreenState *state,
                        GPIO::PushButton *button_ok, GPIO::PushButton *button_up, GPIO::PushButton *button_down, std::vector<Screen *> *screens)
     : menu_line{ScrollingLineSettings(
-          speed,
+          &state->speed,
           4,
           letter_spaceing,
           font,
@@ -13,7 +13,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
           screen_width,
           0)},
       menu_sub_line{ScrollingLineSettings(
-          speed,
+          &state->speed,
           15,
           letter_spaceing,
           font,
@@ -27,7 +27,7 @@ ScreenMenu::ScreenMenu(float speed, int letter_spaceing, Font *font, int screen_
     this->state = state;
     this->current_menu_item = 0;
     this->current_screen = 0;
-    this->menu_items = {"Brightness", "Screen", "Exit"};
+    this->menu_items = {"Brightness", "Speed", "Screen", "Exit"};
     this->last_button_press = std::chrono::system_clock::now();
 
     button_ok->f_released = [&](std::chrono::nanoseconds nano)
@@ -165,6 +165,43 @@ void ScreenMenu::scrollMenu(bool up)
             }
         }
     }
+    else if (this->current_mode == MenuMode::speed_menu)
+    {
+        if (up)
+        {
+            std::cout << "Speed Menu. Scroll up!!" << this->state->speed << std::endl;
+
+            if (this->state->speed != 100)
+            {
+                int increment_by = 0.1;
+                if (this->state->speed + increment_by > 100)
+                {
+                    this->state->speed = 100;
+                }
+                else
+                {
+                    this->state->speed += increment_by;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Speed Menu. Scroll down!!" << this->state->speed << std::endl;
+
+            if (this->state->speed != 0)
+            {
+                int decrement_by = 0.1;
+                if (this->state->speed - decrement_by < 0)
+                {
+                    this->state->speed = 0;
+                }
+                else
+                {
+                    this->state->speed -= decrement_by;
+                }
+            }
+        }
+    }
 }
 
 void ScreenMenu::modeChange()
@@ -186,6 +223,12 @@ void ScreenMenu::modeChange()
         this->current_mode = MenuMode::brightness_menu;
     }
     else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 1)
+    {
+        std::cout << "pressed go to speed menu" << std::endl;
+        this->current_screen = 0;
+        this->current_mode = MenuMode::speed_menu;
+    }
+    else if (this->current_mode == MenuMode::main_menu && this->current_menu_item == 2)
     {
         std::cout << "pressed go to switch order menu" << std::endl;
         this->current_screen = 0;
@@ -220,6 +263,15 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas)
 {
     if (!this->is_visible)
     {
+        return;
+    }
+    using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
+
+    const auto now = std::chrono::system_clock::now();
+
+    if (((now - this->last_button_press) / 1s) > 100)
+    {
+        this->is_visible = false;
         return;
     }
 

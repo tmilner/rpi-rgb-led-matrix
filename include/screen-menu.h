@@ -9,8 +9,7 @@
 class ScreenMenu : public Screen
 {
 public:
-    ScreenMenu(float speed,
-               int letter_spaceing,
+    ScreenMenu(int letter_spaceing,
                Font *font,
                int screen_width,
                ScreenState *state,
@@ -31,6 +30,7 @@ private:
     {
         main_menu,
         brightness_menu,
+        speed_menu,
         switch_screen
     };
     MenuMode current_mode = main_menu;

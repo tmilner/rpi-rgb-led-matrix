@@ -16,6 +16,7 @@ namespace rgb_matrix
         std::map<std::string, Magick::Image> image_map{};
         ScreenMode current_mode = ScreenMode::scrolling_lines;
         int current_brightness = 100;
+        float speed = 2.0f;
     };
 }
 #endif /*SCREEN_STATE_H*/

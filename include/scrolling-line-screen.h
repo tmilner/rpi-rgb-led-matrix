@@ -1,5 +1,5 @@
-#ifndef RADIO6_LINE_UDPATER_H
-#define RADIO6_LINE_UPDATER_H
+#ifndef SCROLLING_SCREEN_H
+#define SCROLLING_SCREEN_H
 #include "updateable-screen.h"
 #include "scrolling-line.h"
 #include "json-fetcher.h"
@@ -18,7 +18,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
     rgb_matrix::Font *font;
     rgb_matrix::Color color;
     rgb_matrix::Color bg_color;
-    float speed;
+    float *speed;
     int letter_spacing;
     ScreenLineOption line1;
     ScreenLineOption line2;
@@ -28,7 +28,7 @@ struct ScrollingLineScreenSettings : ScreenSettings
                                 rgb_matrix::Font *font,
                                 rgb_matrix::Color color,
                                 rgb_matrix::Color bg_color,
-                                float speed,
+                                float *speed,
                                 int letter_spacing,
                                 ScreenLineOption line1,
                                 ScreenLineOption line2,
@@ -66,4 +66,4 @@ private:
     ScrollingLineSettings line1_settings;
     ScrollingLineSettings line2_settings;
 };
-#endif /*RADIO6_LINE_UPDATER_H*/
+#endif /*SCROLLING_SCREEN_H*/

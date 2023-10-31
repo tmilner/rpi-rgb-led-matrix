@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
   state.image_map = {};
   state.current_mode = ScreenMode::scrolling_lines;
   state.current_brightness = 100;
+  state.speed = 1.5f;
 
   // GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
   GPIO::PushButton push_ok(11, GPIO::GPIO_PULL::UP);
@@ -110,18 +111,14 @@ int main(int argc, char *argv[])
   const int width = defaults.chain_length * defaults.cols;
 
   int letter_spacing = 0;
-  float speed = 1.0f;
+  //  float speed = 1.0f;
   const char *base_path_c = ".";
 
   int opt;
-  while ((opt = getopt(argc, argv, "s:p:")) != -1)
+  while ((opt = getopt(argc, argv, "p:")) != -1)
   {
     switch (opt)
     {
-    case 's':
-      speed = atof(optarg);
-      break;
-      break;
     case 'p':
       base_path_c = strdup(optarg);
       break;
@@ -164,12 +161,6 @@ int main(int argc, char *argv[])
                        "Loading", letter_spacing);
   offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
 
-  int delay_speed_usec = 1000000;
-  if (speed > 0)
-  {
-    delay_speed_usec = 1000000 / speed / main_font.CharacterWidth('W');
-  }
-
   const std::string image_path("/img");
 
   for (auto const &dir_entry : std::filesystem::directory_iterator{base_path + image_path})
@@ -209,7 +200,7 @@ int main(int argc, char *argv[])
                                                                                         &main_font,
                                                                                         color,
                                                                                         bg_color,
-                                                                                        speed,
+                                                                                        &state.speed,
                                                                                         letter_spacing,
                                                                                         ScreenLineOption::radio6,
                                                                                         ScreenLineOption::weather,
@@ -239,7 +230,6 @@ int main(int argc, char *argv[])
   std::thread updateThread(updateLines, screens_to_update);
 
   ScreenMenu menu = ScreenMenu(
-      speed,
       letter_spacing,
       &menu_font,
       width,
@@ -263,7 +253,14 @@ int main(int argc, char *argv[])
 
     menu.render(offscreen_canvas);
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-    usleep(delay_speed_usec);
+    if (state.speed == 0)
+    {
+      usleep(1000000);
+    }
+    else
+    {
+      usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
+    }
   }
 
   // Finished. Shut down the RGB matrix.

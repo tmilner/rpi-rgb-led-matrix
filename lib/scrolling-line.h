@@ -8,14 +8,14 @@ using namespace rgb_matrix;
 
 struct ScrollingLineSettings
 {
-    float init_speed;
+    float *init_speed;
     int init_y;
     int init_letter_spacing;
     Font *init_font;
     Color init_color;
     int init_screen_width;
     int init_icon_offset;
-    ScrollingLineSettings(float speed, int y, int letter_space, Font *font, Color color, int screen_width, int icon_offset)
+    ScrollingLineSettings(float *speed, int y, int letter_space, Font *font, Color color, int screen_width, int icon_offset)
     {
         this->init_speed = speed;
         this->init_y = y;
@@ -35,8 +35,8 @@ protected:
     int y;
     int length;
     int letter_spacing;
-    int speed;
-    int orig_speed;
+    float speed;
+    float *orig_speed;
     int icon_offset;
     int screen_width;
     int max_width_for_no_scrolling;

@@ -1,4 +1,4 @@
-#ifndef RADIO6_LINE_UDPATER_H
+#ifndef RADIO6_LINE_UPDATER_H
 #define RADIO6_LINE_UPDATER_H
 #include "updateable-screen.h"
 #include "scrolling-line.h"
