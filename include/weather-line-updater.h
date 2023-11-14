@@ -20,8 +20,15 @@ private:
     JSONFetcher *fetcher;
     std::string url;
     std::string current_image;
-    std::chrono::time_point<std::chrono::system_clock> last_update;
-    static const int update_after_seconds = 360;
+    std::string weather_line;
+    std::string weather_image;
+    std::string time_image;
+    std::string date_image;
+    std::chrono::time_point<std::chrono::system_clock> last_weather_update;
+    std::chrono::time_point<std::chrono::system_clock> last_rotate;
+    int current_display;
+    static const int rotate_after_seconds = 60;
+    static const int update_weather_after_seconds = 360;
     std::map<std::string, Magick::Image> *image_map{};
     std::string name;
 };
