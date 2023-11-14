@@ -64,7 +64,7 @@ void updateLines(std::vector<UpdateableScreen *> screens_to_update)
     {
       (*screen)->update();
     }
-    usleep(20 * 1000 * 1000);
+    usleep(2 * 1000 * 1000);
   }
 }
 

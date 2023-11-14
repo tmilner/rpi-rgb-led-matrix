@@ -71,6 +71,8 @@ void Radio6LineUpdater::update()
         std::cout << "\tTrack Name: " << track_name << std::endl;
         std::cout << std::endl;
 
+        this->last_update = now;
+
         this->current_line.clear();
         this->current_line.append(artist).append(" - ").append(track_name);
     }
