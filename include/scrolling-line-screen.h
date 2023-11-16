@@ -4,6 +4,7 @@
 #include "scrolling-line.h"
 #include "json-fetcher.h"
 #include <Magick++.h>
+#include "spotify_client.h"
 
 enum ScreenLineOption
 {
@@ -49,7 +50,8 @@ struct ScrollingLineScreenSettings : ScreenSettings
 class ScrollingLineScreen : public UpdateableScreen
 {
 public:
-    ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings);
+    ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
+                        SpotifyClient spotify_client);
     void update();
     void render(FrameCanvas *offscreen_canvas);
     void setLine1(ScreenLineOption type);
@@ -58,6 +60,7 @@ public:
 
 private:
     ScrollingLineScreenSettings settings;
+    SpotifyClient spotify_client;
     rgb_matrix::Color bg_color;
     std::string name;
     std::map<std::string, Magick::Image> *image_map{};

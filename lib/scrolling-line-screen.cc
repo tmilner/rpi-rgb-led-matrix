@@ -4,28 +4,30 @@
 #include <iostream>
 #include "img_utils.h"
 
-ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings) : image_map{image_map}, line1_settings{settings.speed,
-                                                                                                                                                                       0,
-                                                                                                                                                                       0,
-                                                                                                                                                                       settings.font,
-                                                                                                                                                                       settings.color,
-                                                                                                                                                                       settings.width,
-                                                                                                                                                                       14},
-                                                                                                                                  line2_settings{settings.speed,
-                                                                                                                                                 settings.height / 2,
-                                                                                                                                                 0,
-                                                                                                                                                 settings.font,
-                                                                                                                                                 settings.color,
-                                                                                                                                                 settings.width, 14},
-                                                                                                                                  settings{settings},
-                                                                                                                                  bg_color{settings.bg_color},
-                                                                                                                                  name{std::string("Scrolling Screen")}
+ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
+                                         SpotifyClient spotify_client) : image_map{image_map}, line1_settings{settings.speed,
+                                                                                                              0,
+                                                                                                              0,
+                                                                                                              settings.font,
+                                                                                                              settings.color,
+                                                                                                              settings.width,
+                                                                                                              14},
+                                                                         line2_settings{settings.speed,
+                                                                                        settings.height / 2,
+                                                                                        0,
+                                                                                        settings.font,
+                                                                                        settings.color,
+                                                                                        settings.width, 14},
+                                                                         settings{settings},
+                                                                         bg_color{settings.bg_color},
+                                                                         name{std::string("Scrolling Screen")},
+                                                                         spotify_client(spotify_client)
 
 {
     this->image_map = image_map;
     this->is_visible = true;
 
-    MusicLine *radio6LineUpdater = new MusicLine(image_map, line1_settings);
+    MusicLine *radio6LineUpdater = new MusicLine(image_map, spotify_client, line1_settings);
     this->line1 = radio6LineUpdater;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
@@ -52,7 +54,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->line1_settings);
+        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->spotify_client, this->line1_settings);
         delete this->line1;
         this->line1 = radio6LineUpdater;
     }
@@ -67,7 +69,7 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
 {
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->line2_settings);
+        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->spotify_client, this->line2_settings);
         delete this->line2;
         this->line2 = radio6LineUpdater;
     }

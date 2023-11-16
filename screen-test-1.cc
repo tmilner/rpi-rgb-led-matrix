@@ -20,6 +20,7 @@
 #include "screen-menu.h"
 #include "game-of-life.h"
 #include "updateable-screen.h"
+#include "spotify_client.h"
 
 #include <string>
 #include <iostream>
@@ -133,6 +134,8 @@ int main(int argc, char *argv[])
   const std::string spotify_client_id = config["spotify_client_id"].as<std::string>();
   const std::string spotify_client_secret = config["spotify_client_secret"].as<std::string>();
   const std::string spotify_refresh_token = config["spotify_refresh_token"].as<std::string>();
+
+  SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
 
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.

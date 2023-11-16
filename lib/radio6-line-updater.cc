@@ -5,8 +5,8 @@
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyClient spotifyClient, ScrollingLineSettings settings) : ScrollingLine(settings),
-                                                                                                                                                     name{std::string("Radio 6 Line")},
-                                                                                                                                                     spotifyClient(spotifyClient)
+                                                                                                                                     name{std::string("Radio 6 Line")},
+                                                                                                                                     spotifyClient(spotifyClient)
 {
     this->current_line = "Loading";
     this->radio6_url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
@@ -61,25 +61,25 @@ void MusicLine::update()
 
     std::cout << "Checking Spotify" << std::endl;
 
-    try {
+    try
+    {
         std::optional<SpotifyClient::NowPlaying> nowPlaying = this->spotifyClient.getNowPlaying();
-
-
 
         if (nowPlaying.has_value() && nowPlaying.value().is_playing)
         {
             std::cout << "Spotify now playing " << nowPlaying.value().track_name << std::endl;
 
-                this->last_update = now;
+            this->last_update = now;
+            this->image_key = "spotify";
 
-                this->current_line.clear();
-                this->current_line.append(nowPlaying.value().artist).append(" - ").append(nowPlaying.value().track_name);
+            this->current_line.clear();
+            this->current_line.append(nowPlaying.value().artist).append(" - ").append(nowPlaying.value().track_name);
         }
         else
         {
-            //TODO move to a client for radio 6 like spotify...
+            // TODO move to a client for radio 6 like spotify...
             std::cout << "Fetching radio6 data from " << this->radio6_url << std::endl;
-        
+
             Json::Value jsonData = fetcher->fetch(this->radio6_url);
 
             std::string artist(jsonData["tracks"][0]["artist"].asString());
@@ -90,6 +90,7 @@ void MusicLine::update()
             std::cout << std::endl;
 
             this->last_update = now;
+            this->image_key = "radio6icon";
 
             this->current_line.clear();
             this->current_line.append(artist).append(" - ").append(track_name);
