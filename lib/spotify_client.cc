@@ -56,7 +56,10 @@ JSONFetcher::APIResponse SpotifyClient::apiQuery(std::string endpoint)
 void SpotifyClient::refreshAccessToken()
 {
     std::string postData = "grant_type=refresh_token&refresh_token=" + this->refresh_token + "&client_id=" + this->client_id + "&client_secret=" + this->client_secret;
-    JSONFetcher::APIResponse token = this->fetcher->fetch("POST", NULL, "https://accounts.spotify.com/api/token", postData);
+    std::string content_type_header = "Content-Type: application/x-www-form-urlencoded";
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, content_type_header.c_str());
+    JSONFetcher::APIResponse token = this->fetcher->fetch("POST", headers, "https://accounts.spotify.com/api/token", postData);
     if (token.code == 200 && token.body.has_value())
     {
         this->access_token = token.body.value()["access_token"].asString();
