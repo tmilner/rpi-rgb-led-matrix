@@ -130,6 +130,9 @@ int main(int argc, char *argv[])
   // Weather API Key
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
   const std::string weather_api_key = config["weather_api_key"].as<std::string>();
+  const std::string spotify_client_id = config["spotify_client_id"].as<std::string>();
+  const std::string spotify_client_secret = config["spotify_client_secret"].as<std::string>();
+  const std::string spotify_refresh_token = config["spotify_refresh_token"].as<std::string>();
 
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.

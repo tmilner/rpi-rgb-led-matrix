@@ -4,11 +4,12 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings),
-                                                                                                                        name{std::string("Radio 6 Line")}
+MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyClient spotifyClient, ScrollingLineSettings settings) : ScrollingLine(settings),
+                                                                                                                                                     name{std::string("Radio 6 Line")},
+                                                                                                                                                     spotifyClient(spotifyClient)
 {
     this->current_line = "Loading";
-    this->url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
+    this->radio6_url = std::string("https://nowplaying.jameswragg.com/api/bbc6music?limit=1");
     this->image_map = image_map;
     this->image_key = "radio6icon";
     this->is_visible = true;
@@ -22,17 +23,17 @@ Radio6LineUpdater::Radio6LineUpdater(std::map<std::string, Magick::Image> *image
     (*this->image_map)[this->image_key] = tmp;
 }
 
-Magick::Image *Radio6LineUpdater::getIcon()
+Magick::Image *MusicLine::getIcon()
 {
     return &(*this->image_map)[this->image_key];
 }
 
-std::string *Radio6LineUpdater::getName()
+std::string *MusicLine::getName()
 {
     return &this->name;
 }
 
-void Radio6LineUpdater::render(FrameCanvas *offscreen_canvas)
+void MusicLine::render(FrameCanvas *offscreen_canvas)
 {
     if (!is_visible)
     {
@@ -44,7 +45,7 @@ void Radio6LineUpdater::render(FrameCanvas *offscreen_canvas)
     CopyImageToCanvas(this->getIcon(), offscreen_canvas, 1, this->y + 2);
 }
 
-void Radio6LineUpdater::update()
+void MusicLine::update()
 {
     if (!is_visible)
     {
@@ -58,26 +59,44 @@ void Radio6LineUpdater::update()
         return;
     }
 
-    std::cout << "Fetching radio6 data from " << this->url << std::endl;
+    std::cout << "Checking Spotify" << std::endl;
 
-    try
-    {
-        Json::Value jsonData = fetcher->fetch(this->url);
+    try {
+        std::optional<SpotifyClient::NowPlaying> nowPlaying = this->spotifyClient.getNowPlaying();
 
-        std::string artist(jsonData["tracks"][0]["artist"].asString());
-        std::string track_name(jsonData["tracks"][0]["name"].asString());
 
-        std::cout << "\tArtist: " << artist << std::endl;
-        std::cout << "\tTrack Name: " << track_name << std::endl;
-        std::cout << std::endl;
 
-        this->last_update = now;
+        if (nowPlaying.has_value() && nowPlaying.value().is_playing)
+        {
+            std::cout << "Spotify now playing " << nowPlaying.value().track_name << std::endl;
 
-        this->current_line.clear();
-        this->current_line.append(artist).append(" - ").append(track_name);
+                this->last_update = now;
+
+                this->current_line.clear();
+                this->current_line.append(nowPlaying.value().artist).append(" - ").append(nowPlaying.value().track_name);
+        }
+        else
+        {
+            //TODO move to a client for radio 6 like spotify...
+            std::cout << "Fetching radio6 data from " << this->radio6_url << std::endl;
+        
+            Json::Value jsonData = fetcher->fetch(this->radio6_url);
+
+            std::string artist(jsonData["tracks"][0]["artist"].asString());
+            std::string track_name(jsonData["tracks"][0]["name"].asString());
+
+            std::cout << "\tArtist: " << artist << std::endl;
+            std::cout << "\tTrack Name: " << track_name << std::endl;
+            std::cout << std::endl;
+
+            this->last_update = now;
+
+            this->current_line.clear();
+            this->current_line.append(artist).append(" - ").append(track_name);
+        }
     }
     catch (std::runtime_error &e)
     {
-        printf("Failed to fetch Radio6 Data\n");
+        std::cerr << "Exception when updating music line" << e.what() << std::endl;
     }
 }

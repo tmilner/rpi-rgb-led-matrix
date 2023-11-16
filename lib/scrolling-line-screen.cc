@@ -25,7 +25,7 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
     this->image_map = image_map;
     this->is_visible = true;
 
-    Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(image_map, line1_settings);
+    MusicLine *radio6LineUpdater = new MusicLine(image_map, line1_settings);
     this->line1 = radio6LineUpdater;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
@@ -52,7 +52,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(this->image_map, this->line1_settings);
+        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->line1_settings);
         delete this->line1;
         this->line1 = radio6LineUpdater;
     }
@@ -67,7 +67,7 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
 {
     if (type == ScreenLineOption::radio6)
     {
-        Radio6LineUpdater *radio6LineUpdater = new Radio6LineUpdater(this->image_map, this->line2_settings);
+        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->line2_settings);
         delete this->line2;
         this->line2 = radio6LineUpdater;
     }

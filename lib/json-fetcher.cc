@@ -28,7 +28,21 @@ JSONFetcher::~JSONFetcher()
     curl_easy_cleanup(this->curl);
 }
 
-Json::Value JSONFetcher::fetch(std::string &url)
+Json::Value JSONFetcher::fetch(std::string url)
+{
+    APIResponse response = this->fetch("GET", NULL, url, "");
+    if (response.code == 200 && response.body.has_value())
+    {
+        return response.body.value();
+    }
+    else
+    {
+        std::cout << "Non 200 from " << url << ". Code = " << response.code << std::endl;
+        throw std::runtime_error("Got non 200 Response from URL");
+    }
+}
+
+JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *headers, std::string url, std::string body)
 {
     // Set remote URL.
     curl_easy_setopt(this->curl, CURLOPT_URL, url.c_str());
@@ -45,8 +59,18 @@ Json::Value JSONFetcher::fetch(std::string &url)
     int httpCode(0);
     std::unique_ptr<std::string> httpData(new std::string());
 
+    curl_easy_setopt(this->curl, CURLOPT_CUSTOMREQUEST, request.c_str());
     // Hook up data handling function.
     curl_easy_setopt(this->curl, CURLOPT_WRITEFUNCTION, write_data);
+
+    // set headers if not null.
+    if (headers != NULL)
+        curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, headers);
+
+    // add body
+    if (!body.empty())
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+
     // Hook up data container (will be passed as the last parameter to the
     // callback handling function).  Can be any pointer type, since it will
     // internally be passed as a void pointer.
@@ -63,19 +87,15 @@ Json::Value JSONFetcher::fetch(std::string &url)
         throw std::runtime_error("Got bad code from CURL");
     }
 
-    if (httpCode == 200)
+    if (!httpData->empty())
     {
-        std::cout << "\nGot successful response from " << url << std::endl;
-
-        // Response looks good - done using Curl now.  Try to parse the results
-        // and print them out.
         Json::Value jsonData;
         Json::Reader jsonReader;
 
         if (jsonReader.parse(*httpData, jsonData))
         {
             httpData.release();
-            return jsonData;
+            return APIResponse(httpCode, std::optional<Json::Value>(jsonData));
         }
         else
         {
@@ -86,11 +106,9 @@ Json::Value JSONFetcher::fetch(std::string &url)
 
             throw std::runtime_error("Failed to Parse JSON");
         }
-    }
-    else
-    {
+    } else {
         httpData.release();
-        std::cout << "Non 200 from " << url << ". Code = " << httpCode << " Curl code " << curl_easy_strerror(code) << std::endl;
-        throw std::runtime_error("Got non 200 Response from URL");
+        return APIResponse(httpCode, std::nullopt);
     }
+
 }
