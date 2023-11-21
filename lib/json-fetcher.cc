@@ -80,6 +80,8 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
     CURLcode code = curl_easy_perform(this->curl);
     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
+    curl_easy_reset(curl);
+
     if (code != CURLE_OK)
     {
         httpData.release();

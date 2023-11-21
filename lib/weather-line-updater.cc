@@ -60,9 +60,7 @@ void WeatherLineUpdater::update()
     {
         return;
     }
-
-    std::cout << "Weather line update" << std::endl;
-
+    
     const auto now = std::chrono::system_clock::now();
     bool screen_rotated = false;
 
