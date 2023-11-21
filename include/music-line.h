@@ -2,15 +2,15 @@
 #define RADIO6_LINE_UPDATER_H
 #include "updateable-screen.h"
 #include "scrolling-line.h"
-#include "json-fetcher.h"
 #include <Magick++.h>
 #include <chrono>
-#include "spotify_client.h"
+#include "spotify-client.h"
+#include "radio6-client.h"
 
 class MusicLine : public UpdateableScreen, ScrollingLine
 {
 public:
-    MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyClient spotifyClient, ScrollingLineSettings settings);
+    MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyClient spotifyClient, Radio6Client radio6Client, ScrollingLineSettings settings);
     void update();
     void render(FrameCanvas *offscreen_canvas);
     std::string *getName();
@@ -18,7 +18,7 @@ public:
 private:
     Magick::Image *getIcon();
     SpotifyClient spotifyClient;
-    JSONFetcher *fetcher;
+    Radio6Client radio6Client;
     std::string radio6_url;
     std::chrono::time_point<std::chrono::system_clock> last_update;
     static const int update_after_seconds = 20;

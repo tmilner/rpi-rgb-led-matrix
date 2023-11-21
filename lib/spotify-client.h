@@ -1,5 +1,5 @@
-#ifndef SPOTIFY_LIB_H
-#define SPOTIFY_LIB_H
+#ifndef SPOTIFY_CLIENT_H
+#define SPOTIFY_CLIENT_H
 
 #include <string>
 #include <chrono>
@@ -10,7 +10,7 @@ class SpotifyClient
 {
 public:
     SpotifyClient(std::string refresh_token, std::string client_id, std::string client_secret);
-
+    ~SpotifyClient()
     struct NowPlaying
     {
     public:
@@ -37,4 +37,4 @@ private:
     JSONFetcher::APIResponse apiQuery(std::string endpoint);
 };
 
-#endif /*SPOTIFY_LIB_H*/
+#endif /*SPOTIFY_CLIENT_H*/

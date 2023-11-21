@@ -13,14 +13,15 @@
 #include "scrolling-line.h"
 #include "img_utils.h"
 #include "screen_state.h"
-#include "radio6-line-updater.h"
+#include "music-line.h"
 #include "weather-line-updater.h"
 #include "scrolling-line-screen.h"
 #include "rotating-box.h"
 #include "screen-menu.h"
 #include "game-of-life.h"
 #include "updateable-screen.h"
-#include "spotify_client.h"
+#include "spotify-client.h"
+#include "radio6-client.h"
 
 #include <string>
 #include <iostream>
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
   const std::string spotify_refresh_token = config["spotify_refresh_token"].as<std::string>();
 
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
-
+  Radio6Client Radio6Client();
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
                                                                                         ScreenLineOption::weather,
                                                                                         weather_api_key);
 
-  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient);
+  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, Radio6Client);
 
   std::cout << "Setting up update thread" << std::endl;
 
