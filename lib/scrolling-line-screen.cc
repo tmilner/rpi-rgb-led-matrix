@@ -5,7 +5,7 @@
 #include "img_utils.h"
 
 ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
-                                         SpotifyClient spotify_client) : image_map{image_map}, line1_settings{settings.speed,
+                                         SpotifyClient spotify_client, Radio6Client radio6_client) : image_map{image_map}, line1_settings{settings.speed,
                                                                                                               0,
                                                                                                               0,
                                                                                                               settings.font,
@@ -21,14 +21,15 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
                                                                          settings{settings},
                                                                          bg_color{settings.bg_color},
                                                                          name{std::string("Scrolling Screen")},
-                                                                         spotify_client(spotify_client)
+                                                                         spotify_client(spotify_client),
+                                                                         radio6_client(radio6_client)
 
 {
     this->image_map = image_map;
     this->is_visible = true;
 
-    MusicLine *radio6LineUpdater = new MusicLine(image_map, spotify_client, line1_settings);
-    this->line1 = radio6LineUpdater;
+    MusicLine *musicLine = new MusicLine(image_map, spotify_client, radio6_client, line1_settings);
+    this->line1 = musicLine;
     WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
     this->line2 = weatherLineUpdater;
 }
@@ -54,9 +55,9 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->spotify_client, this->line1_settings);
+        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->line1_settings);
         delete this->line1;
-        this->line1 = radio6LineUpdater;
+        this->line1 = musicLine;
     }
     else
     {
@@ -69,9 +70,9 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
 {
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *radio6LineUpdater = new MusicLine(this->image_map, this->spotify_client, this->line2_settings);
+        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->line2_settings);
         delete this->line2;
-        this->line2 = radio6LineUpdater;
+        this->line2 = musicLine;
     }
     else
     {
