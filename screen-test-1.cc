@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
                                                                                         ScreenLineOption::weather,
                                                                                         weather_api_key);
 
-  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, Radio6Client);
+  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client);
 
   std::cout << "Setting up update thread" << std::endl;
 
