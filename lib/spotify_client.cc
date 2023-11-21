@@ -48,8 +48,11 @@ JSONFetcher::APIResponse SpotifyClient::apiQuery(std::string endpoint)
         this->refreshAccessToken();
 
     std::string auth_header = "Authorization: Bearer " + this->access_token;
+    std::string accept = "Accept: application/json";
+
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, auth_header.c_str());
+    headers = curl_slist_append(headers, accept.c_str());
 
     std::string url = "https://api.spotify.com/" + endpoint;
     std::cout << "API Query - url = " << url << ", auth_header " << auth_header << std::endl;

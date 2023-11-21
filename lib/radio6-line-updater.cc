@@ -61,6 +61,8 @@ void MusicLine::update()
 
     std::cout << "Checking Spotify" << std::endl;
 
+    bool showSpotify = true;
+
     try
     {
         std::optional<SpotifyClient::NowPlaying> nowPlaying = this->spotifyClient.getNowPlaying();
@@ -76,6 +78,19 @@ void MusicLine::update()
             this->current_line.append(nowPlaying.value().artist).append(" - ").append(nowPlaying.value().track_name);
         }
         else
+        {
+            showSpotify = false;
+        }
+    }
+    catch (std::runtime_error &e)
+    {
+        showSpotify = false;
+        std::cerr << "Exception when updating music line" << e.what() << std::endl;
+    }
+
+    if (!showSpotify)
+    {
+        try
         {
             // TODO move to a client for radio 6 like spotify...
             std::cout << "Fetching radio6 data from " << this->radio6_url << std::endl;
@@ -95,9 +110,9 @@ void MusicLine::update()
             this->current_line.clear();
             this->current_line.append(artist).append(" - ").append(track_name);
         }
-    }
-    catch (std::runtime_error &e)
-    {
-        std::cerr << "Exception when updating music line" << e.what() << std::endl;
+        catch (std::runtime_error &e)
+        {
+            std::cerr << "Exception when updating music line" << e.what() << std::endl;
+        }
     }
 }
