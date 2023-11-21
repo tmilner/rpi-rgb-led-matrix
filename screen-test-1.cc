@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   const std::string spotify_refresh_token = config["spotify_refresh_token"].as<std::string>();
 
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
-  Radio6Client Radio6Client();
+  Radio6Client radio6Client;
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
