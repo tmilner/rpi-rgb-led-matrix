@@ -14,7 +14,7 @@
 #include "img_utils.h"
 #include "screen_state.h"
 #include "music-line.h"
-#include "weather-line-updater.h"
+#include "time-date-weather-line.h"
 #include "scrolling-line-screen.h"
 #include "rotating-box.h"
 #include "screen-menu.h"
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
                                                                                         &state.speed,
                                                                                         letter_spacing,
                                                                                         ScreenLineOption::radio6,
-                                                                                        ScreenLineOption::weather,
+                                                                                        ScreenLineOption::bus,
                                                                                         weather_api_key);
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client);

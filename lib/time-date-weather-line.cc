@@ -1,4 +1,4 @@
-#include "weather-line-updater.h"
+#include "time-date-weather-line.h"
 #include <iostream>
 #include <iomanip>
 #include "json/json.h"
@@ -7,7 +7,7 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key,
+TimeDateWeatherLine::TimeDateWeatherLine(const std::string weather_api_key,
                                        std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings),
                                                                                                                           name{std::string("Weather Line")}
 {
@@ -33,17 +33,17 @@ WeatherLineUpdater::WeatherLineUpdater(const std::string weather_api_key,
     std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
 
-std::string *WeatherLineUpdater::getName()
+std::string *TimeDateWeatherLine::getName()
 {
     return &this->name;
 }
 
-Magick::Image *WeatherLineUpdater::getIcon()
+Magick::Image *TimeDateWeatherLine::getIcon()
 {
     return &(*this->image_map)[this->current_image];
 }
 
-void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
+void TimeDateWeatherLine::render(FrameCanvas *offscreen_canvas)
 {
     if (!is_visible)
     {
@@ -54,7 +54,7 @@ void WeatherLineUpdater::render(FrameCanvas *offscreen_canvas)
     rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
     CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1);
 }
-void WeatherLineUpdater::update()
+void TimeDateWeatherLine::update()
 {
     if (!is_visible)
     {

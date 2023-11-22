@@ -1,6 +1,6 @@
 #include "scrolling-line-screen.h"
 #include "music-line.h"
-#include "weather-line-updater.h"
+#include "time-date-weather-line.h"
 #include "bus-towards-oval-line.h"
 #include <iostream>
 #include "img_utils.h"
@@ -28,11 +28,8 @@ ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *i
 {
     this->image_map = image_map;
     this->is_visible = true;
-
-    MusicLine *musicLine = new MusicLine(image_map, spotify_client, radio6_client, line1_settings);
-    this->line1 = musicLine;
-    WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(settings.weather_api_key, image_map, line2_settings);
-    this->line2 = weatherLineUpdater;
+    this->setLine1(this->settings.line1);
+    this->setLine2(this->settings.line2);
 }
 
 std::string *ScrollingLineScreen::getName()
@@ -68,9 +65,9 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
     }
     else
     {
-        WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(this->settings.weather_api_key, this->image_map, this->line1_settings);
+        TimeDateWeatherLine *TimeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line1_settings);
         delete this->line1;
-        this->line1 = weatherLineUpdater;
+        this->line1 = TimeDateWeatherLine;
     }
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type)
@@ -89,9 +86,9 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
     }
     else
     {
-        WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(this->settings.weather_api_key, this->image_map, this->line2_settings);
+        TimeDateWeatherLine *TimeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line2_settings);
         delete this->line2;
-        this->line2 = weatherLineUpdater;
+        this->line2 = TimeDateWeatherLine;
     }
 }
 void ScrollingLineScreen::update()
