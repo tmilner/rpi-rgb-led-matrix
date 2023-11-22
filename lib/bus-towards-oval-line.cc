@@ -10,7 +10,7 @@ BusTowardsOvalLine::BusTowardsOvalLine(std::map<std::string, Magick::Image> *ima
     this->current_line = "Loading";
     this->url = std::string("https://api.tfl.gov.uk/StopPoint/490014229J/Arrivals");
     this->image_map = image_map;
-    this->image_key = "busicon";
+    this->image_key = "bus";
     this->is_visible = false;
     this->fetcher = new JSONFetcher();
     auto now = std::chrono::system_clock::now();
@@ -65,7 +65,7 @@ void BusTowardsOvalLine::update()
         Json::Value jsonData = fetcher->fetch(this->url);
         std::string busTimes = "";
 
-        for ( int i = 0; i < jsonData.size(); i++)
+        for (int i = 0; i < jsonData.size(); i++)
         {
             Json::Value bus = jsonData[i];
             int timeToStationSeconds = bus["timeToStation"].asInt();

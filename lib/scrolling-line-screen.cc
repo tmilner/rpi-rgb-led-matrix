@@ -1,28 +1,29 @@
 #include "scrolling-line-screen.h"
 #include "music-line.h"
 #include "weather-line-updater.h"
+#include "bus-towards-oval-line.h"
 #include <iostream>
 #include "img_utils.h"
 
 ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
                                          SpotifyClient spotify_client, Radio6Client radio6_client) : image_map{image_map}, line1_settings{settings.speed,
-                                                                                                              0,
-                                                                                                              0,
-                                                                                                              settings.font,
-                                                                                                              settings.color,
-                                                                                                              settings.width,
-                                                                                                              14},
-                                                                         line2_settings{settings.speed,
-                                                                                        settings.height / 2,
-                                                                                        0,
-                                                                                        settings.font,
-                                                                                        settings.color,
-                                                                                        settings.width, 14},
-                                                                         settings{settings},
-                                                                         bg_color{settings.bg_color},
-                                                                         name{std::string("Scrolling Screen")},
-                                                                         spotify_client(spotify_client),
-                                                                         radio6_client(radio6_client)
+                                                                                                                                          0,
+                                                                                                                                          0,
+                                                                                                                                          settings.font,
+                                                                                                                                          settings.color,
+                                                                                                                                          settings.width,
+                                                                                                                                          14},
+                                                                                                     line2_settings{settings.speed,
+                                                                                                                    settings.height / 2,
+                                                                                                                    0,
+                                                                                                                    settings.font,
+                                                                                                                    settings.color,
+                                                                                                                    settings.width, 14},
+                                                                                                     settings{settings},
+                                                                                                     bg_color{settings.bg_color},
+                                                                                                     name{std::string("Scrolling Screen")},
+                                                                                                     spotify_client(spotify_client),
+                                                                                                     radio6_client(radio6_client)
 
 {
     this->image_map = image_map;
@@ -59,6 +60,12 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
         delete this->line1;
         this->line1 = musicLine;
     }
+    else if (type = ScreenLineOption::bus)
+    {
+        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->line1_settings);
+        delete this->line1;
+        this->line1 = busTowardsOvalLine;
+    }
     else
     {
         WeatherLineUpdater *weatherLineUpdater = new WeatherLineUpdater(this->settings.weather_api_key, this->image_map, this->line1_settings);
@@ -73,6 +80,12 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
         MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->radio6_client, this->line2_settings);
         delete this->line2;
         this->line2 = musicLine;
+    }
+    else if (type = ScreenLineOption::bus)
+    {
+        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->line2_settings);
+        delete this->line2;
+        this->line2 = busTowardsOvalLine;
     }
     else
     {

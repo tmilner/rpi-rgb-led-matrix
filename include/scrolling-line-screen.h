@@ -10,7 +10,8 @@
 enum ScreenLineOption
 {
     radio6,
-    weather
+    weather,
+    bus
 };
 
 struct ScrollingLineScreenSettings : ScreenSettings
