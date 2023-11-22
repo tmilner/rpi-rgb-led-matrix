@@ -65,9 +65,9 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
     }
     else
     {
-        TimeDateWeatherLine *TimeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line1_settings);
+        TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line1_settings);
         delete this->line1;
-        this->line1 = TimeDateWeatherLine;
+        this->line1 = timeDateWeatherLine;
     }
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type)
@@ -86,9 +86,9 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
     }
     else
     {
-        TimeDateWeatherLine *TimeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line2_settings);
+        TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(this->settings.weather_api_key, this->image_map, this->line2_settings);
         delete this->line2;
-        this->line2 = TimeDateWeatherLine;
+        this->line2 = timeDateWeatherLine;
     }
 }
 void ScrollingLineScreen::update()

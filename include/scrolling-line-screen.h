@@ -10,7 +10,7 @@
 enum ScreenLineOption
 {
     radio6,
-    weather,
+    timeDateWeather,
     bus
 };
 
