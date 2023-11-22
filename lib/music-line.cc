@@ -5,9 +5,9 @@
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyClient spotifyClient, Radio6Client radio6Client, ScrollingLineSettings settings) : ScrollingLine(settings),
-                                                                                                                                     name{std::string("Radio 6 Line")},
-                                                                                                                                     spotifyClient(spotifyClient),
-                                                                                                                                     radio6Client(radio6Client)
+                                                                                                                                                                name{std::string("Radio 6 Line")},
+                                                                                                                                                                spotifyClient(spotifyClient),
+                                                                                                                                                                radio6Client(radio6Client)
 {
     this->current_line = "Loading";
     this->image_map = image_map;
@@ -40,8 +40,8 @@ void MusicLine::render(FrameCanvas *offscreen_canvas)
     }
     this->renderLine(offscreen_canvas);
     offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
-    rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
     CopyImageToCanvas(this->getIcon(), offscreen_canvas, 1, this->y + 2);
+    rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16, Color(130, 100, 73));
 }
 
 void MusicLine::update()
