@@ -16,10 +16,10 @@ MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map, SpotifyCli
     auto now = std::chrono::system_clock::now();
     this->last_update = now - 5min;
 
-    Magick::Image tmp = (*image_map)[this->image_key];
-    tmp.resize(Magick::Geometry(11, 11));
+    // Magick::Image tmp = (*image_map)[this->image_key];
+    // tmp.resize(Magick::Geometry(11, 11));
 
-    (*this->image_map)[this->image_key] = tmp;
+    // (*this->image_map)[this->image_key] = tmp;
 }
 
 Magick::Image *MusicLine::getIcon()
