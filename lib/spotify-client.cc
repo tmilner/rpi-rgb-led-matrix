@@ -14,6 +14,10 @@ SpotifyClient::SpotifyClient(std::string refresh_token, std::string client_id, s
     this->access_token_expiry = std::chrono::system_clock::now();
 }
 
+SpotifyClient::~SpotifyClient()
+{
+}
+
 std::optional<SpotifyClient::NowPlaying> SpotifyClient::getNowPlaying()
 {
     JSONFetcher::APIResponse response = this->apiQuery("v1/me/player?market=GB");
