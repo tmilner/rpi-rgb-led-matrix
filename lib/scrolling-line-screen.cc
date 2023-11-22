@@ -55,7 +55,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
 
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->line1_settings);
+        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->radio6_client, this->line1_settings);
         delete this->line1;
         this->line1 = musicLine;
     }
@@ -70,7 +70,7 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
 {
     if (type == ScreenLineOption::radio6)
     {
-        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->line2_settings);
+        MusicLine *musicLine = new MusicLine(this->image_map, this->spotify_client, this->radio6_client, this->line2_settings);
         delete this->line2;
         this->line2 = musicLine;
     }
