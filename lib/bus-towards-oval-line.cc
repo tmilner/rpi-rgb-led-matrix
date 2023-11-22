@@ -4,22 +4,16 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-BusTowardsOvalLine::BusTowardsOvalLine(std::map<std::string, Magick::Image> *image_map, ScrollingLineSettings settings) : ScrollingLine(settings),
-                                                                                                                          name{std::string("Buses Towards Oval")}
+BusTowardsOvalLine::BusTowardsOvalLine(std::map<std::string, Magick::Image> *image_map, TflClient tflClient, ScrollingLineSettings settings) : ScrollingLine(settings),
+                                                                                                                                               tflClient(tflClient),
+                                                                                                                                               name{std::string("Buses Towards Oval")}
 {
     this->current_line = "Loading";
-    this->url = std::string("https://api.tfl.gov.uk/StopPoint/490014229J/Arrivals");
     this->image_map = image_map;
     this->image_key = "bus";
     this->is_visible = true;
-    this->fetcher = new JSONFetcher();
     auto now = std::chrono::system_clock::now();
     this->last_update = now - 5min;
-
-    Magick::Image tmp = (*image_map)[this->image_key];
-    tmp.resize(Magick::Geometry(11, 11));
-
-    (*this->image_map)[this->image_key] = tmp;
 }
 
 Magick::Image *BusTowardsOvalLine::getIcon()
@@ -58,26 +52,14 @@ void BusTowardsOvalLine::update()
         return;
     }
 
-    std::cout << "Fetching bus towards oval data from " << this->url << std::endl;
-
     try
     {
-        Json::Value jsonData = fetcher->fetch(this->url);
+        std::vector<TflClient::Arrival> arrivals = this->tflClient.getButArrivals("490014229J");
         std::string busTimes = "";
 
-        for (int i = 0; i < jsonData.size(); i++)
+        for (auto &arrival : arrivals)
         {
-            Json::Value bus = jsonData[i];
-            int timeToStationSeconds = bus["timeToStation"].asInt();
-
-            if (timeToStationSeconds > 60)
-            {
-                busTimes.append(bus["lineName"].asString())
-                    .append(" ")
-                    .append(std::to_string(timeToStationSeconds / 60))
-                    .append("mins")
-                    .append(" - ");
-            }
+            busTimes.append(arrival.getDisplayString()).append("-");
         }
 
         std::cout << "\t Next busses: " << busTimes << std::endl;

@@ -18,6 +18,7 @@
 #include "scrolling-line-screen.h"
 #include "rotating-box.h"
 #include "screen-menu.h"
+#include "tfl-client.h"
 #include "game-of-life.h"
 #include "updateable-screen.h"
 #include "spotify-client.h"
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
 
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
+  TflClient tflClient;
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
@@ -213,7 +215,7 @@ int main(int argc, char *argv[])
                                                                                         ScreenLineOption::bus,
                                                                                         weather_api_key);
 
-  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client);
+  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client, tflClient);
 
   std::cout << "Setting up update thread" << std::endl;
 

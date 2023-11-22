@@ -1,41 +1,55 @@
-#include "spotify-client.h"
+#include "tfl-client.h"
 
 #include <iostream>
+#include <algorithm>
+#include <string>
 
-SpotifyClient::SpotifyClient(std::string refresh_token, std::string client_id, std::string client_secret)
+TflClient::TflClient()
 {
     this->fetcher = new JSONFetcher();
-
-    this->client_id = client_id;
-    this->client_secret = client_secret;
-
-    this->refresh_token = refresh_token;
-    this->access_token = "";
-    this->access_token_expiry = std::chrono::system_clock::now();
 }
 
-SpotifyClient::~SpotifyClient()
+TflClient::~TflClient()
 {
 }
 
-std::optional<SpotifyClient::NowPlaying> SpotifyClient::getNowPlaying()
+bool compareArrivalTimes(const TflClient::Arrival &a, const TflClient::Arrival &b)
 {
-    JSONFetcher::APIResponse response = this->apiQuery("v1/me/player?market=GB");
+    return a.secondsUntilArrival < b.secondsUntilArrival;
+}
+
+std::string TflClient::Arrival::getDisplayString()
+{
+    if (this->secondsUntilArrival < 60)
+    {
+        return this->busName.append(": ").append(std::to_string(this->secondsUntilArrival)).append("seconds");
+    }
+    else
+    {
+        int arrivalInMins = this->secondsUntilArrival / 60;
+        return this->busName.append(": ").append(std::to_string(arrivalInMins)).append("mins");
+    }
+}
+
+std::vector<TflClient::Arrival> TflClient::getButArrivals(std::string busCode)
+{
+    JSONFetcher::APIResponse response = this->fetcher->fetch("GET", NULL, "https://api.tfl.gov.uk/StopPoint/" + busCode + "/Arrivals", "");
     if (response.code == 200 && response.body.has_value())
     {
-        SpotifyClient::NowPlaying nowPlaying;
-        auto item = response.body.value()["item"];
+        std::vector<TflClient::Arrival> arrivals = std::vector<TflClient::Arrival>();
+        Json::Value jsonData = response.body.value();
 
-        nowPlaying.album = item["album"]["name"].asString();
-        nowPlaying.artist = item["artists"][0]["name"].asString();
-        nowPlaying.track_name = item["name"].asString();
-        nowPlaying.is_playing = response.body.value()["is_playing"].asBool();
+        for (int i = 0; i < jsonData.size(); i++)
+        {
+            Json::Value bus = jsonData[i];
+            int timeToStationSeconds = bus["timeToStation"].asInt();
 
-        return std::optional<SpotifyClient::NowPlaying>(nowPlaying);
-    }
-    else if (response.code == 204)
-    {
-        return std::nullopt;
+            TflClient::Arrival arrival(bus["lineName"].asString(), bus["timeToStation"].asInt());
+            arrivals.push_back(arrival);
+        }
+
+        std::sort(arrivals.begin(), arrivals.end(), compareArrivalTimes);
+        return arrivals;
     }
     else
     {
@@ -43,7 +57,7 @@ std::optional<SpotifyClient::NowPlaying> SpotifyClient::getNowPlaying()
     }
 }
 
-JSONFetcher::APIResponse SpotifyClient::apiQuery(std::string endpoint)
+JSONFetcher::APIResponse TflClient::apiQuery(std::string endpoint)
 {
     auto now = std::chrono::system_clock::now();
 
@@ -64,7 +78,7 @@ JSONFetcher::APIResponse SpotifyClient::apiQuery(std::string endpoint)
     return this->fetcher->fetch("GET", headers, url, "");
 }
 
-void SpotifyClient::refreshAccessToken()
+void TflClient::refreshAccessToken()
 {
     std::string postData = "grant_type=refresh_token&refresh_token=" + this->refresh_token + "&client_id=" + this->client_id + "&client_secret=" + this->client_secret;
     std::string content_type_header = "Content-Type: application/x-www-form-urlencoded";

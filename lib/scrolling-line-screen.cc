@@ -6,24 +6,25 @@
 #include "img_utils.h"
 
 ScrollingLineScreen::ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
-                                         SpotifyClient spotify_client, Radio6Client radio6_client) : image_map{image_map}, line1_settings{settings.speed,
-                                                                                                                                          0,
+                                         SpotifyClient spotify_client, Radio6Client radio6_client, TflClient tfl_client) : image_map{image_map}, line1_settings{settings.speed,
+                                                                                                                                                                0,
+                                                                                                                                                                0,
+                                                                                                                                                                settings.font,
+                                                                                                                                                                settings.color,
+                                                                                                                                                                settings.width,
+                                                                                                                                                                14},
+                                                                                                                           line2_settings{settings.speed,
+                                                                                                                                          settings.height / 2,
                                                                                                                                           0,
                                                                                                                                           settings.font,
                                                                                                                                           settings.color,
-                                                                                                                                          settings.width,
-                                                                                                                                          14},
-                                                                                                     line2_settings{settings.speed,
-                                                                                                                    settings.height / 2,
-                                                                                                                    0,
-                                                                                                                    settings.font,
-                                                                                                                    settings.color,
-                                                                                                                    settings.width, 14},
-                                                                                                     settings{settings},
-                                                                                                     bg_color{settings.bg_color},
-                                                                                                     name{std::string("Scrolling Screen")},
-                                                                                                     spotify_client(spotify_client),
-                                                                                                     radio6_client(radio6_client)
+                                                                                                                                          settings.width, 14},
+                                                                                                                           settings{settings},
+                                                                                                                           bg_color{settings.bg_color},
+                                                                                                                           name{std::string("Scrolling Screen")},
+                                                                                                                           spotify_client(spotify_client),
+                                                                                                                           radio6_client(radio6_client),
+                                                                                                                           tfl_client(tfl_client)
 
 {
     this->image_map = image_map;
@@ -59,7 +60,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
     }
     else if (type = ScreenLineOption::bus)
     {
-        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->line1_settings);
+        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->tfl_client, this->line1_settings);
         delete this->line1;
         this->line1 = busTowardsOvalLine;
     }
@@ -80,7 +81,7 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
     }
     else if (type = ScreenLineOption::bus)
     {
-        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->line2_settings);
+        BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->tfl_client, this->line2_settings);
         delete this->line2;
         this->line2 = busTowardsOvalLine;
     }

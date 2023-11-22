@@ -6,6 +6,7 @@
 #include <Magick++.h>
 #include "spotify-client.h"
 #include "radio6-client.h"
+#include "tfl-client.h"
 
 enum ScreenLineOption
 {
@@ -53,7 +54,7 @@ class ScrollingLineScreen : public UpdateableScreen
 {
 public:
     ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map, ScrollingLineScreenSettings settings,
-                        SpotifyClient spotify_client, Radio6Client radio6_client);
+                        SpotifyClient spotify_client, Radio6Client radio6_client, TflClient tfl_client);
     void update();
     void render(FrameCanvas *offscreen_canvas);
     void setLine1(ScreenLineOption type);
@@ -64,6 +65,7 @@ private:
     ScrollingLineScreenSettings settings;
     SpotifyClient spotify_client;
     Radio6Client radio6_client;
+    TflClient tfl_client;
     rgb_matrix::Color bg_color;
     std::string name;
     std::map<std::string, Magick::Image> *image_map{};
