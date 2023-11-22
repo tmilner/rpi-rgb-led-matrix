@@ -11,7 +11,7 @@ BusTowardsOvalLine::BusTowardsOvalLine(std::map<std::string, Magick::Image> *ima
     this->url = std::string("https://api.tfl.gov.uk/StopPoint/490014229J/Arrivals");
     this->image_map = image_map;
     this->image_key = "bus";
-    this->is_visible = false;
+    this->is_visible = true;
     this->fetcher = new JSONFetcher();
     auto now = std::chrono::system_clock::now();
     this->last_update = now - 5min;
