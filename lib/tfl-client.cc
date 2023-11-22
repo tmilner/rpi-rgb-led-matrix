@@ -27,7 +27,7 @@ std::string TflClient::Arrival::getDisplayString()
     else
     {
         int arrivalInMins = this->secondsUntilArrival / 60;
-        return this->busName.append(": ").append(std::to_string(arrivalInMins)).append("mins");
+        return this->busName.append(":").append(std::to_string(arrivalInMins)).append("mins");
     }
 }
 

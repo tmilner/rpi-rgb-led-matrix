@@ -59,7 +59,7 @@ void BusTowardsOvalLine::update()
 
         for (auto &arrival : arrivals)
         {
-            busTimes.append(arrival.getDisplayString()).append("-");
+            busTimes.append(arrival.getDisplayString()).append(", ");
         }
 
         std::cout << "\t Next busses: " << busTimes << std::endl;
