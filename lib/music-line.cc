@@ -94,7 +94,7 @@ void MusicLine::update()
             // TODO move to a client for radio 6 like spotify...
             std::cout << "Fetching radio6 data from " << this->radio6_url << std::endl;
 
-            Radio6Client::NowPlaying nowPlaying = this->radio6Client->getNowPlaying();
+            Radio6Client::NowPlaying nowPlaying = this->radio6Client.getNowPlaying();
 
             this->last_update = now;
             this->image_key = "radio6icon";
