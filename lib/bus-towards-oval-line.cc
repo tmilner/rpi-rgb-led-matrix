@@ -59,7 +59,7 @@ void BusTowardsOvalLine::update()
 
         for (auto &arrival : arrivals)
         {
-            if (arrival.secondsUntilArrival < (20*60)) 
+            if (arrival.secondsUntilArrival < (20*60) && arrival.secondsUntilArrival > 30) 
             {
                 busTimes.append(arrival.getDisplayString()).append(", ");
             }

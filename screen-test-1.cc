@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
                                                                                         &state.speed,
                                                                                         letter_spacing,
                                                                                         ScreenLineOption::radio6,
-                                                                                        ScreenLineOption::bus,
+                                                                                        ScreenLineOption::timeDateWeather,
                                                                                         weather_api_key);
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client, tflClient);
