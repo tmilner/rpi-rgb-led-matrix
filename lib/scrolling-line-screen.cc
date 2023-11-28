@@ -58,7 +58,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type)
         delete this->line1;
         this->line1 = musicLine;
     }
-    else if (type = ScreenLineOption::bus)
+    else if (type == ScreenLineOption::bus)
     {
         BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->tfl_client, this->line1_settings);
         delete this->line1;
@@ -79,7 +79,7 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type)
         delete this->line2;
         this->line2 = musicLine;
     }
-    else if (type = ScreenLineOption::bus)
+    else if (type == ScreenLineOption::bus)
     {
         BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(this->image_map, this->tfl_client, this->line2_settings);
         delete this->line2;
