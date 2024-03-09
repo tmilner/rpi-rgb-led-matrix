@@ -29,12 +29,15 @@
 #include <chrono>
 #include <thread>
 #include <ctime>
+#include <cstring>
+#include <cctype>
 #include <filesystem>
 #include <stdexcept>
 #include <iomanip>
 #include <sstream>
-
+#include <cstdlib>
 #include <list>
+
 #include <cppgpio.hpp>
 #include <yaml-cpp/yaml.h>
 #include <getopt.h>
@@ -45,12 +48,15 @@
 #include <unistd.h>
 #include <json/json.h>
 
+#include "mqtt/async_client.h"
 #include <Magick++.h>
 #include <magick/image.h>
 
-namespace fs = std::filesystem;
+namespace fs = filesystem;
 
 using namespace rgb_matrix;
+using namespace std;
+
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo)
@@ -58,18 +64,24 @@ static void InterruptHandler(int signo)
   interrupt_received = true;
 }
 
-using namespace std::literals::chrono_literals;
-void updateLines(std::vector<UpdateableScreen *> screens_to_update)
+using namespace literals::chrono_literals;
+void updateLines(vector<UpdateableScreen *> screens_to_update)
 {
   while (true)
   {
-    for (std::vector<UpdateableScreen *>::iterator screen = screens_to_update.begin(); screen != screens_to_update.end(); screen++)
+    for (vector<UpdateableScreen *>::iterator screen = screens_to_update.begin(); screen != screens_to_update.end(); screen++)
     {
       (*screen)->update();
     }
     usleep(2 * 1000 * 1000);
   }
 }
+
+const string SERVER_ADDRESS	{ "mqtt://localhost:1883" };
+const string CLIENT_ID		{ "paho_cpp_async_consume" };
+const string TOPIC 			{ "hello" };
+
+const int  QOS = 1;
 
 int main(int argc, char *argv[])
 {
@@ -128,14 +140,14 @@ int main(int argc, char *argv[])
     }
   }
 
-  const std::string base_path(base_path_c);
+  const string base_path(base_path_c);
 
   // Weather API Key
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
-  const std::string weather_api_key = config["weather_api_key"].as<std::string>();
-  const std::string spotify_client_id = config["spotify_client_id"].as<std::string>();
-  const std::string spotify_client_secret = config["spotify_client_secret"].as<std::string>();
-  const std::string spotify_refresh_token = config["spotify_refresh_token"].as<std::string>();
+  const string weather_api_key = config["weather_api_key"].as<string>();
+  const string spotify_client_id = config["spotify_client_id"].as<string>();
+  const string spotify_client_secret = config["spotify_client_secret"].as<string>();
+  const string spotify_refresh_token = config["spotify_refresh_token"].as<string>();
 
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
@@ -143,8 +155,8 @@ int main(int argc, char *argv[])
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
-  const std::string bdf_8x13_font_path(base_path + "/fonts/8x13.bdf");
-  const std::string bdf_5x7_font_path(base_path + "/fonts/5x7.bdf");
+  const string bdf_8x13_font_path(base_path + "/fonts/8x13.bdf");
+  const string bdf_5x7_font_path(base_path + "/fonts/5x7.bdf");
 
   rgb_matrix::Font main_font;
   if (!main_font.LoadFont(bdf_8x13_font_path.c_str()))
@@ -170,9 +182,9 @@ int main(int argc, char *argv[])
                        "Loading", letter_spacing);
   offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
 
-  const std::string image_path("/img");
+  const string image_path("/img");
 
-  for (auto const &dir_entry : std::filesystem::directory_iterator{base_path + image_path})
+  for (auto const &dir_entry : filesystem::directory_iterator{base_path + image_path})
   {
     if (dir_entry.path().extension() == ".png")
     {
@@ -181,11 +193,11 @@ int main(int argc, char *argv[])
           13,
           13);
 
-      std::cout << "Loading image: " << dir_entry.path() << std::endl;
+      cout << "Loading image: " << dir_entry.path() << endl;
 
       if (image.size() == 0)
       {
-        std::cout << "FAILED TO LOAD IMAGE" << dir_entry.path() << std::endl;
+        cout << "FAILED TO LOAD IMAGE" << dir_entry.path() << endl;
       }
       else
       {
@@ -194,15 +206,15 @@ int main(int argc, char *argv[])
     }
     else
     {
-      std::cout << "Found a non PNG file: " << dir_entry.path() << ", extension is: " << dir_entry.path().extension() << std::endl;
+      cout << "Found a non PNG file: " << dir_entry.path() << ", extension is: " << dir_entry.path().extension() << endl;
     }
   }
 
-  std::cout << "Images loaded: " << std::endl;
+  cout << "Images loaded: " << endl;
   for (const auto &[key, value] : state.image_map)
-    std::cout << '[' << key << "] = " << value.constImageInfo() << std::endl;
+    cout << '[' << key << "] = " << value.constImageInfo() << endl;
 
-  std::string current_image = "01d";
+  string current_image = "01d";
 
   ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
                                                                                         defaults.rows,
@@ -217,7 +229,7 @@ int main(int argc, char *argv[])
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client, tflClient);
 
-  std::cout << "Setting up update thread" << std::endl;
+  cout << "Setting up update thread" << endl;
 
   GameOfLfeScreen *game_of_life_screen = new GameOfLfeScreen(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
@@ -225,18 +237,18 @@ int main(int argc, char *argv[])
   RotatingBox *rotating_box = new RotatingBox(offscreen_canvas);
   rotating_box->set_hidden();
 
-  std::vector<Screen *> screens_to_render;
+  vector<Screen *> screens_to_render;
 
   screens_to_render.push_back(srollingTwoLineScreen);
   screens_to_render.push_back(game_of_life_screen);
   screens_to_render.push_back(rotating_box);
 
-  std::vector<UpdateableScreen *> screens_to_update;
+  vector<UpdateableScreen *> screens_to_update;
 
   screens_to_update.push_back(srollingTwoLineScreen);
   screens_to_update.push_back(game_of_life_screen);
 
-  std::thread updateThread(updateLines, screens_to_update);
+  thread updateThread(updateLines, screens_to_update);
 
   ScreenMenu menu = ScreenMenu(
       letter_spacing,
@@ -255,7 +267,7 @@ int main(int argc, char *argv[])
     offscreen_canvas->SetBrightness(state.current_brightness);
     offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-    for (std::vector<Screen *>::iterator screen = screens_to_render.begin(); screen != screens_to_render.end(); screen++)
+    for (vector<Screen *>::iterator screen = screens_to_render.begin(); screen != screens_to_render.end(); screen++)
     {
       (*screen)->render(offscreen_canvas);
     }

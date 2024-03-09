@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/tmilner/git/rpi-rgb-led-matrix/build/build/Release/generators/CMakePresets.json"
+    ]
+}
