@@ -23,6 +23,7 @@
 #include "updateable-screen.h"
 #include "spotify-client.h"
 #include "radio6-client.h"
+#include "mqtt-client.h"
 
 #include <string>
 #include <iostream>
@@ -48,11 +49,10 @@
 #include <unistd.h>
 #include <json/json.h>
 
-#include "mqtt/async_client.h"
 #include <Magick++.h>
 #include <magick/image.h>
 
-namespace fs = filesystem;
+namespace fs = std::filesystem;
 
 using namespace rgb_matrix;
 using namespace std;
@@ -76,12 +76,6 @@ void updateLines(vector<UpdateableScreen *> screens_to_update)
     usleep(2 * 1000 * 1000);
   }
 }
-
-const string SERVER_ADDRESS	{ "mqtt://localhost:1883" };
-const string CLIENT_ID		{ "paho_cpp_async_consume" };
-const string TOPIC 			{ "hello" };
-
-const int  QOS = 1;
 
 int main(int argc, char *argv[])
 {
@@ -142,13 +136,29 @@ int main(int argc, char *argv[])
 
   const string base_path(base_path_c);
 
-  // Weather API Key
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
+
   const string weather_api_key = config["weather_api_key"].as<string>();
+
   const string spotify_client_id = config["spotify_client_id"].as<string>();
   const string spotify_client_secret = config["spotify_client_secret"].as<string>();
   const string spotify_refresh_token = config["spotify_refresh_token"].as<string>();
 
+  const string mqtt_server = config["mqtt_server"].as<string>();
+  const string mqtt_client_id = config["mqtt_client_id"].as<string>();
+  const string light_state_topic = config["light_state_topic"].as<string>();
+  const string light_command_topic = config["light_command_topic"].as<string>();
+  const string light_brightness_state_topic = config["light_brightness_state_topic"].as<string>();
+  const string light_brightness_command_topic = config["light_brightness_command_topic"].as<string>();
+
+
+  vector<string> topics;
+  topics.push_back(light_state_topic);
+  topics.push_back(light_command_topic);
+  topics.push_back(light_brightness_state_topic);
+  topics.push_back(light_brightness_command_topic);
+
+  MQTTClient mqttClient(mqtt_server, mqtt_client_id, topics);
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;
