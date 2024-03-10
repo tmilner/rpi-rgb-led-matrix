@@ -194,9 +194,9 @@ int main(int argc, char *argv[])
   const string light_brightness_command_topic = config["light_brightness_command_topic"].as<string>();
 
   vector<string> topics;
-  topics.push_back(light_state_topic);
+  // topics.push_back(light_state_topic);
   topics.push_back(light_command_topic);
-  topics.push_back(light_brightness_state_topic);
+  // topics.push_back(light_brightness_state_topic);
   topics.push_back(light_brightness_command_topic);
 
   MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name, mqtt_password, topics);
