@@ -76,15 +76,12 @@ void updateLines(vector<UpdateableScreen *> screens_to_update)
   }
 }
 
-void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_state_topic, std::string light_brightness_command_topic)
+void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_command_topic, std::string light_brightness_state_topic)
 {
   while (true)
   {
     try
     {
-
-      std::cout << "Attempt to consume message!" << endl;
-
       auto message = mqttClient->consume_message();
       if (!message)
       {
