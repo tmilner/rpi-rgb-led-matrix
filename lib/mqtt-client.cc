@@ -80,5 +80,5 @@ mqtt::message::const_ptr_t MQTTClient::consume_message()
 
 void MQTTClient::publish_message(mqtt::message_ptr message)
 {
-    cli.publish(message)->wait_for(TIMEOUT);
+    cli.publish(message)->wait();
 }

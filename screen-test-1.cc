@@ -191,17 +191,6 @@ int main(int argc, char *argv[])
   Radio6Client radio6Client;
   TflClient tflClient;
 
-  mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
-  onMessage->set_qos(QOS);
-  onMessage->set_retained(true);
-  mqttClient.publish_message(onMessage);
-  mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
-  brightnessMessage->set_qos(QOS);
-  brightnessMessage->set_retained(true);
-  mqttClient.publish_message(brightnessMessage);
-
-  thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
-
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
@@ -265,6 +254,18 @@ int main(int argc, char *argv[])
     cout << '[' << key << "] = " << value.constImageInfo() << endl;
 
   string current_image = "01d";
+
+  mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
+  onMessage->set_qos(QOS);
+  onMessage->set_retained(true);
+  mqttClient.publish_message(onMessage);
+  mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
+  brightnessMessage->set_qos(QOS);
+  brightnessMessage->set_retained(true);
+  mqttClient.publish_message(brightnessMessage);
+
+  thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
+
 
   ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
                                                                                         defaults.rows,
