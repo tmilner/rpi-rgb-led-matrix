@@ -145,6 +145,8 @@ int main(int argc, char *argv[])
   const string spotify_refresh_token = config["spotify_refresh_token"].as<string>();
 
   const string mqtt_server = config["mqtt_server"].as<string>();
+  const string mqtt_user_name = config["mqtt_user_name"].as<string>();
+  const string mqtt_password = config["mqtt_password"].as<string>();
   const string mqtt_client_id = config["mqtt_client_id"].as<string>();
   const string light_state_topic = config["light_state_topic"].as<string>();
   const string light_command_topic = config["light_command_topic"].as<string>();
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
   topics.push_back(light_brightness_state_topic);
   topics.push_back(light_brightness_command_topic);
 
-  MQTTClient mqttClient(mqtt_server, mqtt_client_id, topics);
+  MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name, mqtt_password, topics);
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;

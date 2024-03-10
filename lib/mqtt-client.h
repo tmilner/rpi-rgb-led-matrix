@@ -11,7 +11,7 @@ const int QOS = 1;
 class MQTTClient
 {
 public:
-    MQTTClient(std::string server_address, std::string client_id, std::vector<std::string> topics);
+    MQTTClient(std::string server_address, std::string client_id, std::string mqtt_user_name, std::string mqtt_password, std::vector<std::string> topics);
     ~MQTTClient();
     mqtt::message::const_ptr_t consume_message();
 private:

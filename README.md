@@ -1,3 +1,7 @@
+This project is a specificly a custom LED Matrix display with Spotify, Radio 6, Weather and Bus times. Its based on the _FANTASTIC_ RPI RGB LED Matric library. 
+
+Below is the README from that library (from which this is a fork, with customisations added) verbatum. 
+
 Controlling RGB LED display with Raspberry Pi GPIO
 ==================================================
 

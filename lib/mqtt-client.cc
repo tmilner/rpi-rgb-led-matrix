@@ -9,10 +9,12 @@
 
 using namespace std;
 
-MQTTClient::MQTTClient(string server_address, string client_id, vector<string> topics) : cli{mqtt::async_client(server_address, client_id)}, topics{topics}
+MQTTClient::MQTTClient(string server_address, string client_id, std::string mqtt_user_name, std::string mqtt_password, vector<string> topics) : cli{mqtt::async_client(server_address, client_id)}, topics{topics}
 {
     auto connOpts = mqtt::connect_options_builder()
 		.clean_session(false)
+        .user_name(mqtt_user_name)
+        .password(mqtt_password)
 		.finalize();
 
     try {
