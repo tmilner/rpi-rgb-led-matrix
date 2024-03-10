@@ -257,13 +257,16 @@ int main(int argc, char *argv[])
 
   cout << "Publishing ON message to MQTT" << endl;
   mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
-  onMessage->set_qos(QOS);
+  cout << "Made Message 1" << endl;
+  onMessage->set_qos(1);
+  cout << "Made Message 2" << endl;
   onMessage->set_retained(true);
+  cout << "Made Message 3" << endl;
   mqttClient.publish_message(onMessage);
 
   cout << "Publishing Brightness message to MQTT" << endl;
   mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
-  brightnessMessage->set_qos(QOS);
+  brightnessMessage->set_qos(1);
   brightnessMessage->set_retained(true);
   mqttClient.publish_message(brightnessMessage);
 
