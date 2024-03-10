@@ -78,10 +78,11 @@ void updateLines(vector<UpdateableScreen *> screens_to_update)
 
 void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_state_topic, std::string light_brightness_command_topic)
 {
-  try
+  while (true)
   {
-    while (true)
+    try
     {
+
       std::cout << "Attempt to consume message!" << endl;
 
       auto message = mqttClient->consume_message();
@@ -107,10 +108,15 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string 
           std::cout << "Brightness updated via MQTT to " << new_brightness << endl;
         }
       }
-      usleep(2 * 1000 * 1000);
     }
-  } catch (const mqtt::exception& exc) {
-    cerr << "Exception on MQTT handler thread" << exc << endl;
+    catch (const mqtt::exception &exc)
+    {
+      cerr << "Exception on MQTT handler thread" << exc << endl;
+    }
+    catch (exception e)
+    {
+      cerr << "generic exception on MQTT handler thread" << endl;
+    }
   }
 }
 
@@ -279,7 +285,7 @@ int main(int argc, char *argv[])
 
   cout << "Done publishing startup MQTT messages" << endl;
 
-  thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
+  // thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
 
   ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
                                                                                         defaults.rows,
