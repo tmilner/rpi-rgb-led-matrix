@@ -78,31 +78,39 @@ void updateLines(vector<UpdateableScreen *> screens_to_update)
 
 void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_state_topic, std::string light_brightness_command_topic)
 {
-  while (true)
+  try
   {
-    auto message = mqttClient->consume_message();
-    if(!message) {
-      cerr << "Failed to consume message!" << endl;
-      break;
-    }
-    cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->to_string() << endl;
-
-    if (message->get_topic() == light_brightness_command_topic)
+    while (true)
     {
-      cout << "Updating brightness!" << message->to_string() << endl;
-      std::string message_contents = message->to_string();
-      int new_brightness = stoi(message_contents);
-      if (new_brightness >= 0 && new_brightness <= 100)
+      std::cout << "Attempt to consume message!" << endl;
+
+      auto message = mqttClient->consume_message();
+      if (!message)
       {
-        state->current_brightness = new_brightness;
-        mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(new_brightness));
-        brightnessMessage->set_qos(QOS);
-        brightnessMessage->set_retained(true);
-        mqttClient->publish_message(brightnessMessage);
-        cout << "Brightness updated via MQTT to " << new_brightness << endl;
+        cerr << "Failed to consume message!" << endl;
+        break;
       }
+      std::cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->to_string() << endl;
+
+      if (message->get_topic() == light_brightness_command_topic)
+      {
+        std::cout << "Updating brightness!" << message->to_string() << endl;
+        std::string message_contents = message->to_string();
+        int new_brightness = stoi(message_contents);
+        if (new_brightness >= 0 && new_brightness <= 100)
+        {
+          state->current_brightness = new_brightness;
+          mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(new_brightness));
+          brightnessMessage->set_qos(QOS);
+          brightnessMessage->set_retained(true);
+          mqttClient->publish_message(brightnessMessage);
+          std::cout << "Brightness updated via MQTT to " << new_brightness << endl;
+        }
+      }
+      usleep(2 * 1000 * 1000);
     }
-    usleep(2 * 1000 * 1000);
+  } catch (const mqtt::exception& exc) {
+    cerr << "Exception on MQTT handler thread" << exc << endl;
   }
 }
 
@@ -272,7 +280,6 @@ int main(int argc, char *argv[])
   cout << "Done publishing startup MQTT messages" << endl;
 
   thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
-
 
   ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
                                                                                         defaults.rows,
