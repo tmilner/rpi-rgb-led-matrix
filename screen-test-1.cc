@@ -57,7 +57,6 @@ namespace fs = std::filesystem;
 using namespace rgb_matrix;
 using namespace std;
 
-
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo)
 {
@@ -74,6 +73,22 @@ void updateLines(vector<UpdateableScreen *> screens_to_update)
       (*screen)->update();
     }
     usleep(2 * 1000 * 1000);
+  }
+}
+
+void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_state_topic, std::string light_brightness_command_topic)
+{
+  while (true)
+  {
+    auto message = mqttClient->consume_message();
+    cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->get_payload() << endl;
+
+    if (message->get_topic() == light_brightness_command_topic)
+    {
+    }
+    else if (message->get_topic() == light_brightness_state_topic)
+    {
+    }
   }
 }
 
@@ -153,7 +168,6 @@ int main(int argc, char *argv[])
   const string light_brightness_state_topic = config["light_brightness_state_topic"].as<string>();
   const string light_brightness_command_topic = config["light_brightness_command_topic"].as<string>();
 
-
   vector<string> topics;
   topics.push_back(light_state_topic);
   topics.push_back(light_command_topic);
@@ -164,6 +178,9 @@ int main(int argc, char *argv[])
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;
+
+  thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
+
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
@@ -261,7 +278,7 @@ int main(int argc, char *argv[])
   screens_to_update.push_back(game_of_life_screen);
 
   thread updateThread(updateLines, screens_to_update);
-
+  
   ScreenMenu menu = ScreenMenu(
       letter_spacing,
       &menu_font,
