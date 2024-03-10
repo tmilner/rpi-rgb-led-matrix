@@ -85,7 +85,7 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string 
       cerr << "Failed to consume message!" << endl;
       break;
     }
-    cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->get_payload() << endl;
+    cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->to_string() << endl;
 
     if (message->get_topic() == light_brightness_command_topic)
     {
@@ -255,14 +255,19 @@ int main(int argc, char *argv[])
 
   string current_image = "01d";
 
+  cout << "Publishing ON message to MQTT" << endl;
   mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
   onMessage->set_qos(QOS);
   onMessage->set_retained(true);
   mqttClient.publish_message(onMessage);
+
+  cout << "Publishing Brightness message to MQTT" << endl;
   mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
   brightnessMessage->set_qos(QOS);
   brightnessMessage->set_retained(true);
   mqttClient.publish_message(brightnessMessage);
+
+  cout << "Done publishing startup MQTT messages" << endl;
 
   thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
 
