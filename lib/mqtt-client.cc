@@ -6,20 +6,41 @@
 #include <cctype>
 #include <thread>
 #include <chrono>
+#include <atomic>
 
 using namespace std;
+
+const auto TIMEOUT = std::chrono::seconds(10);
+class callback : public virtual mqtt::callback
+{
+public:
+	void connection_lost(const string& cause) override {
+		cout << "\nConnection lost" << endl;
+		if (!cause.empty())
+			cout << "\tcause: " << cause << endl;
+	}
+
+	void delivery_complete(mqtt::delivery_token_ptr tok) override {
+		cout << "\tDelivery complete for token: "
+			<< (tok ? tok->get_message_id() : -1) << endl;
+	}
+};
 
 MQTTClient::MQTTClient(string server_address, string client_id, std::string mqtt_user_name, std::string mqtt_password, vector<string> topics) : cli{mqtt::async_client(server_address, client_id)}, topics{topics}
 {
     auto connOpts = mqtt::connect_options_builder()
-		.clean_session(false)
+		.clean_session(true)
         .user_name(mqtt_user_name)
         .password(mqtt_password)
 		.finalize();
 
+
     try {
         cli.start_consuming();
-
+	    
+        callback cb;
+	    cli.set_callback(cb);
+        
         cout << "Connecting to MQTT Server at " << server_address << flush;
         auto tok = cli.connect(connOpts);
 
@@ -55,4 +76,9 @@ MQTTClient::~MQTTClient()
 mqtt::message::const_ptr_t MQTTClient::consume_message()
 {
     return cli.consume_message();
+}
+
+void MQTTClient::publish_message(mqtt::message_ptr message)
+{
+    cli.publish(message)->wait_for(TIMEOUT);
 }

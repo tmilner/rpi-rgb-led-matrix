@@ -81,13 +81,25 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string 
   while (true)
   {
     auto message = mqttClient->consume_message();
+    if(!message) {
+      cerr << "Failed to consume message!" << endl;
+      break;
+    }
     cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->get_payload() << endl;
 
     if (message->get_topic() == light_brightness_command_topic)
     {
-    }
-    else if (message->get_topic() == light_brightness_state_topic)
-    {
+      std::string message_contents = message->to_string();
+      int new_brightness = stoi(message_contents);
+      if (new_brightness >= 0 && new_brightness <= 100)
+      {
+        state->current_brightness = new_brightness;
+        mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(new_brightness));
+        brightnessMessage->set_qos(QOS);
+        brightnessMessage->set_retained(true);
+        mqttClient->publish_message(brightnessMessage);
+        cout << "Brightness updated via MQTT to " << new_brightness << endl;
+      }
     }
   }
 }
@@ -178,6 +190,15 @@ int main(int argc, char *argv[])
   SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;
+
+  mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
+  onMessage->set_qos(QOS);
+  onMessage->set_retained(true);
+  mqttClient.publish_message(onMessage);
+  mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
+  brightnessMessage->set_qos(QOS);
+  brightnessMessage->set_retained(true);
+  mqttClient.publish_message(brightnessMessage);
 
   thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
 
@@ -278,7 +299,7 @@ int main(int argc, char *argv[])
   screens_to_update.push_back(game_of_life_screen);
 
   thread updateThread(updateLines, screens_to_update);
-  
+
   ScreenMenu menu = ScreenMenu(
       letter_spacing,
       &menu_font,
