@@ -89,6 +89,7 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string 
 
     if (message->get_topic() == light_brightness_command_topic)
     {
+      cout << "Updating brightness!" << message->to_string() << endl;
       std::string message_contents = message->to_string();
       int new_brightness = stoi(message_contents);
       if (new_brightness >= 0 && new_brightness <= 100)
@@ -101,6 +102,7 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string 
         cout << "Brightness updated via MQTT to " << new_brightness << endl;
       }
     }
+    usleep(2 * 1000 * 1000);
   }
 }
 
@@ -257,11 +259,8 @@ int main(int argc, char *argv[])
 
   cout << "Publishing ON message to MQTT" << endl;
   mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
-  cout << "Made Message 1" << endl;
   onMessage->set_qos(1);
-  cout << "Made Message 2" << endl;
   onMessage->set_retained(true);
-  cout << "Made Message 3" << endl;
   mqttClient.publish_message(onMessage);
 
   cout << "Publishing Brightness message to MQTT" << endl;
