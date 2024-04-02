@@ -318,28 +318,27 @@ int main(int argc, char *argv[]) {
 
   offscreen_canvas->Clear();
 
-  int brightness = state.current_brightness;
-
   while (!interrupt_received) {
     if (state.screen_on) {
-      brightness = state.current_brightness;
-    } else
-      brightness = 0;
+      offscreen_canvas->SetBrightness(state.current_brightness);
+      offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-    offscreen_canvas->SetBrightness(brightness);
-    offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
+      for (vector<Screen *>::iterator screen = screens_to_render.begin();
+           screen != screens_to_render.end(); screen++) {
+        (*screen)->render(offscreen_canvas);
+      }
 
-    for (vector<Screen *>::iterator screen = screens_to_render.begin();
-         screen != screens_to_render.end(); screen++) {
-      (*screen)->render(offscreen_canvas);
-    }
-
-    menu.render(offscreen_canvas);
-    offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-    if (state.speed == 0) {
-      usleep(1000000);
+      menu.render(offscreen_canvas);
+      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
+      if (state.speed == 0) {
+        usleep(1000000);
+      } else {
+        usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
+      }
     } else {
-      usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
+      offscreen_canvas->SetBrightness(state.current_brightness);
+      offscreen_canvas->Fill(0, 0, 0);
+      usleep(1000000000);
     }
   }
 
