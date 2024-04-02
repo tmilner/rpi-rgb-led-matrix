@@ -327,18 +327,16 @@ int main(int argc, char *argv[]) {
            screen != screens_to_render.end(); screen++) {
         (*screen)->render(offscreen_canvas);
       }
-
-      menu.render(offscreen_canvas);
-      offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-      if (state.speed == 0) {
-        usleep(1000000);
-      } else {
-        usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
-      }
     } else {
       offscreen_canvas->SetBrightness(state.current_brightness);
       offscreen_canvas->Fill(0, 0, 0);
-      usleep(1000000000);
+    }
+    menu.render(offscreen_canvas);
+    offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
+    if (state.speed == 0) {
+      usleep(1000000);
+    } else {
+      usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
     }
   }
 
