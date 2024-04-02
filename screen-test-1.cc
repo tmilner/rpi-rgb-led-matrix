@@ -1,4 +1,4 @@
-// -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
+// -*- mode: c++; c-basic-offset: 2; indent-t
 // Small example how to scroll text.
 //
 // This code is public domain
@@ -7,118 +7,118 @@
 // For a utility with a few more features see
 // ../utils/text-scroller.cc
 
-#include "led-matrix.h"
+#include "game-of-life.h"
 #include "graphics.h"
-#include "json-fetcher.h"
-#include "scrolling-line.h"
 #include "img_utils.h"
-#include "screen_state.h"
-#include "music-line.h"
-#include "time-date-weather-line.h"
-#include "scrolling-line-screen.h"
+#include "led-matrix.h"
+#include "mqtt-client.h"
+#include "radio6-client.h"
 #include "rotating-box.h"
 #include "screen-menu.h"
-#include "tfl-client.h"
-#include "game-of-life.h"
-#include "updateable-screen.h"
+#include "screen_state.h"
+#include "scrolling-line-screen.h"
 #include "spotify-client.h"
-#include "radio6-client.h"
-#include "mqtt-client.h"
+#include "tfl-client.h"
+#include "updateable-screen.h"
 
-#include <string>
 #include <iostream>
-#include <chrono>
-#include <thread>
-#include <ctime>
-#include <cstring>
-#include <cctype>
-#include <filesystem>
-#include <stdexcept>
-#include <iomanip>
-#include <sstream>
+#include <string>
+
 #include <cstdlib>
-#include <list>
+#include <cstring>
+#include <ctime>
+#include <filesystem>
 
 #include <cppgpio.hpp>
-#include <yaml-cpp/yaml.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <json/json.h>
+#include <yaml-cpp/yaml.h>
+// #include <json/json.h>
 
 #include <Magick++.h>
 #include <magick/image.h>
-
-namespace fs = std::filesystem;
 
 using namespace rgb_matrix;
 using namespace std;
 
 volatile bool interrupt_received = false;
-static void InterruptHandler(int signo)
-{
-  interrupt_received = true;
-}
+static void InterruptHandler(int signo) { interrupt_received = true; }
 
 using namespace literals::chrono_literals;
-void updateLines(vector<UpdateableScreen *> screens_to_update)
-{
-  while (true)
-  {
-    for (vector<UpdateableScreen *>::iterator screen = screens_to_update.begin(); screen != screens_to_update.end(); screen++)
-    {
+void updateLines(vector<UpdateableScreen *> screens_to_update) {
+  while (true) {
+    for (vector<UpdateableScreen *>::iterator screen =
+             screens_to_update.begin();
+         screen != screens_to_update.end(); screen++) {
       (*screen)->update();
     }
     usleep(2 * 1000 * 1000);
   }
 }
 
-void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state, std::string light_brightness_command_topic, std::string light_brightness_state_topic)
-{
-  while (true)
-  {
-    try
-    {
+void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
+                        std::string light_brightness_command_topic,
+                        std::string light_brightness_state_topic,
+                        std::string light_state_topic,
+                        std::string light_command_topic) {
+  while (true) {
+    try {
       auto message = mqttClient->consume_message();
-      if (!message)
-      {
+      if (!message) {
         cerr << "Failed to consume message!" << endl;
         break;
       }
-      std::cout << "Recieved message for topic " << message->get_topic() << " with payload " << message->to_string() << endl;
+      std::cout << "Recieved message for topic " << message->get_topic()
+                << " with payload " << message->to_string() << endl;
 
-      if (message->get_topic() == light_brightness_command_topic)
-      {
+      if (message->get_topic() == light_brightness_command_topic) {
         std::cout << "Updating brightness!" << message->to_string() << endl;
         std::string message_contents = message->to_string();
         int new_brightness = stoi(message_contents);
-        if (new_brightness >= 0 && new_brightness <= 100)
-        {
+        if (new_brightness >= 0 && new_brightness <= 100) {
           state->current_brightness = new_brightness;
-          mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(new_brightness));
+          mqtt::message_ptr brightnessMessage = mqtt::make_message(
+              light_brightness_state_topic, to_string(new_brightness));
           brightnessMessage->set_qos(QOS);
           brightnessMessage->set_retained(true);
           mqttClient->publish_message(brightnessMessage);
-          std::cout << "Brightness updated via MQTT to " << new_brightness << endl;
+          std::cout << "Brightness updated via MQTT to " << new_brightness
+                    << endl;
+        }
+      } else if (message->get_topic() == light_command_topic) {
+        std::cout << "Updating state!" << message->to_string() << endl;
+        std::string message_contents = message->to_string();
+        if (message_contents == "ON") {
+          state->screen_on = true;
+          mqtt::message_ptr stateMessage =
+              mqtt::make_message(light_state_topic, "ON");
+          stateMessage->set_qos(QOS);
+          stateMessage->set_retained(true);
+          mqttClient->publish_message(stateMessage);
+          std::cout << "State updated via MQTT to ON" << endl;
+        } else if (message_contents == "OFF") {
+          state->screen_on = false;
+          mqtt::message_ptr stateMessage =
+              mqtt::make_message(light_state_topic, "OFF");
+          stateMessage->set_qos(QOS);
+          stateMessage->set_retained(true);
+          mqttClient->publish_message(stateMessage);
+          std::cout << "State updated via MQTT to OFF" << endl;
         }
       }
-    }
-    catch (const mqtt::exception &exc)
-    {
+    } catch (const mqtt::exception &exc) {
       cerr << "Exception on MQTT handler thread" << exc << endl;
-    }
-    catch (exception e)
-    {
+    } catch (exception e) {
       cerr << "generic exception on MQTT handler thread" << endl;
     }
   }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   ScreenState state;
   state.image_map = {};
   state.current_mode = ScreenMode::scrolling_lines;
@@ -164,10 +164,8 @@ int main(int argc, char *argv[])
   const char *base_path_c = ".";
 
   int opt;
-  while ((opt = getopt(argc, argv, "p:")) != -1)
-  {
-    switch (opt)
-    {
+  while ((opt = getopt(argc, argv, "p:")) != -1) {
+    switch (opt) {
     case 'p':
       base_path_c = strdup(optarg);
       break;
@@ -181,8 +179,10 @@ int main(int argc, char *argv[])
   const string weather_api_key = config["weather_api_key"].as<string>();
 
   const string spotify_client_id = config["spotify_client_id"].as<string>();
-  const string spotify_client_secret = config["spotify_client_secret"].as<string>();
-  const string spotify_refresh_token = config["spotify_refresh_token"].as<string>();
+  const string spotify_client_secret =
+      config["spotify_client_secret"].as<string>();
+  const string spotify_refresh_token =
+      config["spotify_refresh_token"].as<string>();
 
   const string mqtt_server = config["mqtt_server"].as<string>();
   const string mqtt_user_name = config["mqtt_user_name"].as<string>();
@@ -190,8 +190,10 @@ int main(int argc, char *argv[])
   const string mqtt_client_id = config["mqtt_client_id"].as<string>();
   const string light_state_topic = config["light_state_topic"].as<string>();
   const string light_command_topic = config["light_command_topic"].as<string>();
-  const string light_brightness_state_topic = config["light_brightness_state_topic"].as<string>();
-  const string light_brightness_command_topic = config["light_brightness_command_topic"].as<string>();
+  const string light_brightness_state_topic =
+      config["light_brightness_state_topic"].as<string>();
+  const string light_brightness_command_topic =
+      config["light_brightness_command_topic"].as<string>();
 
   vector<string> topics;
   // topics.push_back(light_state_topic);
@@ -199,8 +201,10 @@ int main(int argc, char *argv[])
   // topics.push_back(light_brightness_state_topic);
   topics.push_back(light_brightness_command_topic);
 
-  MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name, mqtt_password, topics);
-  SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id, spotify_client_secret);
+  MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name,
+                        mqtt_password, topics);
+  SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id,
+                              spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;
 
@@ -211,14 +215,12 @@ int main(int argc, char *argv[])
   const string bdf_5x7_font_path(base_path + "/fonts/5x7.bdf");
 
   rgb_matrix::Font main_font;
-  if (!main_font.LoadFont(bdf_8x13_font_path.c_str()))
-  {
+  if (!main_font.LoadFont(bdf_8x13_font_path.c_str())) {
     fprintf(stderr, "Couldn't load font '%s'\n", bdf_8x13_font_path);
     return 1;
   }
   rgb_matrix::Font menu_font;
-  if (!menu_font.LoadFont(bdf_5x7_font_path.c_str()))
-  {
+  if (!menu_font.LoadFont(bdf_5x7_font_path.c_str())) {
     fprintf(stderr, "Couldn't load font '%s'\n", bdf_5x7_font_path);
     return 1;
   }
@@ -228,37 +230,28 @@ int main(int argc, char *argv[])
 
   printf("CTRL-C for exit.\n");
 
-  rgb_matrix::DrawText(offscreen_canvas, main_font,
-                       4, 8 + main_font.baseline(),
-                       color, nullptr,
-                       "Loading", letter_spacing);
+  rgb_matrix::DrawText(offscreen_canvas, main_font, 4, 8 + main_font.baseline(),
+                       color, nullptr, "Loading", letter_spacing);
   offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
 
   const string image_path("/img");
 
-  for (auto const &dir_entry : filesystem::directory_iterator{base_path + image_path})
-  {
-    if (dir_entry.path().extension() == ".png")
-    {
-      ImageVector image = LoadImageAndScaleImage(
-          (dir_entry.path()).c_str(),
-          13,
-          13);
+  for (auto const &dir_entry :
+       filesystem::directory_iterator{base_path + image_path}) {
+    if (dir_entry.path().extension() == ".png") {
+      ImageVector image =
+          LoadImageAndScaleImage((dir_entry.path()).c_str(), 13, 13);
 
       cout << "Loading image: " << dir_entry.path() << endl;
 
-      if (image.size() == 0)
-      {
+      if (image.size() == 0) {
         cout << "FAILED TO LOAD IMAGE" << dir_entry.path() << endl;
-      }
-      else
-      {
+      } else {
         state.image_map[dir_entry.path().stem()] = image[0];
       }
-    }
-    else
-    {
-      cout << "Found a non PNG file: " << dir_entry.path() << ", extension is: " << dir_entry.path().extension() << endl;
+    } else {
+      cout << "Found a non PNG file: " << dir_entry.path()
+           << ", extension is: " << dir_entry.path().extension() << endl;
     }
   }
 
@@ -275,31 +268,32 @@ int main(int argc, char *argv[])
   mqttClient.publish_message(onMessage);
 
   cout << "Publishing Brightness message to MQTT" << endl;
-  mqtt::message_ptr brightnessMessage = mqtt::make_message(light_brightness_state_topic, to_string(state.current_brightness));
+  mqtt::message_ptr brightnessMessage = mqtt::make_message(
+      light_brightness_state_topic, to_string(state.current_brightness));
   brightnessMessage->set_qos(1);
   brightnessMessage->set_retained(true);
   mqttClient.publish_message(brightnessMessage);
 
   cout << "Done publishing startup MQTT messages" << endl;
 
-  thread handleMqttMessagesThread(handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic, light_brightness_state_topic);
+  thread handleMqttMessagesThread(
+      handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic,
+      light_brightness_state_topic, light_state_topic, light_command_topic);
 
-  ScrollingLineScreenSettings scrollingLineScreenSettings = ScrollingLineScreenSettings(defaults.cols,
-                                                                                        defaults.rows,
-                                                                                        &main_font,
-                                                                                        color,
-                                                                                        bg_color,
-                                                                                        &state.speed,
-                                                                                        letter_spacing,
-                                                                                        ScreenLineOption::radio6,
-                                                                                        ScreenLineOption::timeDateWeather,
-                                                                                        weather_api_key);
+  ScrollingLineScreenSettings scrollingLineScreenSettings =
+      ScrollingLineScreenSettings(
+          defaults.cols, defaults.rows, &main_font, color, bg_color,
+          &state.speed, letter_spacing, ScreenLineOption::radio6,
+          ScreenLineOption::timeDateWeather, weather_api_key);
 
-  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings, spotifyClient, radio6Client, tflClient);
+  ScrollingLineScreen *srollingTwoLineScreen =
+      new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings,
+                              spotifyClient, radio6Client, tflClient);
 
   cout << "Setting up update thread" << endl;
 
-  GameOfLfeScreen *game_of_life_screen = new GameOfLfeScreen(offscreen_canvas, 500, true);
+  GameOfLfeScreen *game_of_life_screen =
+      new GameOfLfeScreen(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
 
   RotatingBox *rotating_box = new RotatingBox(offscreen_canvas);
@@ -318,36 +312,33 @@ int main(int argc, char *argv[])
 
   thread updateThread(updateLines, screens_to_update);
 
-  ScreenMenu menu = ScreenMenu(
-      letter_spacing,
-      &menu_font,
-      width,
-      &state,
-      &push_ok,
-      &push_up,
-      &push_down,
-      &screens_to_render);
+  ScreenMenu menu =
+      ScreenMenu(letter_spacing, &menu_font, width, &state, &push_ok, &push_up,
+                 &push_down, &screens_to_render);
 
   offscreen_canvas->Clear();
 
-  while (!interrupt_received)
-  {
-    offscreen_canvas->SetBrightness(state.current_brightness);
+  int brightness = state.current_brightness;
+
+  while (!interrupt_received) {
+    if (state.screen_on) {
+      brightness = state.current_brightness;
+    } else
+      brightness = 0;
+
+    offscreen_canvas->SetBrightness(brightness);
     offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
-    for (vector<Screen *>::iterator screen = screens_to_render.begin(); screen != screens_to_render.end(); screen++)
-    {
+    for (vector<Screen *>::iterator screen = screens_to_render.begin();
+         screen != screens_to_render.end(); screen++) {
       (*screen)->render(offscreen_canvas);
     }
 
     menu.render(offscreen_canvas);
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-    if (state.speed == 0)
-    {
+    if (state.speed == 0) {
       usleep(1000000);
-    }
-    else
-    {
+    } else {
       usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
     }
   }

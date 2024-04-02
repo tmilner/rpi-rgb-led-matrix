@@ -1,0 +1,164 @@
+[
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/screen-test-1.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/screen-test-1.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/screen-test-1.cc",
+  "output": "CMakeFiles/ScreenTest.dir/screen-test-1.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/bdf-font.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/bdf-font.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/bdf-font.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/bdf-font.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/bus-towards-oval-line.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/bus-towards-oval-line.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/bus-towards-oval-line.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/bus-towards-oval-line.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/content-streamer.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/content-streamer.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/content-streamer.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/content-streamer.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/framebuffer.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/framebuffer.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/framebuffer.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/framebuffer.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/game-of-life.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/game-of-life.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/game-of-life.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/game-of-life.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/gpio.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/gpio.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/gpio.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/gpio.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/graphics.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/graphics.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/graphics.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/graphics.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/cc -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -o CMakeFiles/ScreenTest.dir/lib/hardware-mapping.c.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/hardware-mapping.c",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/hardware-mapping.c",
+  "output": "CMakeFiles/ScreenTest.dir/lib/hardware-mapping.c.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/img_utils.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/img_utils.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/img_utils.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/img_utils.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/json-fetcher.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/json-fetcher.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/json-fetcher.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/json-fetcher.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/led-matrix-c.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/led-matrix-c.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/led-matrix-c.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/led-matrix-c.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/led-matrix.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/led-matrix.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/led-matrix.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/led-matrix.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/mqtt-client.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/mqtt-client.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/mqtt-client.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/mqtt-client.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/multiplex-mappers.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/multiplex-mappers.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/multiplex-mappers.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/multiplex-mappers.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/music-line.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/music-line.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/music-line.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/music-line.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/options-initialize.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/options-initialize.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/options-initialize.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/options-initialize.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/pixel-mapper.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/pixel-mapper.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/pixel-mapper.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/pixel-mapper.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/radio6-client.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/radio6-client.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/radio6-client.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/radio6-client.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/rotating-box.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/rotating-box.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/rotating-box.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/rotating-box.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/screen-menu.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/screen-menu.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/screen-menu.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/screen-menu.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/scrolling-line-screen.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/scrolling-line-screen.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/scrolling-line-screen.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/scrolling-line-screen.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/scrolling-line.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/scrolling-line.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/scrolling-line.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/scrolling-line.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/spotify-client.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/spotify-client.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/spotify-client.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/spotify-client.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/tfl-client.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/tfl-client.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/tfl-client.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/tfl-client.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/thread.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/thread.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/thread.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/thread.cc.o"
+},
+{
+  "directory": "/home/tmilner/git/rpi-rgb-led-matrix",
+  "command": "/usr/bin/c++ -DYAML_CPP_STATIC_DEFINE -I/home/tmilner/git/rpi-rgb-led-matrix/lib -I/home/tmilner/git/rpi-rgb-led-matrix/include -I/usr/include/GraphicsMagick -I/usr/lib -isystem /home/tmilner/.conan2/p/b/jsonc6507824e72bf3/p/include -isystem /home/tmilner/.conan2/p/b/opensa312e8a13d3bd/p/include -isystem /home/tmilner/.conan2/p/b/yaml-e0902d5b6da72/p/include -isystem /home/tmilner/.conan2/p/b/paho-1f809c8c2344d/p/include -isystem /home/tmilner/.conan2/p/b/paho-5b8a9cb9bd982/p/include -m64 -O3 -DNDEBUG -std=gnu++17 -o CMakeFiles/ScreenTest.dir/lib/time-date-weather-line.cc.o -c /home/tmilner/git/rpi-rgb-led-matrix/lib/time-date-weather-line.cc",
+  "file": "/home/tmilner/git/rpi-rgb-led-matrix/lib/time-date-weather-line.cc",
+  "output": "CMakeFiles/ScreenTest.dir/lib/time-date-weather-line.cc.o"
+}
+]
