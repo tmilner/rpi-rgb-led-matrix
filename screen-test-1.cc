@@ -216,12 +216,12 @@ int main(int argc, char *argv[]) {
 
   rgb_matrix::Font main_font;
   if (!main_font.LoadFont(bdf_8x13_font_path.c_str())) {
-    fprintf(stderr, "Couldn't load font '%s'\n", bdf_8x13_font_path);
+    fprintf(stderr, "Couldn't load font '%s'\n", bdf_8x13_font_path.c_str());
     return 1;
   }
   rgb_matrix::Font menu_font;
   if (!menu_font.LoadFont(bdf_5x7_font_path.c_str())) {
-    fprintf(stderr, "Couldn't load font '%s'\n", bdf_5x7_font_path);
+    fprintf(stderr, "Couldn't load font '%s'\n", bdf_5x7_font_path.c_str());
     return 1;
   }
 
