@@ -84,7 +84,7 @@
 #include <windows.h>
 #endif // _WIN32
 
-#include "date/tz_private.h"
+#include "tz_private.h"
 
 #ifdef __APPLE__
 #include "date/ios.h"
