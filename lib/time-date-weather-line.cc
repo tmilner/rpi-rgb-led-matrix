@@ -1,7 +1,7 @@
 #include "time-date-weather-line.h"
 #include "date.h"
-#include "date/tz.h"
 #include "img_utils.h"
+#include "tz.h"
 #include "json/json.h"
 #include <iomanip>
 #include <iostream>
@@ -114,8 +114,9 @@ void TimeDateWeatherLine::update() {
     this->current_image.clear();
     this->current_image.append(this->time_image);
     this->current_line.clear();
-    this->current_line.append(
-        date::format("%R", date::floor<std::chrono::milliseconds>(now)));
+    auto current_date =
+        make_zoned(date::current_zone(), std::chrono::system_clock::now());
+    this->current_line.append(date::format("%R", current_date));
   } else if (this->current_display == 2) {
     this->current_image.clear();
     this->current_image.append(this->date_image);
