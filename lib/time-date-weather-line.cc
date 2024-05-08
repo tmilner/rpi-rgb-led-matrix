@@ -114,16 +114,16 @@ void TimeDateWeatherLine::update() {
     this->current_image.clear();
     this->current_image.append(this->time_image);
     this->current_line.clear();
-    auto current_date =
-        make_zoned(date::current_zone(), std::chrono::system_clock::now());
-    this->current_line.append(date::format("%R", current_date));
+    this->current_line.append(
+        date::format("%R", make_zoned(date::current_zone(),
+                                      std::chrono::system_clock::now())));
   } else if (this->current_display == 2) {
     this->current_image.clear();
     this->current_image.append(this->date_image);
     this->current_line.clear();
-    auto current_date =
-        make_zoned(date::current_zone(), std::chrono::system_clock::now());
-    this->current_line.append(date::format("%d %b", current_date));
+    this->current_line.append(
+        date::format("%d %b", make_zoned(date::current_zone(),
+                                         std::chrono::system_clock::now())));
   } else if (this->current_display == 0) {
     this->current_image.clear();
     this->current_image.append(this->weather_image);
