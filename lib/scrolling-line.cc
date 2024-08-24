@@ -42,7 +42,7 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
             << ", Init Screen width = " << settings.init_screen_width
             << " icon offset " << icon_offset << std::endl;
 };
-void ScrollingLine::resetXPosition() { x = icon_offset; }
+void ScrollingLine::resetXPosition() { x = icon_offset + 20; }
 void ScrollingLine::updateText(std::string *new_line_string) {
   if (*new_line_string != current_line) {
     x = this->icon_offset;
