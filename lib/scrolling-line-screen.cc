@@ -50,8 +50,10 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas) {
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
 
   if (type == ScreenLineOption::radio6) {
+    this->music_line->resetXPosition();
     this->line1 = this->music_line;
   } else if (type == ScreenLineOption::bus) {
+    this->bus_line->resetXPosition();
     this->line1 = this->bus_line;
   } else {
     TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(
