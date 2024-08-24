@@ -1,7 +1,6 @@
 #include "time-date-weather-line.h"
 #include "date.h"
 #include "img_utils.h"
-#include "json/json.h"
 #include <iomanip>
 #include <iostream>
 
