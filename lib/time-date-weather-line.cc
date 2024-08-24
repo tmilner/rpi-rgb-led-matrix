@@ -117,7 +117,7 @@ void TimeDateWeatherLine::update() {
     auto tm = *std::localtime(&t);
 
     std::ostringstream oss;
-    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    oss << std::put_time(&tm, "%H:%M");
     auto time = oss.str();
     this->current_line.append(time);
   } else if (this->current_display == 2) {
