@@ -26,6 +26,12 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->is_visible = true;
   auto now = std::chrono::system_clock::now();
   this->last_rotate = now;
+
+  this->music_line = new MusicLine(this->image_map, this->spotify_client,
+                                   this->radio6_client, this->line1_settings);
+
+  this->bus_line = new BusTowardsOvalLine(this->image_map, this->tfl_client,
+                                          this->line1_settings);
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
 }
@@ -44,16 +50,9 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas) {
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
 
   if (type == ScreenLineOption::radio6) {
-    MusicLine *musicLine =
-        new MusicLine(this->image_map, this->spotify_client,
-                      this->radio6_client, this->line1_settings);
-    delete this->line1;
-    this->line1 = musicLine;
+    this->line1 = this->music_line;
   } else if (type == ScreenLineOption::bus) {
-    BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(
-        this->image_map, this->tfl_client, this->line1_settings);
-    delete this->line1;
-    this->line1 = busTowardsOvalLine;
+    this->line1 = this->bus_line;
   } else {
     TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(
         this->settings.weather_api_key, this->image_map, this->line1_settings);
@@ -104,6 +103,7 @@ void ScrollingLineScreen::update() {
       this->setLine1(ScreenLineOption::bus);
   }
 
-  this->line1->update();
+  this->music_line->update();
+  this->bus_line->update();
   this->line2->update();
 }

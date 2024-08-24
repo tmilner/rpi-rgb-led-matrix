@@ -1,5 +1,7 @@
 #ifndef SCROLLING_SCREEN_H
 #define SCROLLING_SCREEN_H
+#include "bus-towards-oval-line.h"
+#include "music-line.h"
 #include "radio6-client.h"
 #include "scrolling-line.h"
 #include "spotify-client.h"
@@ -59,10 +61,14 @@ private:
   std::string name;
   std::map<std::string, Magick::Image> *image_map{};
   ScreenLineOption current_line1;
+  BusTowardsOvalLine *bus_line;
+  MusicLine *music_line;
+
   UpdateableScreen *line1;
   UpdateableScreen *line2;
   ScrollingLineSettings line1_settings;
   ScrollingLineSettings line2_settings;
+
   std::chrono::time_point<std::chrono::system_clock> last_rotate;
   static const int rotate_after_seconds = 15;
 };
