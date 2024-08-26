@@ -2,12 +2,11 @@
 #define RENDERABLE_HPP
 
 #include "led-matrix.h"
-#include <string>
 
-class Renderable
-{
+class Renderable {
 public:
-    virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas) = 0;
+  virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas,
+                      char opacity = 0xFF) = 0;
 };
 
 #endif /*RENDERABLE_HPP*/

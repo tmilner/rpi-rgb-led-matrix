@@ -41,15 +41,17 @@ Magick::Image *TimeDateWeatherLine::getIcon() {
   return &(*this->image_map)[this->current_image];
 }
 
-void TimeDateWeatherLine::render(FrameCanvas *offscreen_canvas) {
+void TimeDateWeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
-  this->renderLine(offscreen_canvas);
+  if (opacity >= (CHAR_MAX / 2)) {
+    this->renderLine(offscreen_canvas);
+  }
   offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
   rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16,
                        Color(130, 100, 73));
-  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1);
+  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
 void TimeDateWeatherLine::update() {
   if (!is_visible) {

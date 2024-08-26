@@ -13,7 +13,7 @@ public:
             SpotifyClient spotifyClient, Radio6Client radio6Client,
             ScrollingLineSettings settings);
   void update();
-  void render(FrameCanvas *offscreen_canvas);
+  void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
 
 private:

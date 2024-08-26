@@ -1,7 +1,7 @@
 #include "music-line.h"
 #include "img_utils.h"
+#include <climits>
 #include <iostream>
-
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map,
@@ -23,13 +23,15 @@ Magick::Image *MusicLine::getIcon() {
 
 std::string *MusicLine::getName() { return &this->name; }
 
-void MusicLine::render(FrameCanvas *offscreen_canvas) {
+void MusicLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
-  this->renderLine(offscreen_canvas);
+  if (opacity >= (CHAR_MAX / 2)) {
+    this->renderLine(offscreen_canvas);
+  }
   offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
-  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1);
+  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
   rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16,
                        Color(130, 100, 73));
 }

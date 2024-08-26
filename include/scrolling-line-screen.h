@@ -47,7 +47,7 @@ public:
                       SpotifyClient spotify_client, Radio6Client radio6_client,
                       TflClient tfl_client);
   void update();
-  void render(FrameCanvas *offscreen_canvas);
+  void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   void setLine1(ScreenLineOption type);
   void setLine2(ScreenLineOption type);
   std::string *getName();
@@ -68,6 +68,10 @@ private:
   UpdateableScreen *line2;
   ScrollingLineSettings line1_settings;
   ScrollingLineSettings line2_settings;
+
+  UpdateableScreen *previous_line1;
+  char line1_transition_percentage;
+  bool line1_transitioning;
 
   std::chrono::time_point<std::chrono::system_clock> last_rotate;
   static const int rotate_after_seconds = 15;

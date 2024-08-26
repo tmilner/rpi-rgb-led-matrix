@@ -34,20 +34,32 @@ ScrollingLineScreen::ScrollingLineScreen(
                                           this->line1_settings);
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
+  this->line1_transitioning = false;
+  this->line1_transition_percentage = 0xFF;
+  this->previous_line1 = this->bus_line;
 }
 
 std::string *ScrollingLineScreen::getName() { return &this->name; }
 
-void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas) {
+void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
+
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
-  this->line1->render(offscreen_canvas);
+  if (this->line1_transitioning) {
+    this->previous_line1->render(offscreen_canvas);
+    this->line1->render(offscreen_canvas);
+  } else {
+    this->line1->render(offscreen_canvas);
+  }
   this->line2->render(offscreen_canvas);
 }
 
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
+  this->line1_transitioning = true;
+  this->previous_line1 = this->line1;
+  this->line1_transition_percentage = 0x00;
 
   if (type == ScreenLineOption::radio6) {
     this->music_line->resetXPosition();

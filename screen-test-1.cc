@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
   Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
 
-  rgb_matrix::DrawCircle(offscreen_canvas, 32, 13, 10, color);
+  rgb_matrix::DrawCircle(offscreen_canvas, 32, 12, 10, color);
   offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
 
   /* x_origin is set by default just right of the screen */
@@ -207,7 +207,6 @@ int main(int argc, char *argv[]) {
                               spotify_client_secret);
   Radio6Client radio6Client;
   TflClient tflClient;
-
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */

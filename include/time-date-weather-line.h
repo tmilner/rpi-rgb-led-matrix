@@ -13,7 +13,7 @@ public:
                       std::map<std::string, Magick::Image> *image_map,
                       ScrollingLineSettings settings);
   void update();
-  void render(FrameCanvas *offscreen_canvas);
+  void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
 
 private:
