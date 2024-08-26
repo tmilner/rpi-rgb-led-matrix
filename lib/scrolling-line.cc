@@ -44,9 +44,6 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
 };
 void ScrollingLine::resetXPosition() { x = icon_offset + 20; }
 void ScrollingLine::updateText(std::string *new_line_string) {
-  if (*new_line_string != current_line) {
-    x = this->icon_offset;
-  }
   current_line = *new_line_string;
 };
 void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
