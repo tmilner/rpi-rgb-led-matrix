@@ -60,7 +60,7 @@ void CopyImageToCanvas(const Magick::Image *image, Canvas *canvas, int offset_x,
 }
 
 char scaleQuantumWithOpacity(Magick::Quantum quantum, char opacity) {
-  return (char)((int)opacity * ScaleQuantumToChar(quantum)) / CHAR_MAX;
+  return (char)(((int)opacity * (int)ScaleQuantumToChar(quantum)) / CHAR_MAX);
 }
 void CopyImageToCanvas(const Magick::Image *image, Canvas *canvas, int offset_x,
                        int offset_y, char opacity) {
