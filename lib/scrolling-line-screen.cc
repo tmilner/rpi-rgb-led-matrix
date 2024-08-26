@@ -4,6 +4,7 @@
 #include "img_utils.h"
 #include "music-line.h"
 #include "time-date-weather-line.h"
+#include <climits>
 #include <iostream>
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
@@ -35,7 +36,7 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
   this->line1_transitioning = false;
-  this->line1_transition_percentage = 0xFF;
+  this->line1_transition_percentage = CHAR_MAX;
   this->previous_line1 = this->bus_line;
 }
 
@@ -48,10 +49,15 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
 
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
   if (this->line1_transitioning) {
-    this->previous_line1->render(offscreen_canvas);
-    this->line1->render(offscreen_canvas);
+    this->previous_line1->render(offscreen_canvas,
+                                 CHAR_MAX - this->line1_transition_percentage);
+    this->line1->render(offscreen_canvas, this->line1_transition_percentage);
+    if (this->line1_transition_percentage >= CHAR_MAX - 10) {
+      this->line1_transitioning = false;
+    }
+    this->line1_transition_percentage += 50;
   } else {
-    this->line1->render(offscreen_canvas);
+    this->line1->render(offscreen_canvas, CHAR_MAX);
   }
   this->line2->render(offscreen_canvas);
 }

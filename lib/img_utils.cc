@@ -68,8 +68,7 @@ void CopyImageToCanvas(const Magick::Image *image, Canvas *canvas, int offset_x,
   for (size_t y = 0; y < image->rows(); ++y) {
     for (size_t x = 0; x < image->columns(); ++x) {
       const Magick::Color &c = image->pixelColor(x, y);
-      // if (c.alphaQuantum() < 256)
-      {
+      if (c.alphaQuantum() < 256) {
         canvas->SetPixel(x + offset_x, y + offset_y,
                          scaleQuantumWithOpacity(c.redQuantum(), opacity),
                          scaleQuantumWithOpacity(c.greenQuantum(), opacity),
