@@ -54,8 +54,11 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     return;
   }
 
+  std::cout << "SLS Render line 1" << std::endl;
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
   if (this->line1_transitioning) {
+
+    std::cout << "SLS Render line 1 - Trans" << std::endl;
     if (this->line1_transition_percentage < (CHAR_MAX / 2)) {
       this->previous_line1->render(
           offscreen_canvas, CHAR_MAX - this->line1_transition_percentage);
@@ -67,11 +70,14 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
       this->line1_transitioning = false;
     }
   } else {
+    std::cout << "SLS Render line 1, normal" << std::endl;
     this->line1->render(offscreen_canvas, CHAR_MAX);
   }
 
+  std::cout << "SLS Render line 2" << std::endl;
   if (this->line2_transitioning) {
     if (this->line2_transition_percentage < (CHAR_MAX / 2)) {
+      std::cout << "SLS Render line 2 - Trans" << std::endl;
       this->previous_line2->render(
           offscreen_canvas, CHAR_MAX - this->line2_transition_percentage);
     } else {
@@ -82,8 +88,10 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
       this->line2_transitioning = false;
     }
   } else {
+    std::cout << "SLS Render line 1, normal" << std::endl;
     this->line2->render(offscreen_canvas, CHAR_MAX);
   }
+  std::cout << "SLS Render Complete" << std::endl;
 }
 
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
