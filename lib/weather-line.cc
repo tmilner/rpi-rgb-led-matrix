@@ -67,7 +67,7 @@ void WeatherLine::update() {
       std::string temp_str = temp_str_stream.str();
 
       std::cout << "\tCondition: " << condition << std::endl;
-      std::cout << "\tTemp: " << temp << std::endl;
+      std::cout << "\tTemp: " << temp_str << std::endl;
       std::cout << "\tIcon: " << weather_icon << std::endl;
 
       std::cout << std::endl;
@@ -77,6 +77,10 @@ void WeatherLine::update() {
       this->current_line.clear();
       this->current_line.append(temp_str).append("℃");
       this->last_weather_update = now;
+
+      std::cout << "Weather icon " << this->weather_image << std::endl;
+      std::cout << "Weather Line " << this->current_line << std::endl;
+
     } catch (std::runtime_error &e) {
       printf("Failed to fetch Weather\n");
     }
