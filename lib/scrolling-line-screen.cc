@@ -45,6 +45,9 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->line1_transitioning = false;
   this->line1_transition_percentage = CHAR_MAX;
   this->previous_line1 = this->bus_line;
+  this->line2_transitioning = false;
+  this->line2_transition_percentage = CHAR_MAX;
+  this->previous_line2 = this->date_line;
 }
 
 std::string *ScrollingLineScreen::getName() { return &this->name; }
