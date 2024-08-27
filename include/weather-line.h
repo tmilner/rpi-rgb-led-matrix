@@ -20,7 +20,6 @@ private:
   Magick::Image *getIcon();
   JSONFetcher *fetcher;
   std::string url;
-  std::string current_line;
   std::string weather_image;
   std::chrono::time_point<std::chrono::system_clock> last_weather_update;
   static const int update_weather_after_seconds = 360;

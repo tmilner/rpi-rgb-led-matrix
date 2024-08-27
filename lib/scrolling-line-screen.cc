@@ -124,9 +124,6 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type) {
 }
 
 void ScrollingLineScreen::update() {
-  if (!is_visible) {
-    return;
-  }
   const auto now = std::chrono::system_clock::now();
 
   if (((now - this->line1_last_rotate) / 1s) >
@@ -163,9 +160,9 @@ void ScrollingLineScreen::update() {
       this->setLine2(ScreenLineOption::current_time);
     }
   }
+  this->weather_line->update();
   this->music_line->update();
   this->bus_line->update();
   this->time_line->update();
   this->date_line->update();
-  this->weather_line->update();
 }
