@@ -52,10 +52,10 @@ struct ScrollingLineScreenSettings : ScreenSettings {
 
 class ScrollingLineScreen : public UpdateableScreen {
 public:
-  ScrollingLineScreen(std::map<std::string, Magick::Image> *image_map,
-                      ScrollingLineScreenSettings settings,
-                      SpotifyClient spotify_client, Radio6Client radio6_client,
-                      TflClient tfl_client);
+  ScrollingLineScreen(
+      std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+      ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
+      Radio6Client radio6_client, TflClient tfl_client);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   void setLine1(ScreenLineOption type);
@@ -69,7 +69,7 @@ private:
   TflClient tfl_client;
   rgb_matrix::Color bg_color;
   std::string name;
-  std::map<std::string, Magick::Image> *image_map{};
+  std::shared_ptr<std::map<std::string, Magick::Image>> image_map;
   BusTowardsOvalLine *bus_line;
   MusicLine *music_line;
   CurrentTimeLine *time_line;

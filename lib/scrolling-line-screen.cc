@@ -4,7 +4,6 @@
 #include "date.h"
 #include "img_utils.h"
 #include "music-line.h"
-#include "time-date-weather-line.h"
 #include "weather-line.h"
 #include <climits>
 #include <iostream>
@@ -12,7 +11,7 @@
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 ScrollingLineScreen::ScrollingLineScreen(
-    std::map<std::string, Magick::Image> *image_map,
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
     Radio6Client radio6_client, TflClient tfl_client)
     : image_map{image_map},
@@ -25,7 +24,6 @@ ScrollingLineScreen::ScrollingLineScreen(
       radio6_client(radio6_client), tfl_client(tfl_client)
 
 {
-  this->image_map = image_map;
   this->is_visible = true;
   auto now = std::chrono::system_clock::now();
   this->line1_last_rotate = now;
@@ -71,6 +69,7 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
   } else {
     this->line1->render(offscreen_canvas, CHAR_MAX);
   }
+
   if (this->line2_transitioning) {
     if (this->line2_transition_percentage < (CHAR_MAX / 2)) {
       this->previous_line2->render(

@@ -5,8 +5,8 @@
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 BusTowardsOvalLine::BusTowardsOvalLine(
-    std::map<std::string, Magick::Image> *image_map, TflClient tflClient,
-    ScrollingLineSettings settings)
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+    TflClient tflClient, ScrollingLineSettings settings)
     : ScrollingLine(settings), tflClient(tflClient),
       name{std::string("Buses Towards Oval")} {
   this->current_line = "Loading";

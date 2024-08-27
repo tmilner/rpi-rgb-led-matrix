@@ -8,7 +8,7 @@
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 CurrentTimeLine::CurrentTimeLine(
-    std::map<std::string, Magick::Image> *image_map,
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Time Line")} {
   std::cout << "Time Line Updater Constructor" << std::endl;

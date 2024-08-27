@@ -10,7 +10,7 @@
 class WeatherLine : public UpdateableScreen, public ScrollingLine {
 public:
   WeatherLine(const std::string weather_api_key,
-              std::map<std::string, Magick::Image> *image_map,
+              std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
               ScrollingLineSettings settings);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
@@ -24,7 +24,7 @@ private:
   std::string weather_image;
   std::chrono::time_point<std::chrono::system_clock> last_weather_update;
   static const int update_weather_after_seconds = 360;
-  std::map<std::string, Magick::Image> *image_map{};
+  std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};
   std::string name;
 };
 

@@ -283,10 +283,13 @@ int main(int argc, char *argv[]) {
       ScrollingLineScreenSettings(
           defaults.cols, defaults.rows, &main_font, color, bg_color,
           &state.speed, letter_spacing, ScreenLineOption::radio6,
-          ScreenLineOption::timeDateWeather, weather_api_key);
+          ScreenLineOption::current_time, weather_api_key);
+
+  auto imageMapPtr =
+      std::shared_ptr<std::map<std::string, Magick::Image>>(&state.image_map);
 
   ScrollingLineScreen *srollingTwoLineScreen =
-      new ScrollingLineScreen(&state.image_map, scrollingLineScreenSettings,
+      new ScrollingLineScreen(imageMapPtr, scrollingLineScreenSettings,
                               spotifyClient, radio6Client, tflClient);
 
   cout << "Setting up update thread" << endl;

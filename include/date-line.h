@@ -4,10 +4,11 @@
 #include "scrolling-line.h"
 #include "updateable-screen.h"
 #include <Magick++.h>
+#include <memory>
 
 class DateLine : public UpdateableScreen, public ScrollingLine {
 public:
-  DateLine(std::map<std::string, Magick::Image> *image_map,
+  DateLine(std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
            ScrollingLineSettings settings);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
@@ -16,7 +17,7 @@ public:
 private:
   Magick::Image *getIcon();
   std::string date_image;
-  std::map<std::string, Magick::Image> *image_map{};
+  std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};
   std::string name;
 };
 

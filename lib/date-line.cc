@@ -5,8 +5,9 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-DateLine::DateLine(std::map<std::string, Magick::Image> *image_map,
-                   ScrollingLineSettings settings)
+DateLine::DateLine(
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+    ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Date Line")} {
   std::cout << "Date Line Updater Constructor" << std::endl;
 

@@ -5,9 +5,10 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-WeatherLine::WeatherLine(const std::string weather_api_key,
-                         std::map<std::string, Magick::Image> *image_map,
-                         ScrollingLineSettings settings)
+WeatherLine::WeatherLine(
+    const std::string weather_api_key,
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+    ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Weather Line")} {
   std::cout << "Weather Line Updater Constructor" << std::endl;
 

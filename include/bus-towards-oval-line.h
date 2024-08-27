@@ -8,8 +8,9 @@
 
 class BusTowardsOvalLine : public UpdateableScreen, public ScrollingLine {
 public:
-  BusTowardsOvalLine(std::map<std::string, Magick::Image> *image_map,
-                     TflClient tflClient, ScrollingLineSettings settings);
+  BusTowardsOvalLine(
+      std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+      TflClient tflClient, ScrollingLineSettings settings);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
@@ -19,7 +20,7 @@ private:
   TflClient tflClient;
   std::chrono::time_point<std::chrono::system_clock> last_update;
   static const int update_after_seconds = 20;
-  std::map<std::string, Magick::Image> *image_map{};
+  std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};
   std::string image_key;
   std::string name;
 };

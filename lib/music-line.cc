@@ -4,9 +4,10 @@
 #include <iostream>
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-MusicLine::MusicLine(std::map<std::string, Magick::Image> *image_map,
-                     SpotifyClient spotifyClient, Radio6Client radio6Client,
-                     ScrollingLineSettings settings)
+MusicLine::MusicLine(
+    std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+    SpotifyClient spotifyClient, Radio6Client radio6Client,
+    ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Radio 6 Line")},
       spotifyClient(spotifyClient), radio6Client(radio6Client) {
   this->current_line = "Loading";
