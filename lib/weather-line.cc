@@ -47,10 +47,6 @@ void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
 void WeatherLine::update() {
-  if (!is_visible) {
-    return;
-  }
-
   const auto now = std::chrono::system_clock::now();
   bool screen_rotated = false;
 

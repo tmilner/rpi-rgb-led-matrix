@@ -29,9 +29,6 @@ Magick::Image *CurrentTimeLine::getIcon() {
 }
 
 void CurrentTimeLine::render(FrameCanvas *offscreen_canvas, char opacity) {
-  if (!is_visible) {
-    return;
-  }
   if (opacity >= (CHAR_MAX / 2)) {
     this->renderLine(offscreen_canvas);
   }

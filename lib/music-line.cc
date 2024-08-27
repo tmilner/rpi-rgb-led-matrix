@@ -38,10 +38,6 @@ void MusicLine::render(FrameCanvas *offscreen_canvas, char opacity) {
 }
 
 void MusicLine::update() {
-  if (!is_visible) {
-    return;
-  }
-
   const auto now = std::chrono::system_clock::now();
 
   if (((now - this->last_update) / 1s) < this->update_after_seconds) {
