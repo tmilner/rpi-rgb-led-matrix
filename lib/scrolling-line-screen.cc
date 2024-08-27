@@ -57,6 +57,8 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     return;
   }
 
+  char rate = CHAR_MAX / 10;
+
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
   if (this->line1_transitioning) {
     if (this->line1_transition_percentage < (CHAR_MAX / 2)) {
@@ -65,8 +67,8 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     } else {
       this->line1->render(offscreen_canvas, this->line1_transition_percentage);
     }
-    this->line1_transition_percentage += 20;
-    if (this->line1_transition_percentage >= CHAR_MAX - 10) {
+    this->line1_transition_percentage += rate;
+    if (this->line1_transition_percentage >= CHAR_MAX - rate) {
       this->line1_transitioning = false;
     }
   } else {
@@ -80,8 +82,8 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     } else {
       this->line2->render(offscreen_canvas, this->line2_transition_percentage);
     }
-    this->line2_transition_percentage += 20;
-    if (this->line2_transition_percentage >= CHAR_MAX - 10) {
+    this->line2_transition_percentage += rate;
+    if (this->line2_transition_percentage >= CHAR_MAX - rate) {
       this->line2_transitioning = false;
     }
   } else {
