@@ -64,14 +64,27 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     } else {
       this->line1->render(offscreen_canvas, this->line1_transition_percentage);
     }
-    this->line1_transition_percentage += 50;
+    this->line1_transition_percentage += 20;
     if (this->line1_transition_percentage >= CHAR_MAX - 10) {
       this->line1_transitioning = false;
     }
   } else {
     this->line1->render(offscreen_canvas, CHAR_MAX);
   }
-  this->line2->render(offscreen_canvas);
+  if (this->line2_transitioning) {
+    if (this->line2_transition_percentage < (CHAR_MAX / 2)) {
+      this->previous_line2->render(
+          offscreen_canvas, CHAR_MAX - this->line2_transition_percentage);
+    } else {
+      this->line2->render(offscreen_canvas, this->line2_transition_percentage);
+    }
+    this->line2_transition_percentage += 20;
+    if (this->line2_transition_percentage >= CHAR_MAX - 10) {
+      this->line2_transitioning = false;
+    }
+  } else {
+    this->line2->render(offscreen_canvas, CHAR_MAX);
+  }
 }
 
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
@@ -148,5 +161,7 @@ void ScrollingLineScreen::update() {
   }
   this->music_line->update();
   this->bus_line->update();
-  this->line2->update();
+  this->time_line->update();
+  this->date_line->update();
+  this->weather_line->update();
 }

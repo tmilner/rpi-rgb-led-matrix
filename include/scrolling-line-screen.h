@@ -93,6 +93,6 @@ private:
   char line2_transition_percentage;
   bool line2_transitioning;
   std::chrono::time_point<std::chrono::system_clock> line2_last_rotate;
-  static const int line2_rotate_after_seconds = 15;
+  static const int line2_rotate_after_seconds = 10;
 };
 #endif /*SCROLLING_SCREEN_H*/
