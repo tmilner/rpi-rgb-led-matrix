@@ -1,9 +1,11 @@
 #include "scrolling-line-screen.h"
 #include "bus-towards-oval-line.h"
+#include "current-time-line.h"
 #include "date.h"
 #include "img_utils.h"
 #include "music-line.h"
 #include "time-date-weather-line.h"
+#include "weather-line.h"
 #include <climits>
 #include <iostream>
 
@@ -26,13 +28,20 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->image_map = image_map;
   this->is_visible = true;
   auto now = std::chrono::system_clock::now();
-  this->last_rotate = now;
+  this->line1_last_rotate = now;
+  this->line2_last_rotate = now;
 
   this->music_line = new MusicLine(this->image_map, this->spotify_client,
                                    this->radio6_client, this->line1_settings);
 
   this->bus_line = new BusTowardsOvalLine(this->image_map, this->tfl_client,
                                           this->line1_settings);
+
+  this->time_line = new CurrentTimeLine(this->image_map, this->line2_settings);
+  this->date_line = new DateLine(this->image_map, this->line2_settings);
+  this->weather_line = new WeatherLine(this->settings.weather_api_key,
+                                       this->image_map, this->line2_settings);
+
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
   this->line1_transitioning = false;
@@ -49,13 +58,16 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
 
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
   if (this->line1_transitioning) {
-    this->previous_line1->render(offscreen_canvas,
-                                 CHAR_MAX - this->line1_transition_percentage);
-    this->line1->render(offscreen_canvas, this->line1_transition_percentage);
+    if (this->line1_transition_percentage < (CHAR_MAX / 2)) {
+      this->previous_line1->render(
+          offscreen_canvas, CHAR_MAX - this->line1_transition_percentage);
+    } else {
+      this->line1->render(offscreen_canvas, this->line1_transition_percentage);
+    }
+    this->line1_transition_percentage += 50;
     if (this->line1_transition_percentage >= CHAR_MAX - 10) {
       this->line1_transitioning = false;
     }
-    this->line1_transition_percentage += 50;
   } else {
     this->line1->render(offscreen_canvas, CHAR_MAX);
   }
@@ -73,49 +85,42 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type) {
   } else if (type == ScreenLineOption::bus) {
     this->bus_line->resetXPosition();
     this->line1 = this->bus_line;
-  } else {
-    TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(
-        this->settings.weather_api_key, this->image_map, this->line1_settings);
-    delete this->line1;
-    this->line1 = timeDateWeatherLine;
   }
   this->current_line1 = type;
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type) {
-  if (type == ScreenLineOption::radio6) {
-    MusicLine *musicLine =
-        new MusicLine(this->image_map, this->spotify_client,
-                      this->radio6_client, this->line2_settings);
-    delete this->line2;
-    this->line2 = musicLine;
-  } else if (type == ScreenLineOption::bus) {
-    BusTowardsOvalLine *busTowardsOvalLine = new BusTowardsOvalLine(
-        this->image_map, this->tfl_client, this->line2_settings);
-    delete this->line2;
-    this->line2 = busTowardsOvalLine;
+  this->line2_transitioning = true;
+  this->previous_line2 = this->line2;
+  this->line2_transition_percentage = 0x00;
+
+  if (type == ScreenLineOption::current_date) {
+    this->date_line->resetXPosition();
+    this->line2 = this->date_line;
+  } else if (type == ScreenLineOption::current_time) {
+    this->time_line->resetXPosition();
+    this->line2 = this->time_line;
   } else {
-    TimeDateWeatherLine *timeDateWeatherLine = new TimeDateWeatherLine(
-        this->settings.weather_api_key, this->image_map, this->line2_settings);
-    delete this->line2;
-    this->line2 = timeDateWeatherLine;
+    this->weather_line->resetXPosition();
+    this->line2 = this->weather_line;
   }
+  this->current_line2 = type;
 }
+
 void ScrollingLineScreen::update() {
   if (!is_visible) {
     return;
   }
   const auto now = std::chrono::system_clock::now();
-  bool screen_rotated = false;
 
-  if (((now - this->last_rotate) / 1s) > this->rotate_after_seconds) {
-    screen_rotated = true;
+  if (((now - this->line1_last_rotate) / 1s) >
+      this->line1_rotate_after_seconds) {
     std::cout << "Changing line 1" << this->line1->getName()
               << " Last rotate is "
               << date::format("%D %T", date::floor<std::chrono::milliseconds>(
-                                           this->last_rotate))
+                                           this->line1_last_rotate))
               << std::endl;
 
-    this->last_rotate = now;
+    this->line1_last_rotate = now;
 
     if (this->current_line1 == ScreenLineOption::bus) {
       this->setLine1(ScreenLineOption::radio6);
@@ -123,6 +128,24 @@ void ScrollingLineScreen::update() {
       this->setLine1(ScreenLineOption::bus);
   }
 
+  if (((now - this->line2_last_rotate) / 1s) >
+      this->line2_rotate_after_seconds) {
+    std::cout << "Changing line 2" << this->line2->getName()
+              << " Last rotate is "
+              << date::format("%D %T", date::floor<std::chrono::milliseconds>(
+                                           this->line2_last_rotate))
+              << std::endl;
+
+    this->line2_last_rotate = now;
+
+    if (this->current_line2 == ScreenLineOption::current_time) {
+      this->setLine2(ScreenLineOption::current_date);
+    } else if (this->current_line2 == ScreenLineOption::current_date) {
+      this->setLine2(ScreenLineOption::weather);
+    } else {
+      this->setLine2(ScreenLineOption::current_time);
+    }
+  }
   this->music_line->update();
   this->bus_line->update();
   this->line2->update();

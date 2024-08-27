@@ -1,15 +1,25 @@
 #ifndef SCROLLING_SCREEN_H
 #define SCROLLING_SCREEN_H
 #include "bus-towards-oval-line.h"
+#include "current-time-line.h"
+#include "date-line.h"
 #include "music-line.h"
 #include "radio6-client.h"
 #include "scrolling-line.h"
 #include "spotify-client.h"
 #include "tfl-client.h"
 #include "updateable-screen.h"
+#include "weather-line.h"
 #include <Magick++.h>
 
-enum ScreenLineOption { radio6, timeDateWeather, bus };
+enum ScreenLineOption {
+  radio6,
+  current_time,
+  current_date,
+  weather,
+  timeDateWeather,
+  bus
+};
 
 struct ScrollingLineScreenSettings : ScreenSettings {
   int width;
@@ -60,20 +70,29 @@ private:
   rgb_matrix::Color bg_color;
   std::string name;
   std::map<std::string, Magick::Image> *image_map{};
-  ScreenLineOption current_line1;
   BusTowardsOvalLine *bus_line;
   MusicLine *music_line;
+  CurrentTimeLine *time_line;
+  DateLine *date_line;
+  WeatherLine *weather_line;
 
   UpdateableScreen *line1;
   UpdateableScreen *line2;
   ScrollingLineSettings line1_settings;
   ScrollingLineSettings line2_settings;
 
+  ScreenLineOption current_line1;
   UpdateableScreen *previous_line1;
   char line1_transition_percentage;
   bool line1_transitioning;
+  std::chrono::time_point<std::chrono::system_clock> line1_last_rotate;
+  static const int line1_rotate_after_seconds = 15;
 
-  std::chrono::time_point<std::chrono::system_clock> last_rotate;
-  static const int rotate_after_seconds = 15;
+  ScreenLineOption current_line2;
+  UpdateableScreen *previous_line2;
+  char line2_transition_percentage;
+  bool line2_transitioning;
+  std::chrono::time_point<std::chrono::system_clock> line2_last_rotate;
+  static const int line2_rotate_after_seconds = 15;
 };
 #endif /*SCROLLING_SCREEN_H*/

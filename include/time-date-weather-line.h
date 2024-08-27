@@ -1,5 +1,5 @@
-#ifndef WEATHER_LINE_UPDATER_H
-#define WEATHER_LINE_UPDATER_H
+#ifndef TIME_DATE_WEATHER_LINE_UPDATER_H
+#define TIME_DATE_WEATHER_LINE_UPDATER_H
 #include "json-fetcher.h"
 #include "led-matrix.h"
 #include "scrolling-line.h"
@@ -34,4 +34,4 @@ private:
   std::string name;
 };
 
-#endif /*WEATHER_LINE_UPDATER_H*/
+#endif /*TIME_DATE_WEATHER_LINE_UPDATER_H*/
