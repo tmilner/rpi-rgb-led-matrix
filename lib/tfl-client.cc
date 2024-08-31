@@ -1,7 +1,6 @@
 #include "tfl-client.h"
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 
 TflClient::TflClient() { this->fetcher = new JSONFetcher(); }
@@ -28,7 +27,7 @@ std::string TflClient::Arrival::getDisplayString() {
   }
 }
 
-std::vector<TflClient::Arrival> TflClient::getButArrivals(std::string busCode) {
+std::vector<TflClient::Arrival> TflClient::getBusArrivals(std::string busCode) {
   JSONFetcher::APIResponse response = this->fetcher->fetch(
       "GET", NULL, "https://api.tfl.gov.uk/StopPoint/" + busCode + "/Arrivals",
       "");

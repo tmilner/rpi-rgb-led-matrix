@@ -18,6 +18,7 @@ public:
 
 private:
   Magick::Image *getIcon();
+  Magick::Image *getBlankIcon();
   JSONFetcher *fetcher;
   std::string url;
   std::string weather_image;

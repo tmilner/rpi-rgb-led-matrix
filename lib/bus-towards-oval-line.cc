@@ -44,13 +44,44 @@ void BusTowardsOvalLine::update() {
   }
 
   try {
-    std::vector<TflClient::Arrival> arrivals =
-        this->tflClient.getButArrivals("490014229J");
+    std::vector<TflClient::Arrival> arrivalsTowardsOval =
+        this->tflClient.getBusArrivals("490014229J");
+    std::vector<TflClient::Arrival> arrivalsTowardsEC =
+        this->tflClient.getBusArrivals("490015298F");
+
+    std::vector<TflClient::Arrival> allArrivals;
+
+    arrivalsTowardsOval.erase(
+        std::remove_if(arrivalsTowardsOval.begin(), arrivalsTowardsOval.end(),
+                       [](const TflClient::Arrival &item) {
+                         return item.busName == "436";
+                       }),
+        arrivalsTowardsOval.end());
+
+    arrivalsTowardsEC.erase(std::remove_if(arrivalsTowardsEC.begin(),
+                                           arrivalsTowardsEC.end(),
+                                           [](const TflClient::Arrival &item) {
+                                             return item.busName != "68";
+                                           }),
+                            arrivalsTowardsEC.end());
+
+    allArrivals.reserve(arrivalsTowardsOval.size() +
+                        arrivalsTowardsEC.size()); // preallocate memory
+    allArrivals.insert(allArrivals.end(), arrivalsTowardsOval.begin(),
+                       arrivalsTowardsOval.end());
+    allArrivals.insert(allArrivals.end(), arrivalsTowardsEC.begin(),
+                       arrivalsTowardsEC.end());
+
+    std::sort(allArrivals.begin(), allArrivals.end(),
+              [](TflClient::Arrival bus1, TflClient::Arrival bus2) {
+                return bus1.secondsUntilArrival < bus2.secondsUntilArrival;
+              });
+
     std::string busTimes = "";
 
-    for (auto &arrival : arrivals) {
+    for (auto &arrival : allArrivals) {
       if (arrival.secondsUntilArrival < (20 * 60) &&
-          arrival.secondsUntilArrival > 30) {
+          arrival.secondsUntilArrival > 60) {
         busTimes.append(arrival.getDisplayString()).append(", ");
       }
     }
@@ -61,6 +92,6 @@ void BusTowardsOvalLine::update() {
     this->current_line.clear();
     this->current_line.append(busTimes);
   } catch (std::runtime_error &e) {
-    printf("Failed to fetch Radio6 Data\n");
+    printf("Failed to fetch Bus Data\n");
   }
 }

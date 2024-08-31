@@ -254,6 +254,25 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  for (auto const &dir_entry :
+       filesystem::directory_iterator{base_path + image_path + "/weather"}) {
+    if (dir_entry.path().extension() == ".png") {
+      ImageVector image =
+          LoadImageAndScaleImage((dir_entry.path()).c_str(), 9, 9);
+
+      cout << "Loading weather image: " << dir_entry.path() << endl;
+
+      if (image.size() == 0) {
+        cout << "FAILED TO LOAD IMAGE" << dir_entry.path() << endl;
+      } else {
+        state.image_map[dir_entry.path().stem()] = image[0];
+      }
+    } else {
+      cout << "Found a non PNG file: " << dir_entry.path()
+           << ", extension is: " << dir_entry.path().extension() << endl;
+    }
+  }
+
   cout << "Images loaded: " << endl;
   for (const auto &[key, value] : state.image_map)
     cout << '[' << key << "] = " << value.constImageInfo() << endl;
