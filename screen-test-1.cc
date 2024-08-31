@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
        filesystem::directory_iterator{base_path + image_path + "/weather"}) {
     if (dir_entry.path().extension() == ".png") {
       ImageVector image =
-          LoadImageAndScaleImage((dir_entry.path()).c_str(), 9, 9);
+          LoadImageAndScaleImage((dir_entry.path()).c_str(), 11, 11);
 
       cout << "Loading weather image: " << dir_entry.path() << endl;
 
