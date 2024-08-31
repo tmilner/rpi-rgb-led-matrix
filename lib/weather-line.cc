@@ -35,7 +35,7 @@ Magick::Image *WeatherLine::getIcon() {
 }
 
 Magick::Image *WeatherLine::getBlankIcon() {
-  return &(*this->image_map)["empty"];
+  return &(*this->image_map)["empty-circle"];
 }
 
 void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
@@ -43,9 +43,9 @@ void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
   rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16,
                        Color(130, 100, 73));
-  CopyImageToCanvas(this->getBlankIcon(), offscreen_canvas, 0, this->y + 1,
-                    opacity);
-  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
+  // CopyImageToCanvas(this->getBlankIcon(), offscreen_canvas, 0, this->y + 1,
+  //                   opacity);
+  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 2, this->y + 3, opacity);
 }
 
 void WeatherLine::update() {

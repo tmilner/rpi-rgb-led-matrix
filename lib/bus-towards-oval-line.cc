@@ -51,20 +51,6 @@ void BusTowardsOvalLine::update() {
 
     std::vector<TflClient::Arrival> allArrivals;
 
-    arrivalsTowardsOval.erase(
-        std::remove_if(arrivalsTowardsOval.begin(), arrivalsTowardsOval.end(),
-                       [](const TflClient::Arrival &item) {
-                         return item.busName == "436";
-                       }),
-        arrivalsTowardsOval.end());
-
-    arrivalsTowardsEC.erase(std::remove_if(arrivalsTowardsEC.begin(),
-                                           arrivalsTowardsEC.end(),
-                                           [](const TflClient::Arrival &item) {
-                                             return item.busName != "68";
-                                           }),
-                            arrivalsTowardsEC.end());
-
     allArrivals.reserve(arrivalsTowardsOval.size() +
                         arrivalsTowardsEC.size()); // preallocate memory
     allArrivals.insert(allArrivals.end(), arrivalsTowardsOval.begin(),
@@ -81,7 +67,9 @@ void BusTowardsOvalLine::update() {
 
     for (auto &arrival : allArrivals) {
       if (arrival.secondsUntilArrival < (20 * 60) &&
-          arrival.secondsUntilArrival > 60) {
+          arrival.secondsUntilArrival > 60 &&
+          (arrival.busName == "185" || arrival.busName == "36" ||
+           arrival.busName == "68")) {
         busTimes.append(arrival.getDisplayString()).append(", ");
       }
     }
