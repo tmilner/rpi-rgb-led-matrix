@@ -11,7 +11,7 @@ BusTowardsOvalLine::BusTowardsOvalLine(
       name{std::string("Buses Towards Oval")} {
   this->current_line = "Loading";
   this->image_map = image_map;
-  this->image_key = "bus";
+  this->image_key = "bus2";
   this->is_visible = true;
   auto now = std::chrono::system_clock::now();
   this->last_update = now - 5min;

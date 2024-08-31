@@ -35,7 +35,7 @@ Magick::Image *WeatherLine::getIcon() {
 }
 
 Magick::Image *WeatherLine::getBlankIcon() {
-  return &(*this->image_map)["empty-circle"];
+  return &(*this->image_map)["empty-circle2"];
 }
 
 void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {

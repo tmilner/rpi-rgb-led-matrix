@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
   ScreenState state;
   state.image_map = {};
   state.current_mode = ScreenMode::scrolling_lines;
-  state.current_brightness = 100;
+  state.current_brightness = 50;
   state.speed = 1.5f;
 
   // GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
