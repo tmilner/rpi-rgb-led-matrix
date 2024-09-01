@@ -22,7 +22,7 @@ WeatherLine::WeatherLine(
   this->weather_image = "wl-day-sunny";
   this->url = weather_base_url + weather_api_key;
   auto now = std::chrono::system_clock::now();
-  this->last_weather_update = now - 5min;
+  this->last_weather_update = now - 50min;
   this->image_map = image_map;
   this->weather_icon_map = weather_icon_map;
   this->is_visible = true;
