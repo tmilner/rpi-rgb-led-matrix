@@ -48,6 +48,8 @@ void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
   // CopyImageToCanvas(this->getBlankIcon(), offscreen_canvas, 0, this->y + 1,
   //                   opacity);
+  std::cout << "Image Info for Weather" << this->getIcon()->constImageInfo()
+            << std::endl;
   CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
 
