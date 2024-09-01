@@ -48,7 +48,7 @@ void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
   // CopyImageToCanvas(this->getBlankIcon(), offscreen_canvas, 0, this->y + 1,
   //                   opacity);
-  CopyImageToCanvas(this->getIcon(), offscreen_canvas, -1, this->y, opacity);
+  CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
 
 void WeatherLine::update() {
