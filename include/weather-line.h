@@ -10,6 +10,7 @@
 class WeatherLine : public UpdateableScreen, public ScrollingLine {
 public:
   WeatherLine(const std::string weather_api_key,
+              std::map<std::string, std::string> weather_icon_map,
               std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
               ScrollingLineSettings settings);
   void update();
@@ -19,6 +20,7 @@ public:
 private:
   Magick::Image *getIcon();
   Magick::Image *getBlankIcon();
+  std::map<std::string, std::string> weather_icon_map;
   JSONFetcher *fetcher;
   std::string url;
   std::string weather_image;

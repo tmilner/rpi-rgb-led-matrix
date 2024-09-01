@@ -175,7 +175,6 @@ int main(int argc, char *argv[]) {
   const string base_path(base_path_c);
 
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
-
   const string weather_api_key = config["weather_api_key"].as<string>();
 
   const string spotify_client_id = config["spotify_client_id"].as<string>();
@@ -194,6 +193,20 @@ int main(int argc, char *argv[]) {
       config["light_brightness_state_topic"].as<string>();
   const string light_brightness_command_topic =
       config["light_brightness_command_topic"].as<string>();
+
+  YAML::Node weather_icon_map_config =
+      YAML::LoadFile(base_path + "/weather_icons.yaml");
+
+  map<string, string> weather_icon_map;
+
+  for (YAML::const_iterator it = weather_icon_map_config.begin();
+       it != weather_icon_map_config.end(); ++it) {
+    std::string key, value;
+    key = it->first.as<string>();
+    value = it->second.as<string>();
+    std::cout << "Key: " << key << ", value: " << value << std::endl;
+    weather_icon_map[key] = value;
+  }
 
   vector<string> topics;
   // topics.push_back(light_state_topic);
@@ -307,9 +320,9 @@ int main(int argc, char *argv[]) {
   auto imageMapPtr =
       std::shared_ptr<std::map<std::string, Magick::Image>>(&state.image_map);
 
-  ScrollingLineScreen *srollingTwoLineScreen =
-      new ScrollingLineScreen(imageMapPtr, scrollingLineScreenSettings,
-                              spotifyClient, radio6Client, tflClient);
+  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(
+      imageMapPtr, weather_icon_map, scrollingLineScreenSettings, spotifyClient,
+      radio6Client, tflClient);
 
   cout << "Setting up update thread" << endl;
 

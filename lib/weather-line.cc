@@ -2,11 +2,13 @@
 #include "img_utils.h"
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 WeatherLine::WeatherLine(
     const std::string weather_api_key,
+    std::map<std::string, std::string> weather_icon_map,
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Weather Line")} {
@@ -22,6 +24,7 @@ WeatherLine::WeatherLine(
   auto now = std::chrono::system_clock::now();
   this->last_weather_update = now - 5min;
   this->image_map = image_map;
+  this->weather_icon_map = weather_icon_map;
   this->is_visible = true;
   this->fetcher = new JSONFetcher();
   this->name = std::string("Weather Line");
@@ -61,6 +64,20 @@ void WeatherLine::update() {
       const std::string condition(
           jsonData["weather"][0]["description"].asString());
       const std::string weather_icon(jsonData["weather"][0]["icon"].asString());
+      const std::string id(jsonData["weather"][0]["id"].asString());
+
+      const std::string prefix = "wi-";
+      std::string icon_str = weather_icon_map[id];
+
+      const int id_int = std::stoi(id);
+      // If we are not in the ranges mentioned above, add a day/night prefix.
+      if (!(id_int > 699 && id_int < 800) && !(id_int > 899 && id_int < 1000)) {
+        icon_str = "day-" + icon_str;
+      }
+
+      // Finally tack on the prefix.
+      icon_str = prefix + icon_str;
+
       const double kevinScale = 273.15;
       const double temp = jsonData["main"]["temp"].asDouble() - kevinScale;
 
@@ -70,12 +87,12 @@ void WeatherLine::update() {
 
       std::cout << "\tCondition: " << condition << std::endl;
       std::cout << "\tTemp: " << temp_str << std::endl;
-      std::cout << "\tIcon: " << weather_icon << std::endl;
+      std::cout << "\tIcon: " << icon_str << std::endl;
 
       std::cout << std::endl;
 
       this->weather_image.clear();
-      this->weather_image.append(weather_icon);
+      this->weather_image.append(icon_str);
       this->current_line.clear();
       this->current_line.append(temp_str).append("℃");
       this->last_weather_update = now;

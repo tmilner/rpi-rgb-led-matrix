@@ -54,6 +54,7 @@ class ScrollingLineScreen : public UpdateableScreen {
 public:
   ScrollingLineScreen(
       std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+      std::map<std::string, std::string> weather_icon_map,
       ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
       Radio6Client radio6_client, TflClient tfl_client);
   void update();

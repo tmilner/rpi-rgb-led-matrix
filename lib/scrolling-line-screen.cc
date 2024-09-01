@@ -12,6 +12,7 @@ using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 ScrollingLineScreen::ScrollingLineScreen(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+    std::map<std::string, std::string> weather_icon_map,
     ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
     Radio6Client radio6_client, TflClient tfl_client)
     : image_map{image_map},
@@ -37,8 +38,9 @@ ScrollingLineScreen::ScrollingLineScreen(
 
   this->time_line = new CurrentTimeLine(this->image_map, this->line2_settings);
   this->date_line = new DateLine(this->image_map, this->line2_settings);
-  this->weather_line = new WeatherLine(this->settings.weather_api_key,
-                                       this->image_map, this->line2_settings);
+  this->weather_line =
+      new WeatherLine(this->settings.weather_api_key, weather_icon_map,
+                      this->image_map, this->line2_settings);
 
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
