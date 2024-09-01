@@ -74,7 +74,11 @@ void WeatherLine::update() {
       const int id_int = std::stoi(id);
       // If we are not in the ranges mentioned above, add a day/night prefix.
       if (!(id_int > 699 && id_int < 800) && !(id_int > 899 && id_int < 1000)) {
-        icon_str = "day-" + icon_str;
+        if (weather_icon.back() == 'n') {
+          icon_str = "night-" + icon_str;
+        } else {
+          icon_str = "day-" + icon_str;
+        }
       }
 
       // Finally tack on the prefix.
