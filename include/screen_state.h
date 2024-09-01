@@ -12,7 +12,7 @@ namespace rgb_matrix {
 struct ScreenState {
   std::map<std::string, Magick::Image> image_map{};
   ScreenMode current_mode = ScreenMode::scrolling_lines;
-  int current_brightness = 100;
+  int current_brightness = 50;
   bool screen_on = true;
   float speed = 2.0f;
 };
