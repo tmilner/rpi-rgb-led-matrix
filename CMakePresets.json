@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "debug-valgrind",
+      "displayName": "Debug build for Valgrind",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build-debug",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/build-debug/conan_toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug-valgrind",
+      "configurePreset": "debug-valgrind"
+    }
+  ]
+}

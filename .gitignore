@@ -61,3 +61,4 @@ vcpkg
 vcpkg
 img/.DS_Store
 ScreenTest
+build-debug

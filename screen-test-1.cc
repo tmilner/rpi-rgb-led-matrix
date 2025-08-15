@@ -317,8 +317,8 @@ int main(int argc, char *argv[]) {
           &state.speed, letter_spacing, ScreenLineOption::radio6,
           ScreenLineOption::current_time, weather_api_key);
 
-  auto imageMapPtr =
-      std::shared_ptr<std::map<std::string, Magick::Image>>(&state.image_map);
+  auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(
+      &state.image_map, [](void *) {});
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(
       imageMapPtr, weather_icon_map, scrollingLineScreenSettings, spotifyClient,
