@@ -9,9 +9,7 @@
 class ScreenMenu : public Screen {
 public:
   ScreenMenu(int letter_spaceing, Font *font, int screen_width,
-             ScreenState *state, GPIO::PushButton *button_ok,
-             GPIO::PushButton *button_up, GPIO::PushButton *button_down,
-             std::vector<Screen *> *screens);
+             ScreenState *state, std::vector<Screen *> *screens);
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
 

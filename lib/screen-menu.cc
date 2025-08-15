@@ -5,10 +5,7 @@
 #include <sstream>
 
 ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width,
-                       ScreenState *state, GPIO::PushButton *button_ok,
-                       GPIO::PushButton *button_up,
-                       GPIO::PushButton *button_down,
-                       std::vector<Screen *> *screens)
+                       ScreenState *state, std::vector<Screen *> *screens)
     : menu_line{ScrollingLineSettings(&state->speed, 4, letter_spaceing, font,
                                       Color(130, 100, 73), screen_width, 0)},
       menu_sub_line{ScrollingLineSettings(&state->speed, 15, letter_spaceing,
@@ -21,22 +18,6 @@ ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width,
   this->current_screen = 0;
   this->menu_items = {"Brightness", "Speed", "Screen", "Exit"};
   this->last_button_press = std::chrono::system_clock::now();
-
-  button_ok->f_released = [&](std::chrono::nanoseconds nano) {
-    this->modeChange();
-  };
-
-  button_up->f_released = [&](std::chrono::nanoseconds nano) {
-    this->scrollMenu(true);
-  };
-
-  button_down->f_released = [&](std::chrono::nanoseconds nano) {
-    this->scrollMenu(false);
-  };
-
-  button_ok->start();
-  button_up->start();
-  button_down->start();
 }
 
 bool ScreenMenu::debounceTimePassed() {

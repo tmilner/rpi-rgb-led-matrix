@@ -126,9 +126,9 @@ int main(int argc, char *argv[]) {
   state.speed = 1.5f;
 
   // GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
-  GPIO::PushButton push_ok(11, GPIO::GPIO_PULL::UP);
-  GPIO::PushButton push_up(25, GPIO::GPIO_PULL::UP);
-  GPIO::PushButton push_down(9, GPIO::GPIO_PULL::UP);
+  // GPIO::PushButton push_ok(11, GPIO::GPIO_PULL::UP);
+  // GPIO::PushButton push_up(25, GPIO::GPIO_PULL::UP);
+  // GPIO::PushButton push_down(9, GPIO::GPIO_PULL::UP);
 
   Magick::InitializeMagick(*argv);
 
@@ -347,8 +347,7 @@ int main(int argc, char *argv[]) {
   thread updateThread(updateLines, screens_to_update);
 
   ScreenMenu menu =
-      ScreenMenu(letter_spacing, &menu_font, width, &state, &push_ok, &push_up,
-                 &push_down, &screens_to_render);
+      ScreenMenu(letter_spacing, &menu_font, width, &state, &screens_to_render);
 
   offscreen_canvas->Clear();
 
