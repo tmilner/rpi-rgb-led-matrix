@@ -1,14 +1,14 @@
-#ifndef GAME_OF_LIFE_H
-#define GAME_OF_LIFE_H
+#ifndef GAME_OF_LIFE_SCREEN_H
+#define GAME_OF_LIFE_SCREEN_H
 
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <chrono>
 #include <mutex>
-class GameOfLfeScreen : public UpdateableScreen {
+class GameOfLifeScreen : public UpdatableScreen {
 public:
-  GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms = 500,
-                  bool torus = true);
-  ~GameOfLfeScreen();
+  GameOfLifeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms = 500,
+                   bool torus = true);
+  ~GameOfLifeScreen();
   void render(rgb_matrix::FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
   void update();
@@ -32,4 +32,4 @@ private:
   mutable std::mutex life_mutex;
 };
 
-#endif /*GAME_OF_LIFE_H*/
+#endif /*GAME_OF_LIFE_SCREEN_H*/

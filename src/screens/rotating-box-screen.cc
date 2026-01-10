@@ -1,4 +1,4 @@
-#include "screens/rotating-box.h"
+#include "screens/rotating-box-screen.h"
 #include <math.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -7,7 +7,8 @@
 using std::max;
 using std::min;
 
-RotatingBox::RotatingBox(rgb_matrix::FrameCanvas *offscreen_canvas)
+RotatingBoxScreen::RotatingBoxScreen(
+    rgb_matrix::FrameCanvas *offscreen_canvas)
     : name{std::string("Rotating Box")}, cent_x(offscreen_canvas->width() / 2),
       cent_y(offscreen_canvas->height() / 2),
       rotate_square(
@@ -23,10 +24,10 @@ RotatingBox::RotatingBox(rgb_matrix::FrameCanvas *offscreen_canvas)
   return;
 }
 
-std::string *RotatingBox::getName() { return &this->name; }
+std::string *RotatingBoxScreen::getName() { return &this->name; }
 
-void RotatingBox::render(rgb_matrix::FrameCanvas *offscreen_canvas,
-                         char opacity) {
+void RotatingBoxScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas,
+                               char opacity) {
   if (!is_visible) {
     return;
   }
@@ -54,7 +55,7 @@ void RotatingBox::render(rgb_matrix::FrameCanvas *offscreen_canvas,
     }
   }
 }
-uint8_t RotatingBox::scale_col(int val, int lo, int hi) {
+uint8_t RotatingBoxScreen::scale_col(int val, int lo, int hi) {
   if (val < lo)
     return 0;
   if (val > hi)
@@ -62,8 +63,8 @@ uint8_t RotatingBox::scale_col(int val, int lo, int hi) {
   return 255 * (val - lo) / (hi - lo);
 }
 
-void RotatingBox::Rotate(int x, int y, float angle, float *new_x,
-                         float *new_y) {
+void RotatingBoxScreen::Rotate(int x, int y, float angle, float *new_x,
+                               float *new_y) {
   *new_x = x * cosf(angle) - y * sinf(angle);
   *new_y = x * sinf(angle) + y * cosf(angle);
 }

@@ -1,11 +1,11 @@
-#include "lines/bus-towards-oval-line.h"
+#include "lines/bus-arrivals-line.h"
 #include "core/img_utils.h"
 #include <climits>
 #include <iostream>
 #include <mutex>
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-BusTowardsOvalLine::BusTowardsOvalLine(
+BusArrivalsLine::BusArrivalsLine(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     TflClient *tflClient, ScrollingLineSettings settings)
     : ScrollingLine(settings), tflClient(tflClient),
@@ -18,14 +18,14 @@ BusTowardsOvalLine::BusTowardsOvalLine(
   this->last_update = now - 5min;
 }
 
-Magick::Image *BusTowardsOvalLine::getIcon() {
+Magick::Image *BusArrivalsLine::getIcon() {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->image_key];
 }
 
-std::string *BusTowardsOvalLine::getName() { return &this->name; }
+std::string *BusArrivalsLine::getName() { return &this->name; }
 
-void BusTowardsOvalLine::render(FrameCanvas *offscreen_canvas, char opacity) {
+void BusArrivalsLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
@@ -38,7 +38,7 @@ void BusTowardsOvalLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
 }
 
-void BusTowardsOvalLine::update() {
+void BusArrivalsLine::update() {
   const auto now = std::chrono::system_clock::now();
 
   if (((now - this->last_update) / 1s) < this->update_after_seconds) {

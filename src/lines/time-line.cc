@@ -1,4 +1,4 @@
-#include "lines/current-time-line.h"
+#include "lines/time-line.h"
 #include "core/img_utils.h"
 #include <chrono>
 #include <climits>
@@ -8,7 +8,7 @@
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-CurrentTimeLine::CurrentTimeLine(
+TimeLine::TimeLine(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Time Line")} {
@@ -23,13 +23,13 @@ CurrentTimeLine::CurrentTimeLine(
   std::cout << "Time Line Updater Constructor END" << std::endl;
 }
 
-std::string *CurrentTimeLine::getName() { return &this->name; }
+std::string *TimeLine::getName() { return &this->name; }
 
-Magick::Image *CurrentTimeLine::getIcon() {
+Magick::Image *TimeLine::getIcon() {
   return &(*this->image_map)[this->time_image];
 }
 
-void CurrentTimeLine::render(FrameCanvas *offscreen_canvas, char opacity) {
+void TimeLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (opacity >= (CHAR_MAX / 2)) {
     this->renderLine(offscreen_canvas);
   }
@@ -38,7 +38,7 @@ void CurrentTimeLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
   CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
-void CurrentTimeLine::update() {
+void TimeLine::update() {
   if (!is_visible) {
     return;
   }

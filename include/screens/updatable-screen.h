@@ -1,13 +1,13 @@
-#ifndef UPDATEABLE_SCREEN_HPP
-#define UPDATEABLE_SCREEN_HPP
+#ifndef UPDATABLE_SCREEN_HPP
+#define UPDATABLE_SCREEN_HPP
 
 #include "core/led-matrix.h"
 #include "screens/screen.h"
 
-class UpdateableScreen : public Screen {
+class UpdatableScreen : public Screen {
 public:
-  UpdateableScreen(){};
-  virtual ~UpdateableScreen(){};
+  UpdatableScreen(){};
+  virtual ~UpdatableScreen(){};
   virtual void update() = 0;
   virtual void render(rgb_matrix::FrameCanvas *offscreen_canvas,
                       char opacity = 0xFF) = 0;
@@ -17,4 +17,4 @@ protected:
   std::string name;
 };
 
-#endif /*UPDATEABLE_SCREEN_HPP*/
+#endif /*UPDATABLE_SCREEN_HPP*/

@@ -1,11 +1,11 @@
-#include "lines/music-line.h"
+#include "lines/music-info-line.h"
 #include "core/img_utils.h"
 #include <climits>
 #include <iostream>
 #include <mutex>
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
-MusicLine::MusicLine(
+MusicInfoLine::MusicInfoLine(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     SpotifyClient *spotifyClient, Radio6Client *radio6Client,
     ScrollingLineSettings settings)
@@ -19,14 +19,14 @@ MusicLine::MusicLine(
   this->last_update = now - 5min;
 }
 
-Magick::Image *MusicLine::getIcon() {
+Magick::Image *MusicInfoLine::getIcon() {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->image_key];
 }
 
-std::string *MusicLine::getName() { return &this->name; }
+std::string *MusicInfoLine::getName() { return &this->name; }
 
-void MusicLine::render(FrameCanvas *offscreen_canvas, char opacity) {
+void MusicInfoLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
@@ -39,7 +39,7 @@ void MusicLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
 }
 
-void MusicLine::update() {
+void MusicInfoLine::update() {
   const auto now = std::chrono::system_clock::now();
 
   if (((now - this->last_update) / 1s) < this->update_after_seconds) {

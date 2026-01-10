@@ -1,14 +1,14 @@
-#ifndef BUS_TOWARDS_OVAL_LINE_H
-#define BUS_TOWARDS_OVAL_LINE_H
+#ifndef BUS_ARRIVALS_LINE_H
+#define BUS_ARRIVALS_LINE_H
 #include "clients/tfl-client.h"
 #include "lines/scrolling-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <chrono>
 
-class BusTowardsOvalLine : public UpdateableScreen, public ScrollingLine {
+class BusArrivalsLine : public UpdatableScreen, public ScrollingLine {
 public:
-  BusTowardsOvalLine(
+  BusArrivalsLine(
       std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
       TflClient *tflClient, ScrollingLineSettings settings);
   void update();
@@ -19,9 +19,9 @@ private:
   Magick::Image *getIcon();
   TflClient *tflClient;
   std::chrono::time_point<std::chrono::system_clock> last_update;
-  static const int update_after_seconds = 25;
+  static const int update_after_seconds = 45;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};
   std::string image_key;
   std::string name;
 };
-#endif /*BUS_TOWARDS_OVAL_LINE_H*/
+#endif /*BUS_ARRIVALS_LINE_H*/

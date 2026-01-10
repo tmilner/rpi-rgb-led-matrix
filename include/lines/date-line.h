@@ -1,12 +1,12 @@
-#ifndef DATE_LINE_UPDATER_H
-#define DATE_LINE_UPDATER_H
+#ifndef DATE_LINE_H
+#define DATE_LINE_H
 #include "core/led-matrix.h"
 #include "lines/scrolling-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <memory>
 
-class DateLine : public UpdateableScreen, public ScrollingLine {
+class DateLine : public UpdatableScreen, public ScrollingLine {
 public:
   DateLine(std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
            ScrollingLineSettings settings);
@@ -21,4 +21,4 @@ private:
   std::string name;
 };
 
-#endif /*DATE_LINE_UPDATER_H*/
+#endif /*DATE_LINE_H*/

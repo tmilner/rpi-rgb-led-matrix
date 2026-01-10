@@ -1,13 +1,13 @@
-#ifndef TIME_DATE_WEATHER_LINE_UPDATER_H
-#define TIME_DATE_WEATHER_LINE_UPDATER_H
+#ifndef TIME_DATE_WEATHER_LINE_H
+#define TIME_DATE_WEATHER_LINE_H
 #include "clients/json-fetcher.h"
 #include "core/led-matrix.h"
 #include "lines/scrolling-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <chrono>
 
-class TimeDateWeatherLine : public UpdateableScreen, ScrollingLine {
+class TimeDateWeatherLine : public UpdatableScreen, ScrollingLine {
 public:
   TimeDateWeatherLine(const std::string weather_api_key,
                       std::map<std::string, Magick::Image> *image_map,
@@ -35,4 +35,4 @@ private:
   std::string name;
 };
 
-#endif /*TIME_DATE_WEATHER_LINE_UPDATER_H*/
+#endif /*TIME_DATE_WEATHER_LINE_H*/

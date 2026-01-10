@@ -1,9 +1,9 @@
 #include "screens/scrolling-line-screen.h"
-#include "lines/bus-towards-oval-line.h"
-#include "lines/current-time-line.h"
+#include "lines/bus-arrivals-line.h"
+#include "lines/time-line.h"
 #include "core/date.h"
 #include "core/img_utils.h"
-#include "lines/music-line.h"
+#include "lines/music-info-line.h"
 #include "lines/weather-line.h"
 #include <climits>
 #include <iostream>
@@ -40,14 +40,15 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->line2_last_rotate = now;
 
   this->music_line =
-      std::make_unique<MusicLine>(this->image_map, this->spotify_client,
-                                  this->radio6_client, this->line1_settings);
+      std::make_unique<MusicInfoLine>(this->image_map, this->spotify_client,
+                                      this->radio6_client,
+                                      this->line1_settings);
 
-  this->bus_line = std::make_unique<BusTowardsOvalLine>(
+  this->bus_line = std::make_unique<BusArrivalsLine>(
       this->image_map, this->tfl_client, this->line1_settings);
 
   this->time_line =
-      std::make_unique<CurrentTimeLine>(this->image_map, this->line2_settings);
+      std::make_unique<TimeLine>(this->image_map, this->line2_settings);
   this->date_line =
       std::make_unique<DateLine>(this->image_map, this->line2_settings);
   this->weather_line = std::make_unique<WeatherLine>(

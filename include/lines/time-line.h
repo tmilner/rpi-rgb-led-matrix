@@ -1,14 +1,14 @@
-#ifndef TIME_LINE_UPDATER_H
-#define TIME_LINE_UPDATER_H
+#ifndef TIME_LINE_H
+#define TIME_LINE_H
 #include "core/led-matrix.h"
 #include "lines/scrolling-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <memory>
 
-class CurrentTimeLine : public UpdateableScreen, public ScrollingLine {
+class TimeLine : public UpdatableScreen, public ScrollingLine {
 public:
-  CurrentTimeLine(
+  TimeLine(
       std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
       ScrollingLineSettings settings);
   void update();
@@ -22,4 +22,4 @@ private:
   std::string name;
 };
 
-#endif /*TIME_LINE_UPDATER_H*/
+#endif /*TIME_LINE_H*/

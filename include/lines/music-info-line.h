@@ -1,17 +1,17 @@
-#ifndef RADIO6_LINE_UPDATER_H
-#define RADIO6_LINE_UPDATER_H
+#ifndef MUSIC_INFO_LINE_H
+#define MUSIC_INFO_LINE_H
 #include "clients/radio6-client.h"
 #include "clients/spotify-client.h"
 #include "lines/scrolling-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <chrono>
 
-class MusicLine : public UpdateableScreen, public ScrollingLine {
+class MusicInfoLine : public UpdatableScreen, public ScrollingLine {
 public:
-  MusicLine(std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
-            SpotifyClient *spotifyClient, Radio6Client *radio6Client,
-            ScrollingLineSettings settings);
+  MusicInfoLine(std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
+                SpotifyClient *spotifyClient, Radio6Client *radio6Client,
+                ScrollingLineSettings settings);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
@@ -27,4 +27,4 @@ private:
   std::string image_key;
   std::string name;
 };
-#endif /*RADIO6_LINE_UPDATER_H*/
+#endif /*MUSIC_INFO_LINE_H*/

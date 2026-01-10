@@ -3,13 +3,13 @@
 #include "clients/radio6-client.h"
 #include "clients/spotify-client.h"
 #include "clients/tfl-client.h"
-#include "lines/bus-towards-oval-line.h"
-#include "lines/current-time-line.h"
+#include "lines/bus-arrivals-line.h"
+#include "lines/time-line.h"
 #include "lines/date-line.h"
-#include "lines/music-line.h"
+#include "lines/music-info-line.h"
 #include "lines/scrolling-line.h"
 #include "lines/weather-line.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 #include <Magick++.h>
 #include <chrono>
 #include <memory>
@@ -65,7 +65,7 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   }
 };
 
-class ScrollingLineScreen : public UpdateableScreen {
+class ScrollingLineScreen : public UpdatableScreen {
 public:
   ScrollingLineScreen(
       std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
@@ -89,14 +89,14 @@ private:
   rgb_matrix::Color bg_color;
   std::string name;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map;
-  std::unique_ptr<BusTowardsOvalLine> bus_line;
-  std::unique_ptr<MusicLine> music_line;
-  std::unique_ptr<CurrentTimeLine> time_line;
+  std::unique_ptr<BusArrivalsLine> bus_line;
+  std::unique_ptr<MusicInfoLine> music_line;
+  std::unique_ptr<TimeLine> time_line;
   std::unique_ptr<DateLine> date_line;
   std::unique_ptr<WeatherLine> weather_line;
 
-  UpdateableScreen *line1;
-  UpdateableScreen *line2;
+  UpdatableScreen *line1;
+  UpdatableScreen *line2;
   ScrollingLineSettings line1_settings;
   ScrollingLineSettings line2_settings;
 
@@ -106,14 +106,14 @@ private:
   size_t line2_index = 0;
 
   ScreenLineOption current_line1;
-  UpdateableScreen *previous_line1;
+  UpdatableScreen *previous_line1;
   char line1_transition_percentage;
   bool line1_transitioning;
   std::chrono::time_point<std::chrono::system_clock> line1_last_rotate;
   std::chrono::seconds line1_rotate_after_seconds;
 
   ScreenLineOption current_line2;
-  UpdateableScreen *previous_line2;
+  UpdatableScreen *previous_line2;
   char line2_transition_percentage;
   bool line2_transitioning;
   std::chrono::time_point<std::chrono::system_clock> line2_last_rotate;

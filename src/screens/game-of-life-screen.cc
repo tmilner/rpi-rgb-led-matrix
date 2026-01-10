@@ -1,8 +1,8 @@
-#include "screens/game-of-life.h"
+#include "screens/game-of-life-screen.h"
 #include <iostream>
 
-GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms,
-                                 bool torus)
+GameOfLifeScreen::GameOfLifeScreen(rgb_matrix::FrameCanvas *canvas,
+                                   int delay_ms, bool torus)
     : delay_ms_(delay_ms), torus_(torus), name{std::string("Game of Life")} {
   width_ = canvas->width();
   height_ = canvas->height();
@@ -22,7 +22,7 @@ GameOfLfeScreen::GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms,
   this->seed();
 }
 
-void GameOfLfeScreen::seed() {
+void GameOfLifeScreen::seed() {
   // Init values randomly
   srand(time(NULL));
   for (int x = 0; x < game_width; ++x) {
@@ -50,7 +50,7 @@ void GameOfLfeScreen::seed() {
   }
 }
 
-GameOfLfeScreen::~GameOfLfeScreen() {
+GameOfLifeScreen::~GameOfLifeScreen() {
   for (int x = 0; x < game_width; ++x) {
     delete[] values_[x];
   }
@@ -61,10 +61,10 @@ GameOfLfeScreen::~GameOfLfeScreen() {
   delete[] newValues_;
 }
 
-std::string *GameOfLfeScreen::getName() { return &this->name; }
+std::string *GameOfLifeScreen::getName() { return &this->name; }
 
-void GameOfLfeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas,
-                             char opacity) {
+void GameOfLifeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas,
+                              char opacity) {
   if (!is_visible) {
     return;
   }
@@ -79,7 +79,7 @@ void GameOfLfeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas,
     }
   }
 }
-int GameOfLfeScreen::numAliveNeighbours(int x, int y) {
+int GameOfLifeScreen::numAliveNeighbours(int x, int y) {
   int num = 0;
   if (torus_) {
     // Edges are connected (torus)
@@ -116,7 +116,7 @@ int GameOfLfeScreen::numAliveNeighbours(int x, int y) {
   return num;
 }
 
-void GameOfLfeScreen::update() {
+void GameOfLifeScreen::update() {
   if (!is_visible) {
     return;
   }

@@ -1,11 +1,11 @@
-#ifndef ROTATING_BOX_H
-#define ROTATING_BOX_H
+#ifndef ROTATING_BOX_SCREEN_H
+#define ROTATING_BOX_SCREEN_H
 
 #include "screens/screen.h"
 
-class RotatingBox : public Screen {
+class RotatingBoxScreen : public Screen {
 public:
-  RotatingBox(rgb_matrix::FrameCanvas *offscreen_canvas);
+  RotatingBoxScreen(rgb_matrix::FrameCanvas *offscreen_canvas);
   void render(rgb_matrix::FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
 
@@ -25,4 +25,4 @@ private:
   uint8_t scale_col(int val, int lo, int hi);
 };
 
-#endif /*ROTATING_BOX_H*/
+#endif /*ROTATING_BOX_SCREEN_H*/

@@ -14,12 +14,12 @@
 #include "core/graphics.h"
 #include "core/img_utils.h"
 #include "core/led-matrix.h"
-#include "screens/game-of-life.h"
-#include "screens/rotating-box.h"
-#include "screens/screen-menu.h"
+#include "screens/game-of-life-screen.h"
+#include "screens/rotating-box-screen.h"
+#include "screens/menu-screen.h"
 #include "screens/screen_state.h"
 #include "screens/scrolling-line-screen.h"
-#include "screens/updateable-screen.h"
+#include "screens/updatable-screen.h"
 
 #include <iostream>
 #include <string>
@@ -53,10 +53,10 @@ volatile sig_atomic_t interrupt_received = 0;
 static void InterruptHandler(int signo) { interrupt_received = 1; }
 
 using namespace literals::chrono_literals;
-void updateLines(vector<UpdateableScreen *> screens_to_update,
+void updateLines(vector<UpdatableScreen *> screens_to_update,
                  std::atomic<bool> *running) {
   while (running->load()) {
-    for (vector<UpdateableScreen *>::iterator screen =
+    for (vector<UpdatableScreen *>::iterator screen =
              screens_to_update.begin();
          screen != screens_to_update.end(); screen++) {
       (*screen)->update();
@@ -342,10 +342,10 @@ int main(int argc, char *argv[]) {
   cout << "Setting up update thread" << endl;
 
   auto game_of_life_screen =
-      std::make_unique<GameOfLfeScreen>(offscreen_canvas, 500, true);
+      std::make_unique<GameOfLifeScreen>(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
 
-  auto rotating_box = std::make_unique<RotatingBox>(offscreen_canvas);
+  auto rotating_box = std::make_unique<RotatingBoxScreen>(offscreen_canvas);
   rotating_box->set_hidden();
 
   std::vector<std::unique_ptr<Screen>> screens_owned;
@@ -358,17 +358,17 @@ int main(int argc, char *argv[]) {
     screens_to_render.push_back(screen.get());
   }
 
-  vector<UpdateableScreen *> screens_to_update;
+  vector<UpdatableScreen *> screens_to_update;
 
   screens_to_update.push_back(
-      static_cast<UpdateableScreen *>(screens_to_render[0]));
+      static_cast<UpdatableScreen *>(screens_to_render[0]));
   screens_to_update.push_back(
-      static_cast<UpdateableScreen *>(screens_to_render[1]));
+      static_cast<UpdatableScreen *>(screens_to_render[1]));
 
   thread updateThread(updateLines, screens_to_update, &running);
 
-  ScreenMenu menu =
-      ScreenMenu(letter_spacing, &menu_font, width, &state, &screens_to_render);
+  MenuScreen menu =
+      MenuScreen(letter_spacing, &menu_font, width, &state, &screens_to_render);
 
   offscreen_canvas->Clear();
 
@@ -419,3 +419,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+

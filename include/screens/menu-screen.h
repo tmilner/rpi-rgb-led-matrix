@@ -1,14 +1,14 @@
-#ifndef SCREEN_MENU_H
-#define SCREEN_MENU_H
+#ifndef MENU_SCREEN_H
+#define MENU_SCREEN_H
 #include "lines/scrolling-line.h"
 #include "screens/screen.h"
 #include "screens/screen_state.h"
 #include <chrono>
 #include <cppgpio.hpp>
 
-class ScreenMenu : public Screen {
+class MenuScreen : public Screen {
 public:
-  ScreenMenu(int letter_spaceing, Font *font, int screen_width,
+  MenuScreen(int letter_spaceing, Font *font, int screen_width,
              ScreenState *state, std::vector<Screen *> *screens);
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();
@@ -29,4 +29,4 @@ private:
   std::vector<std::string> menu_items;
   std::chrono::time_point<std::chrono::system_clock> last_button_press;
 };
-#endif /*SCREEN_MENU_H*/
+#endif /*MENU_SCREEN_H*/

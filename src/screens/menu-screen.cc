@@ -1,11 +1,11 @@
-#include "screens/screen-menu.h"
+#include "screens/menu-screen.h"
 #include "core/img_utils.h"
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <sstream>
 
-ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width,
+MenuScreen::MenuScreen(int letter_spaceing, Font *font, int screen_width,
                        ScreenState *state, std::vector<Screen *> *screens)
     : menu_line{ScrollingLineSettings(&state->speed, &state->mutex, 4,
                                       letter_spaceing, font,
@@ -23,7 +23,7 @@ ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width,
   this->last_button_press = std::chrono::system_clock::now();
 }
 
-bool ScreenMenu::debounceTimePassed() {
+bool MenuScreen::debounceTimePassed() {
   using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
   const auto now = std::chrono::system_clock::now();
@@ -36,9 +36,9 @@ bool ScreenMenu::debounceTimePassed() {
   }
 }
 
-std::string *ScreenMenu::getName() { return &this->name; }
+std::string *MenuScreen::getName() { return &this->name; }
 
-void ScreenMenu::scrollMenu(bool up) {
+void MenuScreen::scrollMenu(bool up) {
   if (!debounceTimePassed()) {
     return;
   }
@@ -155,7 +155,7 @@ void ScreenMenu::scrollMenu(bool up) {
   }
 }
 
-void ScreenMenu::modeChange() {
+void MenuScreen::modeChange() {
   if (!debounceTimePassed()) {
     return;
   }
@@ -200,7 +200,7 @@ void ScreenMenu::modeChange() {
   return;
 }
 
-void ScreenMenu::render(FrameCanvas *offscreen_canvas, char opacity) {
+void MenuScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!this->is_visible) {
     return;
   }
