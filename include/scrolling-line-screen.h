@@ -11,6 +11,7 @@
 #include "updateable-screen.h"
 #include "weather-line.h"
 #include <Magick++.h>
+#include <memory>
 #include <mutex>
 
 enum ScreenLineOption {
@@ -75,11 +76,11 @@ private:
   rgb_matrix::Color bg_color;
   std::string name;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map;
-  BusTowardsOvalLine *bus_line;
-  MusicLine *music_line;
-  CurrentTimeLine *time_line;
-  DateLine *date_line;
-  WeatherLine *weather_line;
+  std::unique_ptr<BusTowardsOvalLine> bus_line;
+  std::unique_ptr<MusicLine> music_line;
+  std::unique_ptr<CurrentTimeLine> time_line;
+  std::unique_ptr<DateLine> date_line;
+  std::unique_ptr<WeatherLine> weather_line;
 
   UpdateableScreen *line1;
   UpdateableScreen *line2;

@@ -26,10 +26,11 @@
 
 #include <atomic>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <filesystem>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 #include <cppgpio.hpp>
 #include <getopt.h>
@@ -162,9 +163,6 @@ int main(int argc, char *argv[]) {
   FrameCanvas *offscreen_canvas = matrix->CreateFrameCanvas();
 
   Color color(240, 160, 100);
-  Color divider_color(130, 100, 73);
-
-  Color menu_bg_color(60, 60, 60);
   Color bg_color(0, 0, 0);
 
   rgb_matrix::DrawCircle(offscreen_canvas, 32, 12, 10, color);
@@ -174,19 +172,16 @@ int main(int argc, char *argv[]) {
   const int width = defaults.chain_length * defaults.cols;
 
   int letter_spacing = 0;
-  //  float speed = 1.0f;
-  const char *base_path_c = ".";
+  std::string base_path = ".";
 
   int opt;
   while ((opt = getopt(argc, argv, "p:")) != -1) {
     switch (opt) {
     case 'p':
-      base_path_c = strdup(optarg);
+      base_path = optarg;
       break;
     }
   }
-
-  const string base_path(base_path_c);
 
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
   const string weather_api_key = config["weather_api_key"].as<string>();
@@ -304,8 +299,6 @@ int main(int argc, char *argv[]) {
   for (const auto &[key, value] : state.image_map)
     cout << '[' << key << "] = " << value.constImageInfo() << endl;
 
-  string current_image = "01d";
-
   cout << "Publishing ON message to MQTT" << endl;
   mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
   onMessage->set_qos(1);
@@ -335,29 +328,35 @@ int main(int argc, char *argv[]) {
   auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(
       &state.image_map, [](void *) {});
 
-  ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(
+  auto srollingTwoLineScreen = std::make_unique<ScrollingLineScreen>(
       imageMapPtr, weather_icon_map, scrollingLineScreenSettings,
       &spotifyClient, &radio6Client, &tflClient);
 
   cout << "Setting up update thread" << endl;
 
-  GameOfLfeScreen *game_of_life_screen =
-      new GameOfLfeScreen(offscreen_canvas, 500, true);
+  auto game_of_life_screen =
+      std::make_unique<GameOfLfeScreen>(offscreen_canvas, 500, true);
   game_of_life_screen->set_hidden();
 
-  RotatingBox *rotating_box = new RotatingBox(offscreen_canvas);
+  auto rotating_box = std::make_unique<RotatingBox>(offscreen_canvas);
   rotating_box->set_hidden();
 
-  vector<Screen *> screens_to_render;
+  std::vector<std::unique_ptr<Screen>> screens_owned;
+  screens_owned.push_back(std::move(srollingTwoLineScreen));
+  screens_owned.push_back(std::move(game_of_life_screen));
+  screens_owned.push_back(std::move(rotating_box));
 
-  screens_to_render.push_back(srollingTwoLineScreen);
-  screens_to_render.push_back(game_of_life_screen);
-  screens_to_render.push_back(rotating_box);
+  vector<Screen *> screens_to_render;
+  for (auto &screen : screens_owned) {
+    screens_to_render.push_back(screen.get());
+  }
 
   vector<UpdateableScreen *> screens_to_update;
 
-  screens_to_update.push_back(srollingTwoLineScreen);
-  screens_to_update.push_back(game_of_life_screen);
+  screens_to_update.push_back(
+      static_cast<UpdateableScreen *>(screens_to_render[0]));
+  screens_to_update.push_back(
+      static_cast<UpdateableScreen *>(screens_to_render[1]));
 
   thread updateThread(updateLines, screens_to_update, &running);
 

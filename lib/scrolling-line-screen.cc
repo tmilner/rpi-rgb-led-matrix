@@ -31,27 +31,32 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->line1_last_rotate = now;
   this->line2_last_rotate = now;
 
-  // this->music_line = new MusicLine(this->image_map, this->spotify_client,
-  //                                  this->radio6_client,
-  //                                  this->line1_settings);
+  this->music_line =
+      std::make_unique<MusicLine>(this->image_map, this->spotify_client,
+                                  this->radio6_client, this->line1_settings);
 
-  this->bus_line = new BusTowardsOvalLine(this->image_map, this->tfl_client,
-                                          this->line1_settings);
+  this->bus_line = std::make_unique<BusTowardsOvalLine>(
+      this->image_map, this->tfl_client, this->line1_settings);
 
-  this->time_line = new CurrentTimeLine(this->image_map, this->line2_settings);
-  this->date_line = new DateLine(this->image_map, this->line2_settings);
-  this->weather_line =
-      new WeatherLine(this->settings.weather_api_key, weather_icon_map,
-                      this->image_map, this->line2_settings);
+  this->time_line =
+      std::make_unique<CurrentTimeLine>(this->image_map, this->line2_settings);
+  this->date_line =
+      std::make_unique<DateLine>(this->image_map, this->line2_settings);
+  this->weather_line = std::make_unique<WeatherLine>(
+      this->settings.weather_api_key, weather_icon_map, this->image_map,
+      this->line2_settings);
+
+  this->line1 = this->bus_line.get();
+  this->line2 = this->date_line.get();
 
   this->setLine1(this->settings.line1);
   this->setLine2(this->settings.line2);
   this->line1_transitioning = false;
   this->line1_transition_percentage = CHAR_MAX;
-  this->previous_line1 = this->bus_line;
+  this->previous_line1 = this->bus_line.get();
   this->line2_transitioning = false;
   this->line2_transition_percentage = CHAR_MAX;
-  this->previous_line2 = this->date_line;
+  this->previous_line2 = this->date_line.get();
 }
 
 std::string *ScrollingLineScreen::getName() { return &this->name; }
@@ -104,10 +109,10 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type) {
 
   if (type == ScreenLineOption::radio6) {
     this->music_line->resetXPosition();
-    this->line1 = this->music_line;
+    this->line1 = this->music_line.get();
   } else if (type == ScreenLineOption::bus) {
     this->bus_line->resetXPosition();
-    this->line1 = this->bus_line;
+    this->line1 = this->bus_line.get();
   }
   this->current_line1 = type;
 }
@@ -119,13 +124,13 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type) {
 
   if (type == ScreenLineOption::current_date) {
     this->date_line->resetXPosition();
-    this->line2 = this->date_line;
+    this->line2 = this->date_line.get();
   } else if (type == ScreenLineOption::current_time) {
     this->time_line->resetXPosition();
-    this->line2 = this->time_line;
+    this->line2 = this->time_line.get();
   } else {
     this->weather_line->resetXPosition();
-    this->line2 = this->weather_line;
+    this->line2 = this->weather_line.get();
   }
   this->current_line2 = type;
 }

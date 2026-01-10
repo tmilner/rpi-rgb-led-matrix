@@ -31,7 +31,7 @@ public:
     APIResponse fetch(std::string request, curl_slist *headers, std::string url, std::string body);
 
 private:
-    void *curl;
+    CURL *curl;
 };
 
 #endif /* JSONFETCHER_HPP */

@@ -20,12 +20,19 @@ JSONFetcher::JSONFetcher()
 {
     std::cout << "JSONFetcher Constructor" << std::endl;
     this->curl = curl_easy_init();
+    if (this->curl == nullptr)
+    {
+        throw std::runtime_error("Failed to initialize curl");
+    }
     std::cout << "JSONFetcher Constructor END" << std::endl;
 }
 
 JSONFetcher::~JSONFetcher()
 {
-    curl_easy_cleanup(this->curl);
+    if (this->curl != nullptr)
+    {
+        curl_easy_cleanup(this->curl);
+    }
 }
 
 Json::Value JSONFetcher::fetch(std::string url)
