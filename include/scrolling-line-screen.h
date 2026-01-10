@@ -11,8 +11,10 @@
 #include "updateable-screen.h"
 #include "weather-line.h"
 #include <Magick++.h>
+#include <chrono>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 enum ScreenLineOption {
   radio6,
@@ -32,14 +34,20 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   float *speed;
   std::mutex *speed_mutex;
   int letter_spacing;
-  ScreenLineOption line1;
-  ScreenLineOption line2;
+  std::vector<ScreenLineOption> line1_options;
+  std::vector<ScreenLineOption> line2_options;
+  std::chrono::seconds line1_rotate_after_seconds;
+  std::chrono::seconds line2_rotate_after_seconds;
   std::string weather_api_key;
   ScrollingLineScreenSettings(int width, int height, rgb_matrix::Font *font,
                               rgb_matrix::Color color,
                               rgb_matrix::Color bg_color, float *speed,
-                              std::mutex *speed_mutex, int letter_spacing,
-                              ScreenLineOption line1, ScreenLineOption line2,
+                              std::mutex *speed_mutex,
+                              std::vector<ScreenLineOption> line1_options,
+                              std::vector<ScreenLineOption> line2_options,
+                              std::chrono::seconds line1_rotate_after_seconds,
+                              std::chrono::seconds line2_rotate_after_seconds,
+                              int letter_spacing,
                               const std::string weather_api_key) {
     this->width = width;
     this->height = height;
@@ -48,9 +56,12 @@ struct ScrollingLineScreenSettings : ScreenSettings {
     this->bg_color = bg_color;
     this->speed = speed;
     this->speed_mutex = speed_mutex;
-    this->line1 = line1;
-    this->line2 = line2;
+    this->line1_options = std::move(line1_options);
+    this->line2_options = std::move(line2_options);
+    this->line1_rotate_after_seconds = line1_rotate_after_seconds;
+    this->line2_rotate_after_seconds = line2_rotate_after_seconds;
     this->weather_api_key = weather_api_key;
+    this->letter_spacing = letter_spacing;
   }
 };
 
@@ -65,6 +76,8 @@ public:
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   void setLine1(ScreenLineOption type);
   void setLine2(ScreenLineOption type);
+  void setLine1Options(std::vector<ScreenLineOption> options);
+  void setLine2Options(std::vector<ScreenLineOption> options);
   std::string *getName();
 
 private:
@@ -87,18 +100,23 @@ private:
   ScrollingLineSettings line1_settings;
   ScrollingLineSettings line2_settings;
 
+  std::vector<ScreenLineOption> line1_options;
+  std::vector<ScreenLineOption> line2_options;
+  size_t line1_index = 0;
+  size_t line2_index = 0;
+
   ScreenLineOption current_line1;
   UpdateableScreen *previous_line1;
   char line1_transition_percentage;
   bool line1_transitioning;
   std::chrono::time_point<std::chrono::system_clock> line1_last_rotate;
-  static const int line1_rotate_after_seconds = 15;
+  std::chrono::seconds line1_rotate_after_seconds;
 
   ScreenLineOption current_line2;
   UpdateableScreen *previous_line2;
   char line2_transition_percentage;
   bool line2_transitioning;
   std::chrono::time_point<std::chrono::system_clock> line2_last_rotate;
-  static const int line2_rotate_after_seconds = 10;
+  std::chrono::seconds line2_rotate_after_seconds;
 };
 #endif /*SCROLLING_SCREEN_H*/

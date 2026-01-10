@@ -25,6 +25,7 @@
 #include <string>
 
 #include <atomic>
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <filesystem>
@@ -319,11 +320,17 @@ int main(int argc, char *argv[]) {
       light_brightness_state_topic, light_state_topic, light_command_topic,
       &running);
 
+  std::vector<ScreenLineOption> line1_options = {ScreenLineOption::bus};
+  std::vector<ScreenLineOption> line2_options = {ScreenLineOption::current_time,
+                                                 ScreenLineOption::current_date,
+                                                 ScreenLineOption::weather};
+
   ScrollingLineScreenSettings scrollingLineScreenSettings =
       ScrollingLineScreenSettings(
           defaults.cols, defaults.rows, &main_font, color, bg_color,
-          &state.speed, &state.mutex, letter_spacing, ScreenLineOption::bus,
-          ScreenLineOption::current_time, weather_api_key);
+          &state.speed, &state.mutex, std::move(line1_options),
+          std::move(line2_options), std::chrono::seconds(15),
+          std::chrono::seconds(10), letter_spacing, weather_api_key);
 
   auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(
       &state.image_map, [](void *) {});
