@@ -28,6 +28,7 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
   color = settings.init_color;
   font = *settings.init_font;
   orig_speed = settings.init_speed;
+  speed_mutex = settings.init_speed_mutex;
   speed = *settings.init_speed;
   icon_offset = settings.init_icon_offset;
   screen_width = settings.init_screen_width;
@@ -42,16 +43,29 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
             << ", Init Screen width = " << settings.init_screen_width
             << " icon offset " << icon_offset << std::endl;
 };
-void ScrollingLine::resetXPosition() { x = screen_width + 1; }
+void ScrollingLine::resetXPosition() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  x = screen_width + 1;
+}
 void ScrollingLine::updateText(std::string *new_line_string) {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   current_line = *new_line_string;
 };
 void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
+  float current_speed = 0.0f;
+  if (speed_mutex != nullptr) {
+    std::lock_guard<std::mutex> speed_lock(*speed_mutex);
+    current_speed = *orig_speed;
+  } else {
+    current_speed = *orig_speed;
+  }
+
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   if (length <= max_width_for_no_scrolling) {
     speed = 0;
     x = ((max_width_for_no_scrolling - length) / 2) + icon_offset;
   } else {
-    speed = *orig_speed;
+    speed = current_speed;
   }
 
   length = rgb_matrix::DrawText(offscreen_canvas, font, x,
@@ -63,4 +77,7 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
   }
 };
 
-void ScrollingLine::changeYPos(int new_y) { this->y = new_y; }
+void ScrollingLine::changeYPos(int new_y) {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  this->y = new_y;
+}

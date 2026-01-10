@@ -2,6 +2,7 @@
 #include "img_utils.h"
 #include <climits>
 #include <iostream>
+#include <mutex>
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 MusicLine::MusicLine(
@@ -19,6 +20,7 @@ MusicLine::MusicLine(
 }
 
 Magick::Image *MusicLine::getIcon() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->image_key];
 }
 
@@ -56,13 +58,15 @@ void MusicLine::update() {
       std::cout << "Spotify now playing " << nowPlaying.value().track_name
                 << std::endl;
 
-      this->last_update = now;
-      this->image_key = "spotify";
-
-      this->current_line.clear();
-      this->current_line.append(nowPlaying.value().artist)
-          .append(" - ")
-          .append(nowPlaying.value().track_name);
+      {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->last_update = now;
+        this->image_key = "spotify";
+        this->current_line.clear();
+        this->current_line.append(nowPlaying.value().artist)
+            .append(" - ")
+            .append(nowPlaying.value().track_name);
+      }
     } else {
       showSpotify = false;
     }
@@ -79,13 +83,15 @@ void MusicLine::update() {
 
       Radio6Client::NowPlaying nowPlaying = this->radio6Client.getNowPlaying();
 
-      this->last_update = now;
-      this->image_key = "radio6icon";
-
-      this->current_line.clear();
-      this->current_line.append(nowPlaying.artist)
-          .append(" - ")
-          .append(nowPlaying.track_name);
+      {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->last_update = now;
+        this->image_key = "radio6icon";
+        this->current_line.clear();
+        this->current_line.append(nowPlaying.artist)
+            .append(" - ")
+            .append(nowPlaying.track_name);
+      }
     } catch (std::runtime_error &e) {
       std::cerr << "Exception when updating music line" << e.what()
                 << std::endl;

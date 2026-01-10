@@ -2,6 +2,7 @@
 #include "img_utils.h"
 #include <climits>
 #include <iostream>
+#include <mutex>
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 BusTowardsOvalLine::BusTowardsOvalLine(
@@ -18,6 +19,7 @@ BusTowardsOvalLine::BusTowardsOvalLine(
 }
 
 Magick::Image *BusTowardsOvalLine::getIcon() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->image_key];
 }
 
@@ -46,17 +48,26 @@ void BusTowardsOvalLine::update() {
   try {
     std::vector<TflClient::Arrival> arrivalsTowardsOval =
         this->tflClient.getBusArrivals("490014229J");
-    std::vector<TflClient::Arrival> arrivalsTowardsEC =
+    std::vector<TflClient::Arrival> arrivalsCamberwellGreenTowardsECStopF =
         this->tflClient.getBusArrivals("490015298F");
+    std::vector<TflClient::Arrival> arrivalsCamberwellGreenTowardsECStopE =
+        this->tflClient.getBusArrivals("490015298E");
 
     std::vector<TflClient::Arrival> allArrivals;
 
-    allArrivals.reserve(arrivalsTowardsOval.size() +
-                        arrivalsTowardsEC.size()); // preallocate memory
+    allArrivals.reserve(
+        arrivalsTowardsOval.size() +
+        arrivalsCamberwellGreenTowardsECStopF.size() +
+        arrivalsCamberwellGreenTowardsECStopE.size()); // preallocate memory
+
     allArrivals.insert(allArrivals.end(), arrivalsTowardsOval.begin(),
                        arrivalsTowardsOval.end());
-    allArrivals.insert(allArrivals.end(), arrivalsTowardsEC.begin(),
-                       arrivalsTowardsEC.end());
+    allArrivals.insert(allArrivals.end(),
+                       arrivalsCamberwellGreenTowardsECStopF.begin(),
+                       arrivalsCamberwellGreenTowardsECStopF.end());
+    allArrivals.insert(allArrivals.end(),
+                       arrivalsCamberwellGreenTowardsECStopE.begin(),
+                       arrivalsCamberwellGreenTowardsECStopE.end());
 
     std::sort(allArrivals.begin(), allArrivals.end(),
               [](TflClient::Arrival bus1, TflClient::Arrival bus2) {
@@ -65,20 +76,29 @@ void BusTowardsOvalLine::update() {
 
     std::string busTimes = "";
 
+    int busesAdded = 0;
+
     for (auto &arrival : allArrivals) {
-      if (arrival.secondsUntilArrival < (20 * 60) &&
-          arrival.secondsUntilArrival > 60 &&
+      if (arrival.secondsUntilArrival < (30 * 60) &&
+          arrival.secondsUntilArrival > 180 &&
           (arrival.busName == "185" || arrival.busName == "36" ||
-           arrival.busName == "68")) {
+           arrival.busName == "35")) {
+        busesAdded++;
         busTimes.append(arrival.getDisplayString()).append(", ");
+      }
+      if (busesAdded >= 5) {
+        break;
       }
     }
 
     std::cout << "\t Next busses: " << busTimes << std::endl;
     std::cout << std::endl;
 
-    this->current_line.clear();
-    this->current_line.append(busTimes);
+    {
+      std::lock_guard<std::recursive_mutex> lock(line_mutex);
+      this->current_line.clear();
+      this->current_line.append(busTimes);
+    }
   } catch (std::runtime_error &e) {
     printf("Failed to fetch Bus Data\n");
   }

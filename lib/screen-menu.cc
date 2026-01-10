@@ -2,15 +2,18 @@
 #include "img_utils.h"
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 
 ScreenMenu::ScreenMenu(int letter_spaceing, Font *font, int screen_width,
                        ScreenState *state, std::vector<Screen *> *screens)
-    : menu_line{ScrollingLineSettings(&state->speed, 4, letter_spaceing, font,
+    : menu_line{ScrollingLineSettings(&state->speed, &state->mutex, 4,
+                                      letter_spaceing, font,
                                       Color(130, 100, 73), screen_width, 0)},
-      menu_sub_line{ScrollingLineSettings(&state->speed, 15, letter_spaceing,
-                                          font, Color(130, 100, 73),
-                                          screen_width, 0)},
+      menu_sub_line{ScrollingLineSettings(&state->speed, &state->mutex, 15,
+                                          letter_spaceing, font,
+                                          Color(130, 100, 73), screen_width,
+                                          0)},
       screens{screens}, name{std::string("Menu")} {
   this->is_visible = false;
   this->state = state;
@@ -77,9 +80,15 @@ void ScreenMenu::scrollMenu(bool up) {
     }
   } else if (this->current_mode == MenuMode::brightness_menu) {
     if (up) {
-      std::cout << "Brightness Menu. Scroll up!!"
-                << this->state->current_brightness << std::endl;
+      int current_brightness = 0;
+      {
+        std::lock_guard<std::mutex> lock(this->state->mutex);
+        current_brightness = this->state->current_brightness;
+      }
+      std::cout << "Brightness Menu. Scroll up!!" << current_brightness
+                << std::endl;
 
+      std::lock_guard<std::mutex> lock(this->state->mutex);
       if (this->state->current_brightness != 100) {
         int increment_by = 5;
         if (this->state->current_brightness + increment_by > 100) {
@@ -89,9 +98,15 @@ void ScreenMenu::scrollMenu(bool up) {
         }
       }
     } else {
-      std::cout << "Brightness Menu. Scroll down!!"
-                << this->state->current_brightness << std::endl;
+      int current_brightness = 0;
+      {
+        std::lock_guard<std::mutex> lock(this->state->mutex);
+        current_brightness = this->state->current_brightness;
+      }
+      std::cout << "Brightness Menu. Scroll down!!" << current_brightness
+                << std::endl;
 
+      std::lock_guard<std::mutex> lock(this->state->mutex);
       if (this->state->current_brightness != 0) {
         int decrement_by = 5;
         if (this->state->current_brightness - decrement_by < 0) {
@@ -103,8 +118,14 @@ void ScreenMenu::scrollMenu(bool up) {
     }
   } else if (this->current_mode == MenuMode::speed_menu) {
     if (up) {
-      std::cout << "Speed Menu. Scroll up!!" << this->state->speed << std::endl;
+      float current_speed = 0.0f;
+      {
+        std::lock_guard<std::mutex> lock(this->state->mutex);
+        current_speed = this->state->speed;
+      }
+      std::cout << "Speed Menu. Scroll up!!" << current_speed << std::endl;
 
+      std::lock_guard<std::mutex> lock(this->state->mutex);
       if (this->state->speed != 100) {
         float increment_by = 0.1f;
         if (this->state->speed + increment_by > 10) {
@@ -114,9 +135,14 @@ void ScreenMenu::scrollMenu(bool up) {
         }
       }
     } else {
-      std::cout << "Speed Menu. Scroll down!!" << this->state->speed
-                << std::endl;
+      float current_speed = 0.0f;
+      {
+        std::lock_guard<std::mutex> lock(this->state->mutex);
+        current_speed = this->state->speed;
+      }
+      std::cout << "Speed Menu. Scroll down!!" << current_speed << std::endl;
 
+      std::lock_guard<std::mutex> lock(this->state->mutex);
       if (this->state->speed != 0) {
         float decrement_by = 0.1f;
         if (this->state->speed - decrement_by < 0) {
@@ -194,12 +220,21 @@ void ScreenMenu::render(FrameCanvas *offscreen_canvas, char opacity) {
   rgb_matrix::DrawLine(offscreen_canvas, 2, 13, offscreen_canvas->width() - 4,
                        13, Color(130, 100, 73));
   if (this->current_mode == brightness_menu) {
-    menu_sub_line.updateText(
-        &std::to_string(this->state->current_brightness).append("%"));
+    std::string brightness_text;
+    {
+      std::lock_guard<std::mutex> lock(this->state->mutex);
+      brightness_text = std::to_string(this->state->current_brightness);
+    }
+    brightness_text.append("%");
+    menu_sub_line.updateText(&brightness_text);
   }
   if (this->current_mode == speed_menu) {
     std::stringstream temp_str_stream;
-    temp_str_stream << std::fixed << std::setprecision(2) << this->state->speed;
+    {
+      std::lock_guard<std::mutex> lock(this->state->mutex);
+      temp_str_stream << std::fixed << std::setprecision(2)
+                      << this->state->speed;
+    }
     std::string temp_str = temp_str_stream.str();
     menu_sub_line.updateText(&temp_str);
   } else if (this->current_mode == switch_screen) {

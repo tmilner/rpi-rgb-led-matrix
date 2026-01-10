@@ -15,6 +15,7 @@ public:
     ~MQTTClient();
     mqtt::message::const_ptr_t consume_message();
     void publish_message(mqtt::message_ptr message);
+    void stop_consuming();
 private:
     std::vector<std::string> topics;
     mqtt::async_client cli;

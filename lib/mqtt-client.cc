@@ -63,3 +63,7 @@ void MQTTClient::publish_message(mqtt::message_ptr message) {
   }
   cli.publish(message);
 }
+
+void MQTTClient::stop_consuming() {
+  cli.stop_consuming();
+}

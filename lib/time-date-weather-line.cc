@@ -3,6 +3,7 @@
 #include "img_utils.h"
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
@@ -38,6 +39,7 @@ TimeDateWeatherLine::TimeDateWeatherLine(
 std::string *TimeDateWeatherLine::getName() { return &this->name; }
 
 Magick::Image *TimeDateWeatherLine::getIcon() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->current_image];
 }
 
@@ -99,11 +101,14 @@ void TimeDateWeatherLine::update() {
 
       std::cout << std::endl;
 
-      this->weather_image.clear();
-      this->weather_image.append(weather_icon);
-      this->weather_line.clear();
-      this->weather_line.append(temp_str).append("℃");
-      this->last_weather_update = now;
+      {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->weather_image.clear();
+        this->weather_image.append(weather_icon);
+        this->weather_line.clear();
+        this->weather_line.append(temp_str).append("℃");
+        this->last_weather_update = now;
+      }
     } catch (std::runtime_error &e) {
       printf("Failed to fetch Weather\n");
     }
@@ -111,6 +116,7 @@ void TimeDateWeatherLine::update() {
 
   // switch on enum pls
   if (this->current_display == 1) {
+    std::lock_guard<std::recursive_mutex> lock(line_mutex);
     this->current_image.clear();
     this->current_image.append(this->time_image);
     this->current_line.clear();
@@ -122,12 +128,14 @@ void TimeDateWeatherLine::update() {
     auto time = oss.str();
     this->current_line.append(time);
   } else if (this->current_display == 2) {
+    std::lock_guard<std::recursive_mutex> lock(line_mutex);
     this->current_image.clear();
     this->current_image.append(this->date_image);
     this->current_line.clear();
     this->current_line.append(
         date::format("%d %b", date::floor<std::chrono::milliseconds>(now)));
   } else if (this->current_display == 0) {
+    std::lock_guard<std::recursive_mutex> lock(line_mutex);
     this->current_image.clear();
     this->current_image.append(this->weather_image);
     this->current_line.clear();

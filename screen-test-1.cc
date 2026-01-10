@@ -24,10 +24,12 @@
 #include <iostream>
 #include <string>
 
+#include <atomic>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <filesystem>
+#include <mutex>
 
 #include <cppgpio.hpp>
 #include <getopt.h>
@@ -45,12 +47,13 @@
 using namespace rgb_matrix;
 using namespace std;
 
-volatile bool interrupt_received = false;
-static void InterruptHandler(int signo) { interrupt_received = true; }
+volatile sig_atomic_t interrupt_received = 0;
+static void InterruptHandler(int signo) { interrupt_received = 1; }
 
 using namespace literals::chrono_literals;
-void updateLines(vector<UpdateableScreen *> screens_to_update) {
-  while (true) {
+void updateLines(vector<UpdateableScreen *> screens_to_update,
+                 std::atomic<bool> *running) {
+  while (running->load()) {
     for (vector<UpdateableScreen *>::iterator screen =
              screens_to_update.begin();
          screen != screens_to_update.end(); screen++) {
@@ -64,8 +67,9 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
                         std::string light_brightness_command_topic,
                         std::string light_brightness_state_topic,
                         std::string light_state_topic,
-                        std::string light_command_topic) {
-  while (true) {
+                        std::string light_command_topic,
+                        std::atomic<bool> *running) {
+  while (running->load()) {
     try {
       auto message = mqttClient->consume_message();
       if (!message) {
@@ -80,7 +84,10 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
         std::string message_contents = message->to_string();
         int new_brightness = stoi(message_contents);
         if (new_brightness >= 0 && new_brightness <= 100) {
-          state->current_brightness = new_brightness;
+          {
+            std::lock_guard<std::mutex> lock(state->mutex);
+            state->current_brightness = new_brightness;
+          }
           mqtt::message_ptr brightnessMessage = mqtt::make_message(
               light_brightness_state_topic, to_string(new_brightness));
           brightnessMessage->set_qos(QOS);
@@ -93,7 +100,10 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
         std::cout << "Updating state!" << message->to_string() << endl;
         std::string message_contents = message->to_string();
         if (message_contents == "ON") {
-          state->screen_on = true;
+          {
+            std::lock_guard<std::mutex> lock(state->mutex);
+            state->screen_on = true;
+          }
           mqtt::message_ptr stateMessage =
               mqtt::make_message(light_state_topic, "ON");
           stateMessage->set_qos(QOS);
@@ -101,7 +111,10 @@ void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
           mqttClient->publish_message(stateMessage);
           std::cout << "State updated via MQTT to ON" << endl;
         } else if (message_contents == "OFF") {
-          state->screen_on = false;
+          {
+            std::lock_guard<std::mutex> lock(state->mutex);
+            state->screen_on = false;
+          }
           mqtt::message_ptr stateMessage =
               mqtt::make_message(light_state_topic, "OFF");
           stateMessage->set_qos(QOS);
@@ -124,6 +137,7 @@ int main(int argc, char *argv[]) {
   state.current_mode = ScreenMode::scrolling_lines;
   state.current_brightness = 50;
   state.speed = 1.5f;
+  std::atomic<bool> running(true);
 
   // GPIO::RotaryDial dial(25, 9, GPIO::GPIO_PULL::UP);
   // GPIO::PushButton push_ok(11, GPIO::GPIO_PULL::UP);
@@ -309,12 +323,13 @@ int main(int argc, char *argv[]) {
 
   thread handleMqttMessagesThread(
       handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic,
-      light_brightness_state_topic, light_state_topic, light_command_topic);
+      light_brightness_state_topic, light_state_topic, light_command_topic,
+      &running);
 
   ScrollingLineScreenSettings scrollingLineScreenSettings =
       ScrollingLineScreenSettings(
           defaults.cols, defaults.rows, &main_font, color, bg_color,
-          &state.speed, letter_spacing, ScreenLineOption::radio6,
+          &state.speed, &state.mutex, letter_spacing, ScreenLineOption::radio6,
           ScreenLineOption::current_time, weather_api_key);
 
   auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(
@@ -344,7 +359,7 @@ int main(int argc, char *argv[]) {
   screens_to_update.push_back(srollingTwoLineScreen);
   screens_to_update.push_back(game_of_life_screen);
 
-  thread updateThread(updateLines, screens_to_update);
+  thread updateThread(updateLines, screens_to_update, &running);
 
   ScreenMenu menu =
       ScreenMenu(letter_spacing, &menu_font, width, &state, &screens_to_render);
@@ -352,8 +367,18 @@ int main(int argc, char *argv[]) {
   offscreen_canvas->Clear();
 
   while (!interrupt_received) {
-    if (state.screen_on) {
-      offscreen_canvas->SetBrightness(state.current_brightness);
+    bool screen_on = true;
+    int current_brightness = 0;
+    float current_speed = 0.0f;
+    {
+      std::lock_guard<std::mutex> lock(state.mutex);
+      screen_on = state.screen_on;
+      current_brightness = state.current_brightness;
+      current_speed = state.speed;
+    }
+
+    if (screen_on) {
+      offscreen_canvas->SetBrightness(current_brightness);
       offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
 
       for (vector<Screen *>::iterator screen = screens_to_render.begin();
@@ -361,16 +386,25 @@ int main(int argc, char *argv[]) {
         (*screen)->render(offscreen_canvas);
       }
     } else {
-      offscreen_canvas->SetBrightness(state.current_brightness);
+      offscreen_canvas->SetBrightness(current_brightness);
       offscreen_canvas->Fill(0, 0, 0);
     }
     menu.render(offscreen_canvas);
     offscreen_canvas = matrix->SwapOnVSync(offscreen_canvas);
-    if (state.speed == 0) {
+    if (current_speed == 0) {
       usleep(1000000);
     } else {
-      usleep(1000000 / state.speed / main_font.CharacterWidth('W'));
+      usleep(1000000 / current_speed / main_font.CharacterWidth('W'));
     }
+  }
+
+  running.store(false);
+  mqttClient.stop_consuming();
+  if (handleMqttMessagesThread.joinable()) {
+    handleMqttMessagesThread.join();
+  }
+  if (updateThread.joinable()) {
+    updateThread.join();
   }
 
   // Finished. Shut down the RGB matrix.

@@ -69,6 +69,7 @@ void GameOfLfeScreen::render(rgb_matrix::FrameCanvas *offscreen_canvas,
     return;
   }
 
+  std::lock_guard<std::mutex> lock(life_mutex);
   for (int x = 100; x < width_ + 100; ++x) {
     for (int y = 100; y < height_ + 100; ++y) {
       if (values_[x][y])
@@ -122,6 +123,7 @@ void GameOfLfeScreen::update() {
 
   std::cout << "Update Game of Life" << std::endl;
 
+  std::lock_guard<std::mutex> lock(life_mutex);
   // Copy values to newValues
   for (int x = 0; x < game_width; ++x) {
     for (int y = 0; y < game_height; ++y) {

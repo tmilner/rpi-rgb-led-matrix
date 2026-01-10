@@ -2,21 +2,25 @@
 #define SCROLLING_LINE_H
 #include "graphics.h"
 #include "led-matrix.h"
+#include <mutex>
 #include <string>
 
 using namespace rgb_matrix;
 
 struct ScrollingLineSettings {
   float *init_speed;
+  std::mutex *init_speed_mutex;
   int init_y;
   int init_letter_spacing;
   Font *init_font;
   Color init_color;
   int init_screen_width;
   int init_icon_offset;
-  ScrollingLineSettings(float *speed, int y, int letter_space, Font *font,
-                        Color color, int screen_width, int icon_offset) {
+  ScrollingLineSettings(float *speed, std::mutex *speed_mutex, int y,
+                        int letter_space, Font *font, Color color,
+                        int screen_width, int icon_offset) {
     this->init_speed = speed;
+    this->init_speed_mutex = speed_mutex;
     this->init_y = y;
     this->init_letter_spacing = letter_space;
     this->init_font = font;
@@ -40,6 +44,8 @@ protected:
   int max_width_for_no_scrolling;
   rgb_matrix::Font font;
   Color color;
+  mutable std::recursive_mutex line_mutex;
+  std::mutex *speed_mutex;
 
 public:
   ScrollingLine(ScrollingLineSettings settings);

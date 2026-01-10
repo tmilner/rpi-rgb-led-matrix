@@ -16,10 +16,10 @@ ScrollingLineScreen::ScrollingLineScreen(
     ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
     Radio6Client radio6_client, TflClient tfl_client)
     : image_map{image_map},
-      line1_settings{settings.speed, 0, 0, settings.font, settings.color,
-                     settings.width, 14},
-      line2_settings{settings.speed, settings.height / 2, 0, settings.font,
-                     settings.color, settings.width,      14},
+      line1_settings{settings.speed, settings.speed_mutex, 0, 0, settings.font,
+                     settings.color, settings.width, 14},
+      line2_settings{settings.speed, settings.speed_mutex, settings.height / 2,
+                     0, settings.font, settings.color, settings.width, 14},
       settings{settings}, bg_color{settings.bg_color},
       name{std::string("Scrolling Screen")}, spotify_client(spotify_client),
       radio6_client(radio6_client), tfl_client(tfl_client)
@@ -59,6 +59,7 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     return;
   }
 
+  std::lock_guard<std::mutex> lock(transition_mutex);
   char rate = CHAR_MAX / 10;
 
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
@@ -94,6 +95,7 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
 }
 
 void ScrollingLineScreen::setLine1(ScreenLineOption type) {
+  std::lock_guard<std::mutex> lock(transition_mutex);
   this->line1_transitioning = true;
   this->previous_line1 = this->line1;
   this->line1_transition_percentage = 0x00;
@@ -108,6 +110,7 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type) {
   this->current_line1 = type;
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type) {
+  std::lock_guard<std::mutex> lock(transition_mutex);
   this->line2_transitioning = true;
   this->previous_line2 = this->line2;
   this->line2_transition_percentage = 0x00;

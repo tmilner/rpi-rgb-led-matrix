@@ -4,6 +4,7 @@
 #include <climits>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
@@ -43,6 +44,7 @@ void CurrentTimeLine::update() {
   }
 
   const auto now = std::chrono::system_clock::now();
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   this->current_line.clear();
   auto t = std::time(nullptr);
   auto tm = *std::localtime(&t);

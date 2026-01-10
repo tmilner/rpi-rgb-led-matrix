@@ -11,6 +11,7 @@
 #include "updateable-screen.h"
 #include "weather-line.h"
 #include <Magick++.h>
+#include <mutex>
 
 enum ScreenLineOption {
   radio6,
@@ -28,6 +29,7 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   rgb_matrix::Color color;
   rgb_matrix::Color bg_color;
   float *speed;
+  std::mutex *speed_mutex;
   int letter_spacing;
   ScreenLineOption line1;
   ScreenLineOption line2;
@@ -35,8 +37,8 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   ScrollingLineScreenSettings(int width, int height, rgb_matrix::Font *font,
                               rgb_matrix::Color color,
                               rgb_matrix::Color bg_color, float *speed,
-                              int letter_spacing, ScreenLineOption line1,
-                              ScreenLineOption line2,
+                              std::mutex *speed_mutex, int letter_spacing,
+                              ScreenLineOption line1, ScreenLineOption line2,
                               const std::string weather_api_key) {
     this->width = width;
     this->height = height;
@@ -44,6 +46,7 @@ struct ScrollingLineScreenSettings : ScreenSettings {
     this->color = color;
     this->bg_color = bg_color;
     this->speed = speed;
+    this->speed_mutex = speed_mutex;
     this->line1 = line1;
     this->line2 = line2;
     this->weather_api_key = weather_api_key;
@@ -64,6 +67,7 @@ public:
   std::string *getName();
 
 private:
+  mutable std::mutex transition_mutex;
   ScrollingLineScreenSettings settings;
   SpotifyClient spotify_client;
   Radio6Client radio6_client;

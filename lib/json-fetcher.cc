@@ -69,7 +69,7 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
 
     // add body
     if (!body.empty())
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+        curl_easy_setopt(this->curl, CURLOPT_POSTFIELDS, body.c_str());
 
     // Hook up data container (will be passed as the last parameter to the
     // callback handling function).  Can be any pointer type, since it will
@@ -80,7 +80,7 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
     CURLcode code = curl_easy_perform(this->curl);
     curl_easy_getinfo(this->curl, CURLINFO_RESPONSE_CODE, &httpCode);
 
-    curl_easy_reset(curl);
+    curl_easy_reset(this->curl);
 
     if (code != CURLE_OK)
     {

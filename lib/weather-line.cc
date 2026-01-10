@@ -2,6 +2,7 @@
 #include "img_utils.h"
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <string>
 
 using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
@@ -34,10 +35,12 @@ WeatherLine::WeatherLine(
 std::string *WeatherLine::getName() { return &this->name; }
 
 Magick::Image *WeatherLine::getIcon() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)[this->weather_image];
 }
 
 Magick::Image *WeatherLine::getBlankIcon() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return &(*this->image_map)["empty-circle2"];
 }
 
@@ -97,14 +100,17 @@ void WeatherLine::update() {
 
       std::cout << std::endl;
 
-      this->weather_image.clear();
-      this->weather_image.append(icon_str);
-      this->current_line.clear();
-      this->current_line.append(temp_str).append("℃");
-      this->last_weather_update = now;
+      {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->weather_image.clear();
+        this->weather_image.append(icon_str);
+        this->current_line.clear();
+        this->current_line.append(temp_str).append("℃");
+        this->last_weather_update = now;
 
-      std::cout << "Weather icon " << this->weather_image << std::endl;
-      std::cout << "Weather Line " << this->current_line << std::endl;
+        std::cout << "Weather icon " << this->weather_image << std::endl;
+        std::cout << "Weather Line " << this->current_line << std::endl;
+      }
 
     } catch (std::runtime_error &e) {
       printf("Failed to fetch Weather\n");

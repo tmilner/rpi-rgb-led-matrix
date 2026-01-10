@@ -2,6 +2,7 @@
 #define SCREEN_STATE_H
 
 #include <map>
+#include <mutex>
 #include <string>
 
 #include <Magick++.h>
@@ -15,6 +16,7 @@ struct ScreenState {
   int current_brightness = 50;
   bool screen_on = true;
   float speed = 2.0f;
+  mutable std::mutex mutex;
 };
 } // namespace rgb_matrix
 #endif /*SCREEN_STATE_H*/

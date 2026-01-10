@@ -3,6 +3,7 @@
 
 #include "updateable-screen.h"
 #include <chrono>
+#include <mutex>
 class GameOfLfeScreen : public UpdateableScreen {
 public:
   GameOfLfeScreen(rgb_matrix::FrameCanvas *canvas, int delay_ms = 500,
@@ -28,6 +29,7 @@ private:
   int game_height;
   bool torus_;
   std::string name;
+  mutable std::mutex life_mutex;
 };
 
 #endif /*GAME_OF_LIFE_H*/
