@@ -5,7 +5,10 @@
 
 TflClient::TflClient() { this->fetcher = new JSONFetcher(); }
 
-TflClient::~TflClient() {}
+TflClient::~TflClient() {
+  delete this->fetcher;
+  this->fetcher = nullptr;
+}
 
 bool compareArrivalTimes(const TflClient::Arrival &a,
                          const TflClient::Arrival &b) {

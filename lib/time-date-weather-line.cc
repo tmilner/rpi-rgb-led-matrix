@@ -36,6 +36,11 @@ TimeDateWeatherLine::TimeDateWeatherLine(
   std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
 
+TimeDateWeatherLine::~TimeDateWeatherLine() {
+  delete this->fetcher;
+  this->fetcher = nullptr;
+}
+
 std::string *TimeDateWeatherLine::getName() { return &this->name; }
 
 Magick::Image *TimeDateWeatherLine::getIcon() {

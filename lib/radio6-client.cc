@@ -9,6 +9,8 @@ Radio6Client::Radio6Client()
 
 Radio6Client::~Radio6Client()
 {
+    delete this->fetcher;
+    this->fetcher = nullptr;
 }
 
 Radio6Client::NowPlaying Radio6Client::getNowPlaying()

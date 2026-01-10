@@ -12,6 +12,7 @@ public:
   TimeDateWeatherLine(const std::string weather_api_key,
                       std::map<std::string, Magick::Image> *image_map,
                       ScrollingLineSettings settings);
+  ~TimeDateWeatherLine();
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();

@@ -13,6 +13,7 @@ public:
               std::map<std::string, std::string> weather_icon_map,
               std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
               ScrollingLineSettings settings);
+  ~WeatherLine();
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   std::string *getName();

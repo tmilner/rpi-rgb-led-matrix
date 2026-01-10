@@ -1,6 +1,7 @@
 #include "spotify-client.h"
 
 #include <iostream>
+#include <memory>
 
 SpotifyClient::SpotifyClient(std::string refresh_token, std::string client_id, std::string client_secret)
 {
@@ -16,6 +17,8 @@ SpotifyClient::SpotifyClient(std::string refresh_token, std::string client_id, s
 
 SpotifyClient::~SpotifyClient()
 {
+    delete this->fetcher;
+    this->fetcher = nullptr;
 }
 
 std::optional<SpotifyClient::NowPlaying> SpotifyClient::getNowPlaying()
@@ -57,11 +60,14 @@ JSONFetcher::APIResponse SpotifyClient::apiQuery(std::string endpoint)
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, auth_header.c_str());
     headers = curl_slist_append(headers, accept.c_str());
+    auto headers_guard =
+        std::unique_ptr<curl_slist, decltype(&curl_slist_free_all)>(
+            headers, curl_slist_free_all);
 
     std::string url = "https://api.spotify.com/" + endpoint;
     std::cout << "API Query - url = " << url << ", auth_header " << auth_header << std::endl;
 
-    return this->fetcher->fetch("GET", headers, url, "");
+    return this->fetcher->fetch("GET", headers_guard.get(), url, "");
 }
 
 void SpotifyClient::refreshAccessToken()
@@ -70,9 +76,15 @@ void SpotifyClient::refreshAccessToken()
     std::string content_type_header = "Content-Type: application/x-www-form-urlencoded";
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, content_type_header.c_str());
+    auto headers_guard =
+        std::unique_ptr<curl_slist, decltype(&curl_slist_free_all)>(
+            headers, curl_slist_free_all);
 
     std::cout << "Refresh Access token - " << this->refresh_token << ", " << this->client_id << ", " << this->client_secret << ", body = " << postData << ", header " << content_type_header << std::endl;
-    JSONFetcher::APIResponse token = this->fetcher->fetch("POST", headers, "https://accounts.spotify.com/api/token", postData);
+    JSONFetcher::APIResponse token =
+        this->fetcher->fetch("POST", headers_guard.get(),
+                             "https://accounts.spotify.com/api/token",
+                             postData);
     if (token.code == 200 && token.body.has_value())
     {
         this->access_token = token.body.value()["access_token"].asString();

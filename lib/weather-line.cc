@@ -32,6 +32,11 @@ WeatherLine::WeatherLine(
   std::cout << "Weather Line Updater Constructor END" << std::endl;
 }
 
+WeatherLine::~WeatherLine() {
+  delete this->fetcher;
+  this->fetcher = nullptr;
+}
+
 std::string *WeatherLine::getName() { return &this->name; }
 
 Magick::Image *WeatherLine::getIcon() {

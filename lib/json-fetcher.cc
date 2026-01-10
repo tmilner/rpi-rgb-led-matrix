@@ -57,7 +57,7 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
 
     // Response information.
     int httpCode(0);
-    std::unique_ptr<std::string> httpData(new std::string());
+    std::string httpData;
 
     curl_easy_setopt(this->curl, CURLOPT_CUSTOMREQUEST, request.c_str());
     // Hook up data handling function.
@@ -74,7 +74,7 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
     // Hook up data container (will be passed as the last parameter to the
     // callback handling function).  Can be any pointer type, since it will
     // internally be passed as a void pointer.
-    curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, httpData.get());
+    curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, &httpData);
 
     // Run our HTTP GET command, capture the HTTP response code, and clean up.
     CURLcode code = curl_easy_perform(this->curl);
@@ -84,32 +84,28 @@ JSONFetcher::APIResponse JSONFetcher::fetch(std::string request, curl_slist *hea
 
     if (code != CURLE_OK)
     {
-        httpData.release();
         fprintf(stderr, "curl_easy_perform() for %s failed: %s\n", url.c_str(), curl_easy_strerror(code));
         throw std::runtime_error("Got bad code from CURL");
     }
 
-    if (!httpData->empty())
+    if (!httpData.empty())
     {
         Json::Value jsonData;
         Json::Reader jsonReader;
 
-        if (jsonReader.parse(*httpData, jsonData))
+        if (jsonReader.parse(httpData, jsonData))
         {
-            httpData.release();
             return APIResponse(httpCode, std::optional<Json::Value>(jsonData));
         }
         else
         {
             std::cout << "Could not parse HTTP data as JSON for URL" << url << std::endl;
             std::cout << "HTTP data was:\n"
-                      << *httpData.get() << std::endl;
-            httpData.release();
+                      << httpData << std::endl;
 
             throw std::runtime_error("Failed to Parse JSON");
         }
     } else {
-        httpData.release();
         return APIResponse(httpCode, std::nullopt);
     }
 
