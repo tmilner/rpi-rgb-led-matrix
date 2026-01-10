@@ -19,7 +19,7 @@ private:
   Magick::Image *getIcon();
   TflClient *tflClient;
   std::chrono::time_point<std::chrono::system_clock> last_update;
-  static const int update_after_seconds = 20;
+  static const int update_after_seconds = 25;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};
   std::string image_key;
   std::string name;
