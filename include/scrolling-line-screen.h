@@ -58,8 +58,8 @@ public:
   ScrollingLineScreen(
       std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
       std::map<std::string, std::string> weather_icon_map,
-      ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
-      Radio6Client radio6_client, TflClient tfl_client);
+      ScrollingLineScreenSettings settings, SpotifyClient *spotify_client,
+      Radio6Client *radio6_client, TflClient *tfl_client);
   void update();
   void render(FrameCanvas *offscreen_canvas, char opacity = 0xFF);
   void setLine1(ScreenLineOption type);
@@ -69,9 +69,9 @@ public:
 private:
   mutable std::mutex transition_mutex;
   ScrollingLineScreenSettings settings;
-  SpotifyClient spotify_client;
-  Radio6Client radio6_client;
-  TflClient tfl_client;
+  SpotifyClient *spotify_client;
+  Radio6Client *radio6_client;
+  TflClient *tfl_client;
   rgb_matrix::Color bg_color;
   std::string name;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map;

@@ -10,6 +10,8 @@ class Radio6Client
 public:
     Radio6Client();
     ~Radio6Client();
+    Radio6Client(const Radio6Client&) = delete;
+    Radio6Client& operator=(const Radio6Client&) = delete;
     struct NowPlaying
     {
     public:

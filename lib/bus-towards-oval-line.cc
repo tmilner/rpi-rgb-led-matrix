@@ -7,7 +7,7 @@ using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 BusTowardsOvalLine::BusTowardsOvalLine(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
-    TflClient tflClient, ScrollingLineSettings settings)
+    TflClient *tflClient, ScrollingLineSettings settings)
     : ScrollingLine(settings), tflClient(tflClient),
       name{std::string("Buses Towards Oval")} {
   this->current_line = "Loading";
@@ -47,11 +47,11 @@ void BusTowardsOvalLine::update() {
 
   try {
     std::vector<TflClient::Arrival> arrivalsTowardsOval =
-        this->tflClient.getBusArrivals("490014229J");
+        this->tflClient->getBusArrivals("490014229J");
     std::vector<TflClient::Arrival> arrivalsCamberwellGreenTowardsECStopF =
-        this->tflClient.getBusArrivals("490015298F");
+        this->tflClient->getBusArrivals("490015298F");
     std::vector<TflClient::Arrival> arrivalsCamberwellGreenTowardsECStopE =
-        this->tflClient.getBusArrivals("490015298E");
+        this->tflClient->getBusArrivals("490015298E");
 
     std::vector<TflClient::Arrival> allArrivals;
 

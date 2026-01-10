@@ -11,6 +11,8 @@ class SpotifyClient
 public:
     SpotifyClient(std::string refresh_token, std::string client_id, std::string client_secret);
     ~SpotifyClient();
+    SpotifyClient(const SpotifyClient&) = delete;
+    SpotifyClient& operator=(const SpotifyClient&) = delete;
     struct NowPlaying
     {
     public:

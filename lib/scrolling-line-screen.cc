@@ -13,8 +13,8 @@ using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 ScrollingLineScreen::ScrollingLineScreen(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     std::map<std::string, std::string> weather_icon_map,
-    ScrollingLineScreenSettings settings, SpotifyClient spotify_client,
-    Radio6Client radio6_client, TflClient tfl_client)
+    ScrollingLineScreenSettings settings, SpotifyClient *spotify_client,
+    Radio6Client *radio6_client, TflClient *tfl_client)
     : image_map{image_map},
       line1_settings{settings.speed, settings.speed_mutex, 0, 0, settings.font,
                      settings.color, settings.width,       14},

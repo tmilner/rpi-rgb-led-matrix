@@ -9,6 +9,8 @@ class TflClient {
 public:
   TflClient();
   ~TflClient();
+  TflClient(const TflClient&) = delete;
+  TflClient& operator=(const TflClient&) = delete;
   struct Arrival {
   public:
     std::string busName;

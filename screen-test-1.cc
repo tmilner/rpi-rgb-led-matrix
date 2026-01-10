@@ -336,8 +336,8 @@ int main(int argc, char *argv[]) {
       &state.image_map, [](void *) {});
 
   ScrollingLineScreen *srollingTwoLineScreen = new ScrollingLineScreen(
-      imageMapPtr, weather_icon_map, scrollingLineScreenSettings, spotifyClient,
-      radio6Client, tflClient);
+      imageMapPtr, weather_icon_map, scrollingLineScreenSettings,
+      &spotifyClient, &radio6Client, &tflClient);
 
   cout << "Setting up update thread" << endl;
 

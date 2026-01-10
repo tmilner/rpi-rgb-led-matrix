@@ -7,7 +7,7 @@ using namespace std::literals; // enables literal suffixes, e.g. 24h, 1ms, 1s.
 
 MusicLine::MusicLine(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
-    SpotifyClient spotifyClient, Radio6Client radio6Client,
+    SpotifyClient *spotifyClient, Radio6Client *radio6Client,
     ScrollingLineSettings settings)
     : ScrollingLine(settings), name{std::string("Radio 6 Line")},
       spotifyClient(spotifyClient), radio6Client(radio6Client) {
@@ -52,7 +52,7 @@ void MusicLine::update() {
 
   try {
     std::optional<SpotifyClient::NowPlaying> nowPlaying =
-        this->spotifyClient.getNowPlaying();
+        this->spotifyClient->getNowPlaying();
 
     if (nowPlaying.has_value() && nowPlaying.value().is_playing) {
       std::cout << "Spotify now playing " << nowPlaying.value().track_name
@@ -81,7 +81,8 @@ void MusicLine::update() {
       std::cout << "Fetching radio6 data from " << this->radio6_url
                 << std::endl;
 
-      Radio6Client::NowPlaying nowPlaying = this->radio6Client.getNowPlaying();
+      Radio6Client::NowPlaying nowPlaying =
+          this->radio6Client->getNowPlaying();
 
       {
         std::lock_guard<std::recursive_mutex> lock(line_mutex);
