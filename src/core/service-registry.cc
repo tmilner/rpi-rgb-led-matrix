@@ -10,5 +10,8 @@ ServiceRegistry::ServiceRegistry(const std::string &spotify_refresh_token,
       tfl_client{std::make_unique<TflClient>()} {}
 
 SpotifyClient &ServiceRegistry::spotify() { return *spotify_client; }
+const SpotifyClient &ServiceRegistry::spotify() const { return *spotify_client; }
 Radio6Client &ServiceRegistry::radio6() { return *radio6_client; }
+const Radio6Client &ServiceRegistry::radio6() const { return *radio6_client; }
 TflClient &ServiceRegistry::tfl() { return *tfl_client; }
+const TflClient &ServiceRegistry::tfl() const { return *tfl_client; }
