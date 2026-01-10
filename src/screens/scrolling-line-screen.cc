@@ -126,6 +126,10 @@ void ScrollingLineScreen::setLine1(ScreenLineOption type) {
     this->bus_line->resetXPosition();
     this->line1 = this->bus_line.get();
   }
+  if (this->line1_options.size() <= 1) {
+    this->line1_transitioning = false;
+    this->line1_transition_percentage = CHAR_MAX;
+  }
   this->current_line1 = type;
 }
 void ScrollingLineScreen::setLine2(ScreenLineOption type) {
@@ -143,6 +147,10 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type) {
   } else {
     this->weather_line->resetXPosition();
     this->line2 = this->weather_line.get();
+  }
+  if (this->line2_options.size() <= 1) {
+    this->line2_transitioning = false;
+    this->line2_transition_percentage = CHAR_MAX;
   }
   this->current_line2 = type;
 }
@@ -226,3 +234,4 @@ void ScrollingLineScreen::update() {
     this->weather_line->update();
   }
 }
+
