@@ -169,7 +169,7 @@ void ScrollingLineScreen::update() {
     }
   }
   this->weather_line->update();
-  this->music_line->update();
+  // this->music_line->update();
   this->bus_line->update();
   this->time_line->update();
   this->date_line->update();
