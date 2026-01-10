@@ -49,8 +49,20 @@ void ScrollingLine::resetXPosition() {
 }
 void ScrollingLine::updateText(std::string *new_line_string) {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
-  current_line = *new_line_string;
+  if (isReadyForUpdateLocked()) {
+    current_line = *new_line_string;
+    has_pending_line = false;
+  } else {
+    pending_line = *new_line_string;
+    has_pending_line = true;
+  }
 };
+
+void ScrollingLine::updateTextImmediate(std::string *new_line_string) {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  current_line = *new_line_string;
+  has_pending_line = false;
+}
 void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
   float current_speed = 0.0f;
   if (speed_mutex != nullptr) {
@@ -61,6 +73,10 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
   }
 
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  if (has_pending_line && isReadyForUpdateLocked()) {
+    current_line = pending_line;
+    has_pending_line = false;
+  }
   if (length <= max_width_for_no_scrolling) {
     speed = 0;
     x = ((max_width_for_no_scrolling - length) / 2) + icon_offset;
@@ -80,4 +96,13 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
 void ScrollingLine::changeYPos(int new_y) {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   this->y = new_y;
+}
+
+bool ScrollingLine::isReadyForUpdateLocked() const {
+  return speed == 0 || x >= screen_width;
+}
+
+bool ScrollingLine::isReadyForUpdate() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  return isReadyForUpdateLocked();
 }

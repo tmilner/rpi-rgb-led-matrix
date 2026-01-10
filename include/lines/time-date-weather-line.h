@@ -19,9 +19,11 @@ public:
 
 private:
   Magick::Image *getIcon();
+  void applyPendingImageIfReady();
   JSONFetcher *fetcher;
   std::string url;
   std::string current_image;
+  std::string pending_image;
   std::string weather_line;
   std::string weather_image;
   std::string time_image;

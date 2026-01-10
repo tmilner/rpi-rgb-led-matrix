@@ -18,6 +18,7 @@ public:
 
 private:
   Magick::Image *getIcon();
+  void applyPendingIconIfReady();
   SpotifyClient *spotifyClient;
   Radio6Client *radio6Client;
   std::string radio6_url;
@@ -25,6 +26,7 @@ private:
   static const int update_after_seconds = 20;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map;
   std::string image_key;
+  std::string pending_image_key;
   std::string name;
 };
 #endif /*MUSIC_INFO_LINE_H*/

@@ -8,12 +8,10 @@
 // ../utils/text-scroller.cc
 
 #include "clients/mqtt-client.h"
-#include "clients/radio6-client.h"
-#include "clients/spotify-client.h"
-#include "clients/tfl-client.h"
 #include "core/graphics.h"
 #include "core/img_utils.h"
 #include "core/led-matrix.h"
+#include "core/service-registry.h"
 #include "screens/game-of-life-screen.h"
 #include "screens/rotating-box-screen.h"
 #include "screens/menu-screen.h"
@@ -226,10 +224,8 @@ int main(int argc, char *argv[]) {
 
   MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name,
                         mqtt_password, topics);
-  SpotifyClient spotifyClient(spotify_refresh_token, spotify_client_id,
-                              spotify_client_secret);
-  Radio6Client radio6Client;
-  TflClient tflClient;
+  ServiceRegistry services(spotify_refresh_token, spotify_client_id,
+                           spotify_client_secret);
   /*
    * Load font. This needs to be a filename with a bdf bitmap font.
    */
@@ -320,10 +316,10 @@ int main(int argc, char *argv[]) {
       light_brightness_state_topic, light_state_topic, light_command_topic,
       &running);
 
-  std::vector<ScreenLineOption> line1_options = {ScreenLineOption::bus};
-  std::vector<ScreenLineOption> line2_options = {ScreenLineOption::current_time,
-                                                 ScreenLineOption::current_date,
-                                                 ScreenLineOption::weather};
+  std::vector<LineType> line1_options = {LineType::Bus};
+  std::vector<LineType> line2_options = {LineType::CurrentTime,
+                                         LineType::CurrentDate,
+                                         LineType::Weather};
 
   ScrollingLineScreenSettings scrollingLineScreenSettings =
       ScrollingLineScreenSettings(
@@ -336,8 +332,7 @@ int main(int argc, char *argv[]) {
       &state.image_map, [](void *) {});
 
   auto srollingTwoLineScreen = std::make_unique<ScrollingLineScreen>(
-      imageMapPtr, weather_icon_map, scrollingLineScreenSettings,
-      &spotifyClient, &radio6Client, &tflClient);
+      imageMapPtr, weather_icon_map, scrollingLineScreenSettings, &services);
 
   cout << "Setting up update thread" << endl;
 

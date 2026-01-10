@@ -48,10 +48,19 @@ Magick::Image *TimeDateWeatherLine::getIcon() {
   return &(*this->image_map)[this->current_image];
 }
 
+void TimeDateWeatherLine::applyPendingImageIfReady() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  if (!pending_image.empty() && isReadyForUpdate()) {
+    current_image = pending_image;
+    pending_image.clear();
+  }
+}
+
 void TimeDateWeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
+  applyPendingImageIfReady();
   if (opacity >= (CHAR_MAX / 2)) {
     this->renderLine(offscreen_canvas);
   }
@@ -108,10 +117,8 @@ void TimeDateWeatherLine::update() {
 
       {
         std::lock_guard<std::recursive_mutex> lock(line_mutex);
-        this->weather_image.clear();
-        this->weather_image.append(weather_icon);
-        this->weather_line.clear();
-        this->weather_line.append(temp_str).append("℃");
+        this->weather_image = weather_icon;
+        this->weather_line = temp_str + "℃";
         this->last_weather_update = now;
       }
     } catch (std::runtime_error &e) {
@@ -120,30 +127,32 @@ void TimeDateWeatherLine::update() {
   }
 
   // switch on enum pls
+  std::string next_line;
+  std::string next_image;
   if (this->current_display == 1) {
-    std::lock_guard<std::recursive_mutex> lock(line_mutex);
-    this->current_image.clear();
-    this->current_image.append(this->time_image);
-    this->current_line.clear();
+    next_image = this->time_image;
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
 
     std::ostringstream oss;
     oss << std::put_time(&tm, "%H:%M");
-    auto time = oss.str();
-    this->current_line.append(time);
+    next_line = oss.str();
   } else if (this->current_display == 2) {
-    std::lock_guard<std::recursive_mutex> lock(line_mutex);
-    this->current_image.clear();
-    this->current_image.append(this->date_image);
-    this->current_line.clear();
-    this->current_line.append(
-        date::format("%d %b", date::floor<std::chrono::milliseconds>(now)));
+    next_image = this->date_image;
+    next_line =
+        date::format("%d %b", date::floor<std::chrono::milliseconds>(now));
   } else if (this->current_display == 0) {
     std::lock_guard<std::recursive_mutex> lock(line_mutex);
-    this->current_image.clear();
-    this->current_image.append(this->weather_image);
-    this->current_line.clear();
-    this->current_line.append(this->weather_line);
+    next_image = this->weather_image;
+    next_line = this->weather_line;
   }
+
+  if (isReadyForUpdate()) {
+    std::lock_guard<std::recursive_mutex> lock(line_mutex);
+    this->current_image = next_image;
+  } else {
+    std::lock_guard<std::recursive_mutex> lock(line_mutex);
+    this->pending_image = next_image;
+  }
+  updateText(&next_line);
 }

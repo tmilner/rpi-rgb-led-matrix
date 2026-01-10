@@ -33,6 +33,8 @@ struct ScrollingLineSettings {
 class ScrollingLine {
 protected:
   std::string current_line;
+  std::string pending_line;
+  bool has_pending_line = false;
   int x;
   int y;
   int length;
@@ -46,12 +48,15 @@ protected:
   Color color;
   mutable std::recursive_mutex line_mutex;
   std::mutex *speed_mutex;
+  bool isReadyForUpdateLocked() const;
 
 public:
   ScrollingLine(ScrollingLineSettings settings);
   void updateText(std::string *new_line_string);
+  void updateTextImmediate(std::string *new_line_string);
   void renderLine(FrameCanvas *offscreen_canvas);
   void resetXPosition();
   void changeYPos(int new_y);
+  bool isReadyForUpdate();
 };
 #endif /*SCROLLING_LINE_H*/

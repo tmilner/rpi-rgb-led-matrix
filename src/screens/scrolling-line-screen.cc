@@ -1,18 +1,13 @@
 #include "screens/scrolling-line-screen.h"
-#include "lines/bus-arrivals-line.h"
-#include "lines/time-line.h"
 #include "core/date.h"
-#include "core/img_utils.h"
-#include "lines/music-info-line.h"
-#include "lines/weather-line.h"
+#include "lines/line-registry.h"
 #include <climits>
 #include <iostream>
 
 ScrollingLineScreen::ScrollingLineScreen(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     std::map<std::string, std::string> weather_icon_map,
-    ScrollingLineScreenSettings settings, SpotifyClient *spotify_client,
-    Radio6Client *radio6_client, TflClient *tfl_client)
+    ScrollingLineScreenSettings settings, ServiceRegistry *service_registry)
     : image_map{image_map}, line1_settings{settings.speed,
                                            settings.speed_mutex,
                                            0,
@@ -26,8 +21,7 @@ ScrollingLineScreen::ScrollingLineScreen(
                      settings.font,       settings.color,
                      settings.width,      14},
       settings{settings}, bg_color{settings.bg_color},
-      name{std::string("Scrolling Screen")}, spotify_client(spotify_client),
-      radio6_client(radio6_client), tfl_client(tfl_client),
+      name{std::string("Scrolling Screen")}, service_registry(service_registry),
       line1_options{settings.line1_options},
       line2_options{settings.line2_options},
       line1_rotate_after_seconds{settings.line1_rotate_after_seconds},
@@ -39,37 +33,36 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->line1_last_rotate = now;
   this->line2_last_rotate = now;
 
-  this->music_line =
-      std::make_unique<MusicInfoLine>(this->image_map, this->spotify_client,
-                                      this->radio6_client,
-                                      this->line1_settings);
+  this->weather_icon_map = std::move(weather_icon_map);
+  this->line_context.image_map = this->image_map;
+  this->line_context.weather_icon_map = this->weather_icon_map;
+  this->line_context.weather_api_key = this->settings.weather_api_key;
+  this->line_context.services = this->service_registry;
 
-  this->bus_line = std::make_unique<BusArrivalsLine>(
-      this->image_map, this->tfl_client, this->line1_settings);
+  this->line1_lines = BuildLineMap(this->line1_options, this->line1_settings,
+                                   this->line_context);
+  this->line2_lines = BuildLineMap(this->line2_options, this->line2_settings,
+                                   this->line_context);
 
-  this->time_line =
-      std::make_unique<TimeLine>(this->image_map, this->line2_settings);
-  this->date_line =
-      std::make_unique<DateLine>(this->image_map, this->line2_settings);
-  this->weather_line = std::make_unique<WeatherLine>(
-      this->settings.weather_api_key, weather_icon_map, this->image_map,
-      this->line2_settings);
-
-  this->line1 = this->bus_line.get();
-  this->line2 = this->date_line.get();
-
-  if (!this->line1_options.empty()) {
-    this->setLine1(this->line1_options.front());
-  }
-  if (!this->line2_options.empty()) {
-    this->setLine2(this->line2_options.front());
-  }
+  this->line1 = this->line1_options.empty()
+                    ? nullptr
+                    : GetLine(this->line1_lines, this->line1_options.front());
+  this->line2 = this->line2_options.empty()
+                    ? nullptr
+                    : GetLine(this->line2_lines, this->line2_options.front());
   this->line1_transitioning = false;
   this->line1_transition_percentage = CHAR_MAX;
-  this->previous_line1 = this->bus_line.get();
+  this->previous_line1 = this->line1;
   this->line2_transitioning = false;
   this->line2_transition_percentage = CHAR_MAX;
-  this->previous_line2 = this->date_line.get();
+  this->previous_line2 = this->line2;
+
+  if (!this->line1_options.empty() && this->line1 != nullptr) {
+    this->setLine1(this->line1_options.front());
+  }
+  if (!this->line2_options.empty() && this->line2 != nullptr) {
+    this->setLine2(this->line2_options.front());
+  }
 }
 
 std::string *ScrollingLineScreen::getName() { return &this->name; }
@@ -83,7 +76,8 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
   char rate = CHAR_MAX / 10;
 
   offscreen_canvas->Fill(bg_color.r, bg_color.g, bg_color.b);
-  if (this->line1_transitioning) {
+  if (this->line1 != nullptr && this->line1_transitioning &&
+      this->previous_line1 != nullptr) {
     if (this->line1_transition_percentage < (CHAR_MAX / 2)) {
       this->previous_line1->render(
           offscreen_canvas, CHAR_MAX - this->line1_transition_percentage);
@@ -94,11 +88,12 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     if (this->line1_transition_percentage >= CHAR_MAX - rate) {
       this->line1_transitioning = false;
     }
-  } else {
+  } else if (this->line1 != nullptr) {
     this->line1->render(offscreen_canvas, CHAR_MAX);
   }
 
-  if (this->line2_transitioning) {
+  if (this->line2 != nullptr && this->line2_transitioning &&
+      this->previous_line2 != nullptr) {
     if (this->line2_transition_percentage < (CHAR_MAX / 2)) {
       this->previous_line2->render(
           offscreen_canvas, CHAR_MAX - this->line2_transition_percentage);
@@ -109,46 +104,41 @@ void ScrollingLineScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
     if (this->line2_transition_percentage >= CHAR_MAX - rate) {
       this->line2_transitioning = false;
     }
-  } else {
+  } else if (this->line2 != nullptr) {
     this->line2->render(offscreen_canvas, CHAR_MAX);
   }
 }
 
-void ScrollingLineScreen::setLine1(ScreenLineOption type) {
+void ScrollingLineScreen::setLine1(LineType type) {
   std::lock_guard<std::mutex> lock(transition_mutex);
   this->line1_transitioning = true;
   this->previous_line1 = this->line1;
   this->line1_transition_percentage = 0x00;
 
-  if (type == ScreenLineOption::radio6) {
-    this->music_line->resetXPosition();
-    this->line1 = this->music_line.get();
-  } else if (type == ScreenLineOption::bus) {
-    this->bus_line->resetXPosition();
-    this->line1 = this->bus_line.get();
+  UpdatableScreen *next_line = GetLine(this->line1_lines, type);
+  if (next_line == nullptr) {
+    return;
   }
+  ResetLinePosition(next_line);
+  this->line1 = next_line;
   if (this->line1_options.size() <= 1) {
     this->line1_transitioning = false;
     this->line1_transition_percentage = CHAR_MAX;
   }
   this->current_line1 = type;
 }
-void ScrollingLineScreen::setLine2(ScreenLineOption type) {
+void ScrollingLineScreen::setLine2(LineType type) {
   std::lock_guard<std::mutex> lock(transition_mutex);
   this->line2_transitioning = true;
   this->previous_line2 = this->line2;
   this->line2_transition_percentage = 0x00;
 
-  if (type == ScreenLineOption::current_date) {
-    this->date_line->resetXPosition();
-    this->line2 = this->date_line.get();
-  } else if (type == ScreenLineOption::current_time) {
-    this->time_line->resetXPosition();
-    this->line2 = this->time_line.get();
-  } else {
-    this->weather_line->resetXPosition();
-    this->line2 = this->weather_line.get();
+  UpdatableScreen *next_line = GetLine(this->line2_lines, type);
+  if (next_line == nullptr) {
+    return;
   }
+  ResetLinePosition(next_line);
+  this->line2 = next_line;
   if (this->line2_options.size() <= 1) {
     this->line2_transitioning = false;
     this->line2_transition_percentage = CHAR_MAX;
@@ -156,13 +146,15 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type) {
   this->current_line2 = type;
 }
 
-void ScrollingLineScreen::setLine1Options(
-    std::vector<ScreenLineOption> options) {
-  ScreenLineOption next_line = ScreenLineOption::bus;
+void ScrollingLineScreen::setLine1Options(std::vector<LineType> options) {
+  LineMap new_lines =
+      BuildLineMap(options, this->line1_settings, this->line_context);
+  LineType next_line = LineType::Bus;
   bool should_update = false;
   {
     std::lock_guard<std::mutex> lock(transition_mutex);
     this->line1_options = std::move(options);
+    this->line1_lines = std::move(new_lines);
     this->line1_index = 0;
     if (!this->line1_options.empty()) {
       next_line = this->line1_options.front();
@@ -174,13 +166,15 @@ void ScrollingLineScreen::setLine1Options(
   }
 }
 
-void ScrollingLineScreen::setLine2Options(
-    std::vector<ScreenLineOption> options) {
-  ScreenLineOption next_line = ScreenLineOption::current_time;
+void ScrollingLineScreen::setLine2Options(std::vector<LineType> options) {
+  LineMap new_lines =
+      BuildLineMap(options, this->line2_settings, this->line_context);
+  LineType next_line = LineType::CurrentTime;
   bool should_update = false;
   {
     std::lock_guard<std::mutex> lock(transition_mutex);
     this->line2_options = std::move(options);
+    this->line2_lines = std::move(new_lines);
     this->line2_index = 0;
     if (!this->line2_options.empty()) {
       next_line = this->line2_options.front();
@@ -221,18 +215,10 @@ void ScrollingLineScreen::update() {
     this->setLine2(this->line2_options[this->line2_index]);
   }
 
-  if (this->current_line1 == ScreenLineOption::radio6) {
-    this->music_line->update();
-  } else if (this->current_line1 == ScreenLineOption::bus) {
-    this->bus_line->update();
+  if (this->line1 != nullptr) {
+    this->line1->update();
   }
-
-  if (this->current_line2 == ScreenLineOption::current_time) {
-    this->time_line->update();
-  } else if (this->current_line2 == ScreenLineOption::current_date) {
-    this->date_line->update();
-  } else if (this->current_line2 == ScreenLineOption::weather) {
-    this->weather_line->update();
+  if (this->line2 != nullptr) {
+    this->line2->update();
   }
 }
-

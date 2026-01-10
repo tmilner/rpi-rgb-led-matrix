@@ -94,11 +94,7 @@ void BusArrivalsLine::update() {
     std::cout << "\t Next busses: " << busTimes << std::endl;
     std::cout << std::endl;
 
-    {
-      std::lock_guard<std::recursive_mutex> lock(line_mutex);
-      this->current_line.clear();
-      this->current_line.append(busTimes);
-    }
+    updateText(&busTimes);
   } catch (std::runtime_error &e) {
     printf("Failed to fetch Bus Data\n");
   }

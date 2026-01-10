@@ -26,10 +26,19 @@ Magick::Image *MusicInfoLine::getIcon() {
 
 std::string *MusicInfoLine::getName() { return &this->name; }
 
+void MusicInfoLine::applyPendingIconIfReady() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  if (!pending_image_key.empty() && isReadyForUpdate()) {
+    image_key = pending_image_key;
+    pending_image_key.clear();
+  }
+}
+
 void MusicInfoLine::render(FrameCanvas *offscreen_canvas, char opacity) {
   if (!is_visible) {
     return;
   }
+  applyPendingIconIfReady();
   if (opacity >= (CHAR_MAX / 2)) {
     this->renderLine(offscreen_canvas);
   }
@@ -58,15 +67,17 @@ void MusicInfoLine::update() {
       std::cout << "Spotify now playing " << nowPlaying.value().track_name
                 << std::endl;
 
-      {
+      std::string new_line = nowPlaying.value().artist + " - " +
+                             nowPlaying.value().track_name;
+      this->last_update = now;
+      if (isReadyForUpdate()) {
         std::lock_guard<std::recursive_mutex> lock(line_mutex);
-        this->last_update = now;
         this->image_key = "spotify";
-        this->current_line.clear();
-        this->current_line.append(nowPlaying.value().artist)
-            .append(" - ")
-            .append(nowPlaying.value().track_name);
+      } else {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->pending_image_key = "spotify";
       }
+      updateText(&new_line);
     } else {
       showSpotify = false;
     }
@@ -84,15 +95,17 @@ void MusicInfoLine::update() {
       Radio6Client::NowPlaying nowPlaying =
           this->radio6Client->getNowPlaying();
 
-      {
+      std::string new_line =
+          nowPlaying.artist + " - " + nowPlaying.track_name;
+      this->last_update = now;
+      if (isReadyForUpdate()) {
         std::lock_guard<std::recursive_mutex> lock(line_mutex);
-        this->last_update = now;
         this->image_key = "radio6icon";
-        this->current_line.clear();
-        this->current_line.append(nowPlaying.artist)
-            .append(" - ")
-            .append(nowPlaying.track_name);
+      } else {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->pending_image_key = "radio6icon";
       }
+      updateText(&new_line);
     } catch (std::runtime_error &e) {
       std::cerr << "Exception when updating music line" << e.what()
                 << std::endl;

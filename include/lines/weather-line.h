@@ -21,10 +21,12 @@ public:
 private:
   Magick::Image *getIcon();
   Magick::Image *getBlankIcon();
+  void applyPendingIconIfReady();
   std::map<std::string, std::string> weather_icon_map;
   JSONFetcher *fetcher;
   std::string url;
   std::string weather_image;
+  std::string pending_weather_image;
   std::chrono::time_point<std::chrono::system_clock> last_weather_update;
   static const int update_weather_after_seconds = 360;
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map{};

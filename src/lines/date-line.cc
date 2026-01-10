@@ -41,8 +41,7 @@ void DateLine::update() {
   }
 
   const auto now = std::chrono::system_clock::now();
-  std::lock_guard<std::recursive_mutex> lock(line_mutex);
-  this->current_line.clear();
-  this->current_line.append(
-      date::format("%d %b", date::floor<std::chrono::milliseconds>(now)));
+  std::string date_text =
+      date::format("%d %b", date::floor<std::chrono::milliseconds>(now));
+  updateText(&date_text);
 }

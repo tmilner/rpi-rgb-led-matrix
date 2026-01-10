@@ -226,7 +226,7 @@ void MenuScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
       brightness_text = std::to_string(this->state->current_brightness);
     }
     brightness_text.append("%");
-    menu_sub_line.updateText(&brightness_text);
+    menu_sub_line.updateTextImmediate(&brightness_text);
   }
   if (this->current_mode == speed_menu) {
     std::stringstream temp_str_stream;
@@ -236,16 +236,16 @@ void MenuScreen::render(FrameCanvas *offscreen_canvas, char opacity) {
                       << this->state->speed;
     }
     std::string temp_str = temp_str_stream.str();
-    menu_sub_line.updateText(&temp_str);
+    menu_sub_line.updateTextImmediate(&temp_str);
   } else if (this->current_mode == switch_screen) {
-    menu_sub_line.updateText(
+    menu_sub_line.updateTextImmediate(
         this->screens->at(this->current_screen)->getName());
   } else {
     std::string enter{"..."};
-    menu_sub_line.updateText(&enter);
+    menu_sub_line.updateTextImmediate(&enter);
   }
   menu_sub_line.renderLine(offscreen_canvas);
 
-  menu_line.updateText(&this->menu_items[this->current_menu_item]);
+  menu_line.updateTextImmediate(&this->menu_items[this->current_menu_item]);
   menu_line.renderLine(offscreen_canvas);
 }

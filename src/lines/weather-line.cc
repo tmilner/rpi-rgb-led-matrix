@@ -49,7 +49,16 @@ Magick::Image *WeatherLine::getBlankIcon() {
   return &(*this->image_map)["empty-circle2"];
 }
 
+void WeatherLine::applyPendingIconIfReady() {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  if (!pending_weather_image.empty() && isReadyForUpdate()) {
+    weather_image = pending_weather_image;
+    pending_weather_image.clear();
+  }
+}
+
 void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
+  applyPendingIconIfReady();
   this->renderLine(offscreen_canvas);
   offscreen_canvas->SetPixels(0, this->y, 13, 16, 0, 0, 0);
   rgb_matrix::DrawLine(offscreen_canvas, 13, this->y, 13, this->y + 16,
@@ -105,17 +114,16 @@ void WeatherLine::update() {
 
       std::cout << std::endl;
 
-      {
+      this->last_weather_update = now;
+      if (isReadyForUpdate()) {
         std::lock_guard<std::recursive_mutex> lock(line_mutex);
-        this->weather_image.clear();
-        this->weather_image.append(icon_str);
-        this->current_line.clear();
-        this->current_line.append(temp_str).append("℃");
-        this->last_weather_update = now;
-
-        std::cout << "Weather icon " << this->weather_image << std::endl;
-        std::cout << "Weather Line " << this->current_line << std::endl;
+        this->weather_image = icon_str;
+      } else {
+        std::lock_guard<std::recursive_mutex> lock(line_mutex);
+        this->pending_weather_image = icon_str;
       }
+      std::string new_line = temp_str + "℃";
+      updateText(&new_line);
 
     } catch (std::runtime_error &e) {
       printf("Failed to fetch Weather\n");

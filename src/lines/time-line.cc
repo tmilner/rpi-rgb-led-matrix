@@ -44,13 +44,11 @@ void TimeLine::update() {
   }
 
   const auto now = std::chrono::system_clock::now();
-  std::lock_guard<std::recursive_mutex> lock(line_mutex);
-  this->current_line.clear();
   auto t = std::time(nullptr);
   auto tm = *std::localtime(&t);
 
   std::ostringstream oss;
   oss << std::put_time(&tm, "%H:%M");
   auto time = oss.str();
-  this->current_line.append(time);
+  updateText(&time);
 }
