@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
   ScrollingLineScreenSettings scrollingLineScreenSettings =
       ScrollingLineScreenSettings(
           defaults.cols, defaults.rows, &main_font, color, bg_color,
-          &state.speed, &state.mutex, letter_spacing, ScreenLineOption::radio6,
+          &state.speed, &state.mutex, letter_spacing, ScreenLineOption::bus,
           ScreenLineOption::current_time, weather_api_key);
 
   auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(

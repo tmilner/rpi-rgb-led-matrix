@@ -17,9 +17,10 @@ ScrollingLineScreen::ScrollingLineScreen(
     Radio6Client radio6_client, TflClient tfl_client)
     : image_map{image_map},
       line1_settings{settings.speed, settings.speed_mutex, 0, 0, settings.font,
-                     settings.color, settings.width, 14},
-      line2_settings{settings.speed, settings.speed_mutex, settings.height / 2,
-                     0, settings.font, settings.color, settings.width, 14},
+                     settings.color, settings.width,       14},
+      line2_settings{
+          settings.speed, settings.speed_mutex, settings.height / 2, 0,
+          settings.font,  settings.color,       settings.width,      14},
       settings{settings}, bg_color{settings.bg_color},
       name{std::string("Scrolling Screen")}, spotify_client(spotify_client),
       radio6_client(radio6_client), tfl_client(tfl_client)
@@ -30,8 +31,9 @@ ScrollingLineScreen::ScrollingLineScreen(
   this->line1_last_rotate = now;
   this->line2_last_rotate = now;
 
-  this->music_line = new MusicLine(this->image_map, this->spotify_client,
-                                   this->radio6_client, this->line1_settings);
+  // this->music_line = new MusicLine(this->image_map, this->spotify_client,
+  //                                  this->radio6_client,
+  //                                  this->line1_settings);
 
   this->bus_line = new BusTowardsOvalLine(this->image_map, this->tfl_client,
                                           this->line1_settings);
@@ -131,21 +133,22 @@ void ScrollingLineScreen::setLine2(ScreenLineOption type) {
 void ScrollingLineScreen::update() {
   const auto now = std::chrono::system_clock::now();
 
-  if (((now - this->line1_last_rotate) / 1s) >
-      this->line1_rotate_after_seconds) {
-    std::cout << "Changing line 1" << this->line1->getName()
-              << " Last rotate is "
-              << date::format("%D %T", date::floor<std::chrono::milliseconds>(
-                                           this->line1_last_rotate))
-              << std::endl;
-
-    this->line1_last_rotate = now;
-
-    if (this->current_line1 == ScreenLineOption::bus) {
-      this->setLine1(ScreenLineOption::radio6);
-    } else
-      this->setLine1(ScreenLineOption::bus);
-  }
+  //  if (((now - this->line1_last_rotate) / 1s) >
+  //      this->line1_rotate_after_seconds) {
+  //    std::cout << "Changing line 1" << this->line1->getName()
+  //              << " Last rotate is "
+  //              << date::format("%D %T",
+  //              date::floor<std::chrono::milliseconds>(
+  //                                           this->line1_last_rotate))
+  //              << std::endl;
+  //
+  //    this->line1_last_rotate = now;
+  //
+  //    if (this->current_line1 == ScreenLineOption::bus) {
+  //      this->setLine1(ScreenLineOption::radio6);
+  //    } else
+  //      this->setLine1(ScreenLineOption::bus);
+  //  }
 
   if (((now - this->line2_last_rotate) / 1s) >
       this->line2_rotate_after_seconds) {
