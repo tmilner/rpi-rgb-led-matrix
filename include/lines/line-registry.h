@@ -24,7 +24,7 @@ struct LineRegistryContext {
   std::shared_ptr<std::map<std::string, Magick::Image>> image_map;
   std::map<std::string, std::string> weather_icon_map;
   std::string weather_api_key;
-  const ServiceRegistry *services = nullptr;
+  ServiceRegistry *services = nullptr;
 };
 
 using LineMap = std::map<LineType, std::unique_ptr<UpdatableScreen>>;
