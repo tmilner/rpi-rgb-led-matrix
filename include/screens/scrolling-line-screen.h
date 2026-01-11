@@ -27,19 +27,16 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   int near_end_chars;
   std::chrono::seconds min_display_seconds;
   std::string weather_api_key;
-  ScrollingLineScreenSettings(int width, int height, rgb_matrix::Font *font,
-                              rgb_matrix::Color color,
-                              rgb_matrix::Color bg_color, float *speed,
-                              std::mutex *speed_mutex,
-                              std::vector<LineType> line1_options,
-                              std::vector<LineType> line2_options,
-                              std::chrono::seconds line1_rotate_after_seconds,
-                              std::chrono::seconds line2_rotate_after_seconds,
-                              int letter_spacing,
-                              int near_end_chars = 6,
-                              std::chrono::seconds min_display_seconds =
-                                  std::chrono::seconds(10),
-                              const std::string weather_api_key) {
+  ScrollingLineScreenSettings(
+      int width, int height, rgb_matrix::Font *font, rgb_matrix::Color color,
+      rgb_matrix::Color bg_color, float *speed, std::mutex *speed_mutex,
+      std::vector<LineType> line1_options,
+      std::vector<LineType> line2_options,
+      std::chrono::seconds line1_rotate_after_seconds,
+      std::chrono::seconds line2_rotate_after_seconds, int letter_spacing,
+      const std::string weather_api_key, int near_end_chars = 6,
+      std::chrono::seconds min_display_seconds =
+          std::chrono::seconds(10)) {
     this->width = width;
     this->height = height;
     this->font = font;
