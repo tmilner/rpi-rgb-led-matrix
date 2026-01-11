@@ -79,12 +79,15 @@ void MqttController::publishDiscovery() {
 
   Json::Value light_config;
   light_config["name"] = config.device_name + " Power";
+  light_config["unique_id"] = device; // Ensure this is unique per device
   light_config["schema"] = "json";
+  light_config["brightness"] = true;
   light_config["state_topic"] = stateTopic("power");
   light_config["command_topic"] = commandTopic("power");
   light_config["brightness_state_topic"] = stateTopic("brightness");
   light_config["brightness_command_topic"] = commandTopic("brightness");
   light_config["device"] = device_info;
+
 
   Json::StreamWriterBuilder writer;
   const std::string light_payload = Json::writeString(writer, light_config);

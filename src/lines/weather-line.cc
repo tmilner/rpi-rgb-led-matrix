@@ -41,7 +41,13 @@ std::string *WeatherLine::getName() { return &this->name; }
 
 Magick::Image *WeatherLine::getIcon() {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
-  return &(*this->image_map)[this->weather_image];
+  const auto it = this->image_map->find(this->weather_image);
+  if (it == this->image_map->end()) {
+    std::cout << "Missing weather icon image: " << this->weather_image
+              << std::endl;
+    return getBlankIcon();
+  }
+  return &it->second;
 }
 
 Magick::Image *WeatherLine::getBlankIcon() {
@@ -65,8 +71,6 @@ void WeatherLine::render(FrameCanvas *offscreen_canvas, char opacity) {
                        Color(130, 100, 73));
   // CopyImageToCanvas(this->getBlankIcon(), offscreen_canvas, 0, this->y + 1,
   //                   opacity);
-  std::cout << "Image Info for Weather" << this->getIcon()->constImageInfo()
-            << std::endl;
   CopyImageToCanvas(this->getIcon(), offscreen_canvas, 0, this->y + 1, opacity);
 }
 
