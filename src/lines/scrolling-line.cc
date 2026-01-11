@@ -130,3 +130,10 @@ bool ScrollingLine::shouldFetchUpdate() const {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return (std::chrono::steady_clock::now() - last_line_change) >= min_display;
 }
+
+void ScrollingLine::setPacing(int new_near_end_chars,
+                              std::chrono::seconds new_min_display) {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  near_end_chars = new_near_end_chars;
+  min_display = new_min_display;
+}

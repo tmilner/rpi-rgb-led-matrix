@@ -8,6 +8,7 @@
 // ../utils/text-scroller.cc
 
 #include "clients/mqtt-client.h"
+#include "clients/mqtt-controller.h"
 #include "core/graphics.h"
 #include "core/img_utils.h"
 #include "core/led-matrix.h"
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <string>
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
@@ -29,6 +31,7 @@
 #include <filesystem>
 #include <memory>
 #include <mutex>
+#include <sstream>
 #include <vector>
 
 #include <cppgpio.hpp>
@@ -63,73 +66,49 @@ void updateLines(vector<UpdatableScreen *> screens_to_update,
   }
 }
 
-void handleMQTTMessages(MQTTClient *mqttClient, ScreenState *state,
-                        std::string light_brightness_command_topic,
-                        std::string light_brightness_state_topic,
-                        std::string light_state_topic,
-                        std::string light_command_topic,
-                        std::atomic<bool> *running) {
-  while (running->load()) {
-    try {
-      auto message = mqttClient->consume_message();
-      if (!message) {
-        cerr << "Failed to consume message!" << endl;
-        break;
-      }
-      std::cout << "Recieved message for topic " << message->get_topic()
-                << " with payload " << message->to_string() << endl;
+namespace {
+template <typename T>
+T getOptionalConfig(const YAML::Node &config, const std::string &key,
+                    const T &fallback) {
+  const YAML::Node value = config[key];
+  if (value && !value.IsNull()) {
+    return value.as<T>();
+  }
+  return fallback;
+}
 
-      if (message->get_topic() == light_brightness_command_topic) {
-        std::cout << "Updating brightness!" << message->to_string() << endl;
-        std::string message_contents = message->to_string();
-        int new_brightness = stoi(message_contents);
-        if (new_brightness >= 0 && new_brightness <= 100) {
-          {
-            std::lock_guard<std::mutex> lock(state->mutex);
-            state->current_brightness = new_brightness;
-          }
-          mqtt::message_ptr brightnessMessage = mqtt::make_message(
-              light_brightness_state_topic, to_string(new_brightness));
-          brightnessMessage->set_qos(QOS);
-          brightnessMessage->set_retained(true);
-          mqttClient->publish_message(brightnessMessage);
-          std::cout << "Brightness updated via MQTT to " << new_brightness
-                    << endl;
-        }
-      } else if (message->get_topic() == light_command_topic) {
-        std::cout << "Updating state!" << message->to_string() << endl;
-        std::string message_contents = message->to_string();
-        if (message_contents == "ON") {
-          {
-            std::lock_guard<std::mutex> lock(state->mutex);
-            state->screen_on = true;
-          }
-          mqtt::message_ptr stateMessage =
-              mqtt::make_message(light_state_topic, "ON");
-          stateMessage->set_qos(QOS);
-          stateMessage->set_retained(true);
-          mqttClient->publish_message(stateMessage);
-          std::cout << "State updated via MQTT to ON" << endl;
-        } else if (message_contents == "OFF") {
-          {
-            std::lock_guard<std::mutex> lock(state->mutex);
-            state->screen_on = false;
-          }
-          mqtt::message_ptr stateMessage =
-              mqtt::make_message(light_state_topic, "OFF");
-          stateMessage->set_qos(QOS);
-          stateMessage->set_retained(true);
-          mqttClient->publish_message(stateMessage);
-          std::cout << "State updated via MQTT to OFF" << endl;
-        }
+std::vector<LineType> parseLineOptions(const YAML::Node &node,
+                                       const std::vector<LineType> &fallback) {
+  if (!node || node.IsNull()) {
+    return fallback;
+  }
+  std::vector<LineType> options;
+  if (node.IsSequence()) {
+    for (const auto &entry : node) {
+      if (!entry.IsScalar()) {
+        continue;
       }
-    } catch (const mqtt::exception &exc) {
-      cerr << "Exception on MQTT handler thread" << exc << endl;
-    } catch (exception e) {
-      cerr << "generic exception on MQTT handler thread" << endl;
+      LineType type = LineType::CurrentTime;
+      if (TryParseLineType(entry.as<std::string>(), type)) {
+        options.push_back(type);
+      }
+    }
+  } else if (node.IsScalar()) {
+    std::stringstream ss(node.as<std::string>());
+    std::string item;
+    while (std::getline(ss, item, ',')) {
+      LineType type = LineType::CurrentTime;
+      if (TryParseLineType(item, type)) {
+        options.push_back(type);
+      }
     }
   }
+  if (options.empty()) {
+    return fallback;
+  }
+  return options;
 }
+} // namespace
 
 int main(int argc, char *argv[]) {
   ScreenState state;
@@ -183,24 +162,50 @@ int main(int argc, char *argv[]) {
   }
 
   YAML::Node config = YAML::LoadFile(base_path + "/config.yaml");
-  const string weather_api_key = config["weather_api_key"].as<string>();
+  const string weather_api_key =
+      getOptionalConfig<std::string>(config, "weather_api_key", "");
 
-  const string spotify_client_id = config["spotify_client_id"].as<string>();
+  const string spotify_client_id =
+      getOptionalConfig<std::string>(config, "spotify_client_id", "");
   const string spotify_client_secret =
-      config["spotify_client_secret"].as<string>();
+      getOptionalConfig<std::string>(config, "spotify_client_secret", "");
   const string spotify_refresh_token =
-      config["spotify_refresh_token"].as<string>();
+      getOptionalConfig<std::string>(config, "spotify_refresh_token", "");
 
-  const string mqtt_server = config["mqtt_server"].as<string>();
-  const string mqtt_user_name = config["mqtt_user_name"].as<string>();
-  const string mqtt_password = config["mqtt_password"].as<string>();
-  const string mqtt_client_id = config["mqtt_client_id"].as<string>();
-  const string light_state_topic = config["light_state_topic"].as<string>();
-  const string light_command_topic = config["light_command_topic"].as<string>();
-  const string light_brightness_state_topic =
-      config["light_brightness_state_topic"].as<string>();
-  const string light_brightness_command_topic =
-      config["light_brightness_command_topic"].as<string>();
+  const string mqtt_server =
+      getOptionalConfig<std::string>(config, "mqtt_server", "");
+  const string mqtt_user_name =
+      getOptionalConfig<std::string>(config, "mqtt_user_name", "");
+  const string mqtt_password =
+      getOptionalConfig<std::string>(config, "mqtt_password", "");
+  const string mqtt_client_id =
+      getOptionalConfig<std::string>(config, "mqtt_client_id", "led-matrix");
+
+  const string light_state_topic =
+      getOptionalConfig<std::string>(config, "light_state_topic", "");
+  const string light_command_topic =
+      getOptionalConfig<std::string>(config, "light_command_topic", "");
+  const string light_brightness_state_topic = getOptionalConfig<std::string>(
+      config, "light_brightness_state_topic", "");
+  const string light_brightness_command_topic = getOptionalConfig<std::string>(
+      config, "light_brightness_command_topic", "");
+
+  const string mqtt_base_topic =
+      getOptionalConfig<std::string>(config, "mqtt_base_topic", "led-matrix");
+  const string mqtt_discovery_prefix = getOptionalConfig<std::string>(
+      config, "mqtt_discovery_prefix", "homeassistant");
+  const string mqtt_device_id = getOptionalConfig<std::string>(
+      config, "mqtt_device_id", mqtt_client_id);
+  const string mqtt_device_name = getOptionalConfig<std::string>(
+      config, "mqtt_device_name", "LED Matrix");
+  const bool mqtt_enable_discovery =
+      getOptionalConfig<bool>(config, "mqtt_enable_discovery", true);
+
+  state.current_brightness = std::clamp(
+      getOptionalConfig<int>(config, "brightness", state.current_brightness),
+      0, 100);
+  state.speed =
+      getOptionalConfig<float>(config, "scroll_speed", state.speed);
 
   YAML::Node weather_icon_map_config =
       YAML::LoadFile(base_path + "/weather_icons.yaml");
@@ -216,14 +221,17 @@ int main(int argc, char *argv[]) {
     weather_icon_map[key] = value;
   }
 
-  vector<string> topics;
-  // topics.push_back(light_state_topic);
-  topics.push_back(light_command_topic);
-  // topics.push_back(light_brightness_state_topic);
-  topics.push_back(light_brightness_command_topic);
-
-  MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name,
-                        mqtt_password, topics);
+  MqttControllerConfig mqtt_config;
+  mqtt_config.base_topic = mqtt_base_topic;
+  mqtt_config.discovery_prefix = mqtt_discovery_prefix;
+  mqtt_config.device_id = mqtt_device_id;
+  mqtt_config.device_name = mqtt_device_name;
+  mqtt_config.enable_discovery = mqtt_enable_discovery;
+  mqtt_config.light_state_topic = light_state_topic;
+  mqtt_config.light_command_topic = light_command_topic;
+  mqtt_config.light_brightness_state_topic = light_brightness_state_topic;
+  mqtt_config.light_brightness_command_topic =
+      light_brightness_command_topic;
   ServiceRegistry services(spotify_refresh_token, spotify_client_id,
                            spotify_client_secret);
   /*
@@ -296,43 +304,38 @@ int main(int argc, char *argv[]) {
   for (const auto &[key, value] : state.image_map)
     cout << '[' << key << "] = " << value.constImageInfo() << endl;
 
-  cout << "Publishing ON message to MQTT" << endl;
-  mqtt::message_ptr onMessage = mqtt::make_message(light_state_topic, "ON");
-  onMessage->set_qos(1);
-  onMessage->set_retained(true);
-  mqttClient.publish_message(onMessage);
-
-  cout << "Publishing Brightness message to MQTT" << endl;
-  mqtt::message_ptr brightnessMessage = mqtt::make_message(
-      light_brightness_state_topic, to_string(state.current_brightness));
-  brightnessMessage->set_qos(1);
-  brightnessMessage->set_retained(true);
-  mqttClient.publish_message(brightnessMessage);
-
-  cout << "Done publishing startup MQTT messages" << endl;
-
-  thread handleMqttMessagesThread(
-      handleMQTTMessages, &mqttClient, &state, light_brightness_command_topic,
-      light_brightness_state_topic, light_state_topic, light_command_topic,
-      &running);
-
-  std::vector<LineType> line1_options = {LineType::Bus};
-  std::vector<LineType> line2_options = {LineType::CurrentTime,
-                                         LineType::CurrentDate,
-                                         LineType::Weather};
+  std::vector<LineType> default_line1_options = {LineType::Bus};
+  std::vector<LineType> default_line2_options = {LineType::CurrentTime,
+                                                 LineType::CurrentDate,
+                                                 LineType::Weather};
+  std::vector<LineType> line1_options = parseLineOptions(
+      config["line1_options"], default_line1_options);
+  std::vector<LineType> line2_options = parseLineOptions(
+      config["line2_options"], default_line2_options);
+  const int line1_rotate_seconds =
+      getOptionalConfig<int>(config, "line1_rotate_seconds", 15);
+  const int line2_rotate_seconds =
+      getOptionalConfig<int>(config, "line2_rotate_seconds", 10);
+  const int near_end_chars =
+      getOptionalConfig<int>(config, "near_end_chars", 6);
+  const int min_display_seconds =
+      getOptionalConfig<int>(config, "min_display_seconds", 10);
 
   ScrollingLineScreenSettings scrollingLineScreenSettings =
       ScrollingLineScreenSettings(
           defaults.cols, defaults.rows, &main_font, color, bg_color,
           &state.speed, &state.mutex, std::move(line1_options),
-          std::move(line2_options), std::chrono::seconds(15),
-          std::chrono::seconds(10), letter_spacing, weather_api_key);
+          std::move(line2_options), std::chrono::seconds(line1_rotate_seconds),
+          std::chrono::seconds(line2_rotate_seconds), letter_spacing,
+          weather_api_key, near_end_chars,
+          std::chrono::seconds(min_display_seconds));
 
   auto imageMapPtr = std::shared_ptr<std::map<std::string, Magick::Image>>(
       &state.image_map, [](void *) {});
 
-  auto srollingTwoLineScreen = std::make_unique<ScrollingLineScreen>(
+  auto scrollingTwoLineScreen = std::make_unique<ScrollingLineScreen>(
       imageMapPtr, weather_icon_map, scrollingLineScreenSettings, &services);
+  ScrollingLineScreen *scrolling_screen_ptr = scrollingTwoLineScreen.get();
 
   cout << "Setting up update thread" << endl;
 
@@ -344,7 +347,7 @@ int main(int argc, char *argv[]) {
   rotating_box->set_hidden();
 
   std::vector<std::unique_ptr<Screen>> screens_owned;
-  screens_owned.push_back(std::move(srollingTwoLineScreen));
+  screens_owned.push_back(std::move(scrollingTwoLineScreen));
   screens_owned.push_back(std::move(game_of_life_screen));
   screens_owned.push_back(std::move(rotating_box));
 
@@ -359,6 +362,22 @@ int main(int argc, char *argv[]) {
       static_cast<UpdatableScreen *>(screens_to_render[0]));
   screens_to_update.push_back(
       static_cast<UpdatableScreen *>(screens_to_render[1]));
+
+  std::vector<std::string> mqtt_topics;
+  MQTTClient mqttClient(mqtt_server, mqtt_client_id, mqtt_user_name,
+                        mqtt_password, mqtt_topics);
+  MqttController mqtt_controller(&mqttClient, &state, scrolling_screen_ptr,
+                                 mqtt_config);
+  mqtt_topics = mqtt_controller.command_topics();
+  mqttClient.update_topics(mqtt_topics);
+
+  mqtt_controller.publishDiscovery();
+  mqtt_controller.publishStartupState();
+
+  cout << "Done publishing startup MQTT messages" << endl;
+
+  thread handleMqttMessagesThread(&MqttController::run, &mqtt_controller,
+                                  &running);
 
   thread updateThread(updateLines, screens_to_update, &running);
 

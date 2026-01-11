@@ -7,6 +7,27 @@
 #include "lines/time-line.h"
 #include "lines/weather-line.h"
 
+#include <algorithm>
+#include <cctype>
+#include <string>
+
+namespace {
+std::string toLower(std::string value) {
+  std::transform(value.begin(), value.end(), value.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return value;
+}
+
+std::string trim(const std::string &value) {
+  size_t start = value.find_first_not_of(" \t\n\r");
+  if (start == std::string::npos) {
+    return "";
+  }
+  size_t end = value.find_last_not_of(" \t\n\r");
+  return value.substr(start, end - start + 1);
+}
+} // namespace
+
 LineMap BuildLineMap(const std::vector<LineType> &options,
                      const ScrollingLineSettings &settings,
                      const LineRegistryContext &context) {
@@ -53,6 +74,53 @@ LineMap BuildLineMap(const std::vector<LineType> &options,
     }
   }
   return lines;
+}
+
+bool TryParseLineType(const std::string &value, LineType &type) {
+  const std::string key = toLower(trim(value));
+  if (key == "radio6") {
+    type = LineType::Radio6;
+    return true;
+  }
+  if (key == "time") {
+    type = LineType::CurrentTime;
+    return true;
+  }
+  if (key == "date") {
+    type = LineType::CurrentDate;
+    return true;
+  }
+  if (key == "weather") {
+    type = LineType::Weather;
+    return true;
+  }
+  if (key == "timedateweather") {
+    type = LineType::TimeDateWeather;
+    return true;
+  }
+  if (key == "bus") {
+    type = LineType::Bus;
+    return true;
+  }
+  return false;
+}
+
+std::string LineTypeToString(LineType type) {
+  switch (type) {
+  case LineType::Radio6:
+    return "radio6";
+  case LineType::CurrentTime:
+    return "time";
+  case LineType::CurrentDate:
+    return "date";
+  case LineType::Weather:
+    return "weather";
+  case LineType::TimeDateWeather:
+    return "timedateweather";
+  case LineType::Bus:
+    return "bus";
+  }
+  return "unknown";
 }
 
 UpdatableScreen *GetLine(LineMap &lines, LineType type) {

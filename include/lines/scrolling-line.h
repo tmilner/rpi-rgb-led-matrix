@@ -71,5 +71,6 @@ public:
   bool isReadyForUpdate();
   bool isNearEnd() const;
   bool shouldFetchUpdate() const;
+  void setPacing(int near_end_chars, std::chrono::seconds min_display);
 };
 #endif /*SCROLLING_LINE_H*/

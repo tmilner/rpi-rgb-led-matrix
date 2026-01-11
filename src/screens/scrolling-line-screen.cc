@@ -4,6 +4,18 @@
 #include <climits>
 #include <iostream>
 
+namespace {
+void ApplyLinePacing(LineMap &lines, int near_end_chars,
+                     std::chrono::seconds min_display) {
+  for (auto &entry : lines) {
+    auto *line = dynamic_cast<ScrollingLine *>(entry.second.get());
+    if (line != nullptr) {
+      line->setPacing(near_end_chars, min_display);
+    }
+  }
+}
+} // namespace
+
 ScrollingLineScreen::ScrollingLineScreen(
     std::shared_ptr<std::map<std::string, Magick::Image>> image_map,
     std::map<std::string, std::string> weather_icon_map,
@@ -162,6 +174,11 @@ void ScrollingLineScreen::setLine1Options(std::vector<LineType> options) {
     if (!this->line1_options.empty()) {
       next_line = this->line1_options.front();
       should_update = true;
+    } else {
+      this->line1 = nullptr;
+      this->previous_line1 = nullptr;
+      this->line1_transitioning = false;
+      this->line1_transition_percentage = CHAR_MAX;
     }
   }
   if (should_update) {
@@ -182,11 +199,67 @@ void ScrollingLineScreen::setLine2Options(std::vector<LineType> options) {
     if (!this->line2_options.empty()) {
       next_line = this->line2_options.front();
       should_update = true;
+    } else {
+      this->line2 = nullptr;
+      this->previous_line2 = nullptr;
+      this->line2_transitioning = false;
+      this->line2_transition_percentage = CHAR_MAX;
     }
   }
   if (should_update) {
     this->setLine2(next_line);
   }
+}
+
+std::vector<LineType> ScrollingLineScreen::line1Options() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return line1_options;
+}
+
+std::vector<LineType> ScrollingLineScreen::line2Options() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return line2_options;
+}
+
+void ScrollingLineScreen::setLineRotateIntervals(
+    std::chrono::seconds line1_rotate_after,
+    std::chrono::seconds line2_rotate_after) {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  line1_rotate_after_seconds = line1_rotate_after;
+  line2_rotate_after_seconds = line2_rotate_after;
+}
+
+std::chrono::seconds ScrollingLineScreen::line1RotateSeconds() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return line1_rotate_after_seconds;
+}
+
+std::chrono::seconds ScrollingLineScreen::line2RotateSeconds() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return line2_rotate_after_seconds;
+}
+
+void ScrollingLineScreen::setLinePacing(
+    int near_end_chars, std::chrono::seconds min_display_seconds) {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  settings.near_end_chars = near_end_chars;
+  settings.min_display_seconds = min_display_seconds;
+  line1_settings.init_near_end_chars = near_end_chars;
+  line1_settings.init_min_display = min_display_seconds;
+  line2_settings.init_near_end_chars = near_end_chars;
+  line2_settings.init_min_display = min_display_seconds;
+  ApplyLinePacing(line1_lines, near_end_chars, min_display_seconds);
+  ApplyLinePacing(line2_lines, near_end_chars, min_display_seconds);
+}
+
+int ScrollingLineScreen::nearEndChars() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return settings.near_end_chars;
+}
+
+std::chrono::seconds ScrollingLineScreen::minDisplaySeconds() const {
+  std::lock_guard<std::mutex> lock(transition_mutex);
+  return settings.min_display_seconds;
 }
 
 void ScrollingLineScreen::update() {

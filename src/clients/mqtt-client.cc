@@ -1,4 +1,5 @@
 #include "clients/mqtt-client.h"
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -62,6 +63,18 @@ void MQTTClient::publish_message(mqtt::message_ptr message) {
     cli.reconnect()->wait();
   }
   cli.publish(message);
+}
+
+void MQTTClient::update_topics(const std::vector<std::string> &new_topics) {
+  if (!cli.is_connected()) {
+    cli.reconnect()->wait();
+  }
+  for (const auto &topic : new_topics) {
+    if (std::find(topics.begin(), topics.end(), topic) == topics.end()) {
+      cli.subscribe(topic, QOS)->wait();
+    }
+  }
+  topics = new_topics;
 }
 
 void MQTTClient::stop_consuming() {

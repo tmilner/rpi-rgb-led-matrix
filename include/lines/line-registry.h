@@ -35,5 +35,7 @@ LineMap BuildLineMap(const std::vector<LineType> &options,
 
 UpdatableScreen *GetLine(LineMap &lines, LineType type);
 void ResetLinePosition(UpdatableScreen *line);
+bool TryParseLineType(const std::string &value, LineType &type);
+std::string LineTypeToString(LineType type);
 
 #endif /*LINE_REGISTRY_H*/

@@ -67,6 +67,16 @@ public:
   void setLine2(LineType type);
   void setLine1Options(std::vector<LineType> options);
   void setLine2Options(std::vector<LineType> options);
+  std::vector<LineType> line1Options() const;
+  std::vector<LineType> line2Options() const;
+  void setLineRotateIntervals(std::chrono::seconds line1_rotate_after,
+                              std::chrono::seconds line2_rotate_after);
+  std::chrono::seconds line1RotateSeconds() const;
+  std::chrono::seconds line2RotateSeconds() const;
+  void setLinePacing(int near_end_chars,
+                     std::chrono::seconds min_display_seconds);
+  int nearEndChars() const;
+  std::chrono::seconds minDisplaySeconds() const;
   std::string *getName();
 
 private:
