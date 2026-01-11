@@ -79,15 +79,16 @@ void MqttController::publishDiscovery() {
 
   Json::Value light_config;
   light_config["name"] = config.device_name + " Power";
-  light_config["unique_id"] = device; // Ensure this is unique per device
-  light_config["schema"] = "json";
+  light_config["unique_id"] = device + "_light";
   light_config["brightness"] = true;
+  light_config["brightness_scale"] = 100;
+  light_config["payload_on"] = "ON";
+  light_config["payload_off"] = "OFF";
   light_config["state_topic"] = stateTopic("power");
   light_config["command_topic"] = commandTopic("power");
   light_config["brightness_state_topic"] = stateTopic("brightness");
   light_config["brightness_command_topic"] = commandTopic("brightness");
   light_config["device"] = device_info;
-
 
   Json::StreamWriterBuilder writer;
   const std::string light_payload = Json::writeString(writer, light_config);
@@ -116,7 +117,7 @@ void MqttController::run(std::atomic<bool> *running) {
 }
 
 void MqttController::handleMessage(const std::string &topic,
-                                  const std::string &payload) {
+                                   const std::string &payload) {
   if (topic == config.light_command_topic || topic == commandTopic("power")) {
     bool on = false;
     if (parseBool(payload, on)) {
@@ -207,8 +208,8 @@ void MqttController::handleMessage(const std::string &topic,
   if (topic == commandTopic("min_display_seconds")) {
     int value = 0;
     if (parseInt(payload, value)) {
-      scrolling_screen->setLinePacing(
-          scrolling_screen->nearEndChars(), std::chrono::seconds(value));
+      scrolling_screen->setLinePacing(scrolling_screen->nearEndChars(),
+                                      std::chrono::seconds(value));
       publishPacingState();
     }
     return;
@@ -265,16 +266,16 @@ void MqttController::publishLineOptionsState() {
     return Json::writeString(writer, array);
   };
 
-  mqtt::message_ptr line1 = mqtt::make_message(
-      stateTopic("line1/options"),
-      formatOptions(scrolling_screen->line1Options()));
+  mqtt::message_ptr line1 =
+      mqtt::make_message(stateTopic("line1/options"),
+                         formatOptions(scrolling_screen->line1Options()));
   line1->set_qos(1);
   line1->set_retained(true);
   client->publish_message(line1);
 
-  mqtt::message_ptr line2 = mqtt::make_message(
-      stateTopic("line2/options"),
-      formatOptions(scrolling_screen->line2Options()));
+  mqtt::message_ptr line2 =
+      mqtt::make_message(stateTopic("line2/options"),
+                         formatOptions(scrolling_screen->line2Options()));
   line2->set_qos(1);
   line2->set_retained(true);
   client->publish_message(line2);
@@ -297,9 +298,9 @@ void MqttController::publishRotateState() {
 }
 
 void MqttController::publishPacingState() {
-  mqtt::message_ptr near_end = mqtt::make_message(
-      stateTopic("near_end_chars"),
-      std::to_string(scrolling_screen->nearEndChars()));
+  mqtt::message_ptr near_end =
+      mqtt::make_message(stateTopic("near_end_chars"),
+                         std::to_string(scrolling_screen->nearEndChars()));
   near_end->set_qos(1);
   near_end->set_retained(true);
   client->publish_message(near_end);
@@ -344,8 +345,8 @@ bool MqttController::parseFloat(const std::string &payload,
   }
 }
 
-bool MqttController::parseLineOptions(
-    const std::string &payload, std::vector<LineType> &options) const {
+bool MqttController::parseLineOptions(const std::string &payload,
+                                      std::vector<LineType> &options) const {
   const std::string trimmed = trim(payload);
   if (trimmed.empty()) {
     return false;

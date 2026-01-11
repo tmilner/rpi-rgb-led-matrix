@@ -20,7 +20,7 @@ WeatherLine::WeatherLine(
       "weather?lon=-0.093014&lat=51.474087&appid=");
 
   this->current_line = "Loading";
-  this->weather_image = "wl-day-sunny";
+  this->weather_image = "wi-day-sunny";
   this->url = weather_base_url + weather_api_key;
   auto now = std::chrono::system_clock::now();
   this->last_weather_update = now - 50min;
