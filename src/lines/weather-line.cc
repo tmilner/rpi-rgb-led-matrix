@@ -76,6 +76,9 @@ void WeatherLine::update() {
 
   if (((now - this->last_weather_update) / 1s) >
       this->update_weather_after_seconds) {
+    if (!shouldFetchUpdate()) {
+      return;
+    }
     std::cout << "Fetching wether data from " << this->url << std::endl;
     try {
       Json::Value jsonData = fetcher->fetch(this->url);

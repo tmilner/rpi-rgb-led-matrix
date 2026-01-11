@@ -24,6 +24,8 @@ struct ScrollingLineScreenSettings : ScreenSettings {
   std::vector<LineType> line2_options;
   std::chrono::seconds line1_rotate_after_seconds;
   std::chrono::seconds line2_rotate_after_seconds;
+  int near_end_chars;
+  std::chrono::seconds min_display_seconds;
   std::string weather_api_key;
   ScrollingLineScreenSettings(int width, int height, rgb_matrix::Font *font,
                               rgb_matrix::Color color,
@@ -34,6 +36,9 @@ struct ScrollingLineScreenSettings : ScreenSettings {
                               std::chrono::seconds line1_rotate_after_seconds,
                               std::chrono::seconds line2_rotate_after_seconds,
                               int letter_spacing,
+                              int near_end_chars = 6,
+                              std::chrono::seconds min_display_seconds =
+                                  std::chrono::seconds(10),
                               const std::string weather_api_key) {
     this->width = width;
     this->height = height;
@@ -46,6 +51,8 @@ struct ScrollingLineScreenSettings : ScreenSettings {
     this->line2_options = std::move(line2_options);
     this->line1_rotate_after_seconds = line1_rotate_after_seconds;
     this->line2_rotate_after_seconds = line2_rotate_after_seconds;
+    this->near_end_chars = near_end_chars;
+    this->min_display_seconds = min_display_seconds;
     this->weather_api_key = weather_api_key;
     this->letter_spacing = letter_spacing;
   }

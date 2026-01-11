@@ -44,6 +44,9 @@ void BusArrivalsLine::update() {
   if (((now - this->last_update) / 1s) < this->update_after_seconds) {
     return;
   }
+  if (!shouldFetchUpdate()) {
+    return;
+  }
 
   try {
     std::vector<TflClient::Arrival> arrivalsTowardsOval =
@@ -74,7 +77,7 @@ void BusArrivalsLine::update() {
                 return bus1.secondsUntilArrival < bus2.secondsUntilArrival;
               });
 
-    std::string busTimes = "";
+    std::string busTimes;
 
     int busesAdded = 0;
 
@@ -89,6 +92,14 @@ void BusArrivalsLine::update() {
       if (busesAdded >= 5) {
         break;
       }
+    }
+
+    if (!busTimes.empty() && busTimes.size() >= 2 &&
+        busTimes.substr(busTimes.size() - 2) == ", ") {
+      busTimes.erase(busTimes.size() - 2);
+    }
+    if (busesAdded == 0) {
+      busTimes = "No buses in the next 30 mins";
     }
 
     std::cout << "\t Next busses: " << busTimes << std::endl;

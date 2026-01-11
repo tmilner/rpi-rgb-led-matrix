@@ -21,6 +21,7 @@ using namespace rgb_matrix;
 // }
 ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
   current_line = "Loading";
+  last_line_change = std::chrono::steady_clock::now();
   x = settings.init_icon_offset;
   y = settings.init_y;
   length = 0;
@@ -33,6 +34,8 @@ ScrollingLine::ScrollingLine(ScrollingLineSettings settings) {
   icon_offset = settings.init_icon_offset;
   screen_width = settings.init_screen_width;
   max_width_for_no_scrolling = (settings.init_screen_width - icon_offset);
+  near_end_chars = settings.init_near_end_chars;
+  min_display = settings.init_min_display;
 
   if (speed == 0) {
     x = 14;
@@ -52,6 +55,7 @@ void ScrollingLine::updateText(std::string *new_line_string) {
   if (isReadyForUpdateLocked()) {
     current_line = *new_line_string;
     has_pending_line = false;
+    last_line_change = std::chrono::steady_clock::now();
   } else {
     pending_line = *new_line_string;
     has_pending_line = true;
@@ -62,6 +66,7 @@ void ScrollingLine::updateTextImmediate(std::string *new_line_string) {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   current_line = *new_line_string;
   has_pending_line = false;
+  last_line_change = std::chrono::steady_clock::now();
 }
 void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
   float current_speed = 0.0f;
@@ -76,6 +81,7 @@ void ScrollingLine::renderLine(FrameCanvas *offscreen_canvas) {
   if (has_pending_line && isReadyForUpdateLocked()) {
     current_line = pending_line;
     has_pending_line = false;
+    last_line_change = std::chrono::steady_clock::now();
   }
   if (length <= max_width_for_no_scrolling) {
     speed = 0;
@@ -105,4 +111,22 @@ bool ScrollingLine::isReadyForUpdateLocked() const {
 bool ScrollingLine::isReadyForUpdate() {
   std::lock_guard<std::recursive_mutex> lock(line_mutex);
   return isReadyForUpdateLocked();
+}
+
+bool ScrollingLine::isNearEnd() const {
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  if (speed == 0) {
+    return true;
+  }
+  const int char_width = font.CharacterWidth('W');
+  const int threshold = near_end_chars * char_width;
+  return (x + length) <= (icon_offset + threshold);
+}
+
+bool ScrollingLine::shouldFetchUpdate() const {
+  if (!isNearEnd()) {
+    return false;
+  }
+  std::lock_guard<std::recursive_mutex> lock(line_mutex);
+  return (std::chrono::steady_clock::now() - last_line_change) >= min_display;
 }

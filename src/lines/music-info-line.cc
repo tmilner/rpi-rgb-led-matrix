@@ -1,5 +1,6 @@
 #include "lines/music-info-line.h"
 #include "core/img_utils.h"
+#include <chrono>
 #include <climits>
 #include <iostream>
 #include <mutex>
@@ -52,6 +53,9 @@ void MusicInfoLine::update() {
   const auto now = std::chrono::system_clock::now();
 
   if (((now - this->last_update) / 1s) < this->update_after_seconds) {
+    return;
+  }
+  if (!shouldFetchUpdate()) {
     return;
   }
 

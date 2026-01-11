@@ -75,26 +75,30 @@ void TimeDateWeatherLine::update() {
   }
 
   const auto now = std::chrono::system_clock::now();
-  bool screen_rotated = false;
 
   if (((now - this->last_rotate) / 1s) > this->rotate_after_seconds) {
-    screen_rotated = true;
-    std::cout << "Changing visible text" << this->current_display
-              << " Last rotate is "
-              << date::format("%D %T", date::floor<std::chrono::milliseconds>(
-                                           this->last_rotate))
-              << std::endl;
+    if (shouldFetchUpdate()) {
+      std::cout << "Changing visible text" << this->current_display
+                << " Last rotate is "
+                << date::format("%D %T",
+                                date::floor<std::chrono::milliseconds>(
+                                    this->last_rotate))
+                << std::endl;
 
-    this->last_rotate = now;
+      this->last_rotate = now;
 
-    if (this->current_display >= 2) {
-      this->current_display = 0;
-    } else
-      this->current_display++;
+      if (this->current_display >= 2) {
+        this->current_display = 0;
+      } else
+        this->current_display++;
+    }
   }
 
   if (((now - this->last_weather_update) / 1s) >
       this->update_weather_after_seconds) {
+    if (!shouldFetchUpdate()) {
+      return;
+    }
     std::cout << "Fetching wether data from " << this->url << std::endl;
     try {
       Json::Value jsonData = fetcher->fetch(this->url);
